@@ -53,7 +53,7 @@ body {
   display: flex;
   width: 100%;
   justify-content: left;
-}
+} 
 
 .main {
   width: 100vw;
@@ -276,7 +276,7 @@ label {
   margin: auto;
   width: fit-content;
 }
-.pages a {
+.pages div {
   border: 1px solid white;
   width: 3em;
   padding: 1rem;
@@ -286,7 +286,7 @@ label {
   background-color: var(--blue);
 }
 
-a.activePage {
+div.activePage {
   color: var(--blue);
   background-color: var(--lightBlue);
   border: 1px solid var(--blue);

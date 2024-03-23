@@ -152,23 +152,26 @@ public class CustomerHandler {
 
 	}
 
-	public int getTransactionPageCount(int customerId, String mpin, int accountNo, int months, int limit)
+	public int getTransactionPageCount(int customerId, int accountNo, int months, int limit)
 			throws InvalidValueException, CustomException {
 		Utils.checkRange(1, months, 6, "Can only fetch 6 month transactions at a time");
 		Utils.checkRange(5, limit, 50, "Limit should be within 5 to 50.");
-		checkValidRequest(customerId, mpin, accountNo);
+		if (!getAccounts(customerId).keySet().contains(accountNo)) {
+			throw new InvalidValueException("Invalid Account Number / Restricted Access");
+		}
 		long startTime = Utils.getMillis(LocalDate.now()) - (months * Utils.MONTH_MILLIS);
 		int totalRecords = transactionManager.getTransactionCount(accountNo, startTime);
 		int totalPages = (int) Math.ceil((double) totalRecords / limit);
 		return totalPages;
 	}
 
-	public List<Transaction> getTransactions(int customerId, String mpin, int accountNo, int months, int pageNo,
-			int limit) throws CustomException, InvalidValueException {
-		if (months > 6) {
-			throw new InvalidValueException("Can only fetch 6 month transactions at a time");
+	public List<Transaction> getTransactions(int customerId, int accountNo, int months, int pageNo, int limit)
+			throws CustomException, InvalidValueException {
+		Utils.checkRange(1, months, 6, "Can only fetch 6 month transactions at a time");
+		Utils.checkRange(5, limit, 50, "Limit should be within 5 to 50.");
+		if (!getAccounts(customerId).keySet().contains(accountNo)) {
+			throw new InvalidValueException("Invalid Account Number / Restricted Access");
 		}
-		checkValidRequest(customerId, mpin, accountNo);
 		long startTime = Utils.getMillis(LocalDate.now()) - (months * Utils.MONTH_MILLIS);
 		int offset = Utils.pagination(pageNo, limit);
 		return transactionManager.getTransactions(accountNo, startTime, offset, limit);

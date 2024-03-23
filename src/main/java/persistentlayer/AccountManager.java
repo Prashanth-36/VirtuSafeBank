@@ -33,4 +33,6 @@ public interface AccountManager {
 
 	void setMpin(int accountNo, String newPin) throws CustomException, InvalidValueException;
 
+	int getBranchAccountsCount(int branchId, int limit) throws CustomException;
+
 }

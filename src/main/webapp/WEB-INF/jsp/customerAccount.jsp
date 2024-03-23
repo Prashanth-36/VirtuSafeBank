@@ -1,36 +1,30 @@
+<%@page import="java.time.ZoneId"%>
+<%@page import="utility.Utils"%>
+<%@page import="java.util.List"%>
+<%@page import="model.Transaction"%>
+<%@page import="logicallayer.CustomerHandler"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" errorPage="error.jsp"%>
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Home</title>
-    <link rel="stylesheet" href="css/home.css" />
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/static/css/home.css" />
   </head>
   <body>
-    <nav>
-      <ul class="top-nav">
-        <li><img src="images/logo.png" alt="" id="logo" /></li>
-        <li>
-          <a href="customer.html" class="active">My Accounts</a>
-        </li>
-        <li><a href="moneyTransfer.html">Money Transfer</a></li>
-      </ul>
-      <img src="images/profile-user.png" alt="" style="width: 2.6rem" />
-      <a href="" class="top-nav" id="logout">Logout</a>
-    </nav>
-
-    <div class="main-container">
+	<%@ include file="customerHeader.jsp" %>
       <main class="main">
         <div class="options" style="margin-top: 3rem">
           <div
             class="card"
             onclick="window.location.href=window.location.href+'&setPrimary=1'"
           >
-            <img src="images/financial.png" alt="" width="50rem" />
+            <img src="<%=request.getContextPath()%>/static/images/financial.png" alt="" width="50rem" />
             <p>Set as Primary Account</p>
           </div>
           <div class="card" onclick="toggle()">
-            <img src="images/password.png" alt="" width="50rem" />Change MPIN
+            <img src="<%=request.getContextPath()%>/static/images/password.png" alt="" width="50rem" />Change MPIN
           </div>
         </div>
 
@@ -57,54 +51,28 @@
             <th>Description</th>
             <th>Balance</th>
           </tr>
+          <%
+          	List<Transaction> transactions=(List<Transaction>)request.getAttribute("transactions");
+          for(Transaction transaction:transactions){
+        	  String description=transaction.getDescription();
+          %>
+          
           <tr>
-            <td>1</td>
-            <td>2024-02-02 hh:mm:ss</td>
-            <td>Credit</td>
-            <td>5000</td>
-            <td>22</td>
-            <td>32</td>
-            <td>-</td>
-            <td>10000</td>
+            <td><%=transaction.getId()%></td>
+            <td><%=Utils.formatLocalDateTime(Utils.millisToLocalDateTime(transaction.getTimestamp(), ZoneId.systemDefault()))%></td>
+            <td><%=transaction.getType()%></td>
+            <td><%=transaction.getAmount()%></td>
+            <td><%=transaction.getPrimaryAccount()%></td>
+            <td><%=transaction.getTransactionalAccount()%></td>
+            <td><%=(description==null || description.isEmpty())? "-" : description%></td>
+            <td><%=transaction.getBalance()%></td>
           </tr>
-          <tr>
-            <td>1</td>
-            <td>2024-02-02 hh:mm:ss</td>
-            <td>Credit</td>
-            <td>5000</td>
-            <td>22</td>
-            <td>32</td>
-            <td>-</td>
-            <td>10000</td>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>2024-02-02 hh:mm:ss</td>
-            <td>Credit</td>
-            <td>5000</td>
-            <td>22</td>
-            <td>32</td>
-            <td>-</td>
-            <td>10000</td>
-          </tr>
+          
+          <% } %>
         </table>
-        <div class="pages" id="pages">
-          <a id="previousPage" onclick="previousPage()"
-            ><img src="images/left.png" alt="previous" style="width: 1rem"
-          /></a>
-          <a class="page activePage">1</a>
-          <a class="page">2</a>
-          <a class="page">3</a>
-          <a class="page">4</a>
-          <a class="page">5</a>
-          <a id="nextPage" onclick="nextPage()"
-            ><img src="images/right.png" alt="next" style="width: 1rem"
-          /></a>
-        </div>
 
-        <script src="script/page.js"></script>
+<%@ include file="pagination.jsp" %>
       </main>
-    </div>
 
     <div id="back-drop" class="back-drop" onclick="toggle()">
       <form

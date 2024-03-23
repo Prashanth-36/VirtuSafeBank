@@ -14,9 +14,11 @@ import customexceptions.CustomException;
 import customexceptions.InvalidOperationException;
 import customexceptions.InvalidValueException;
 import logicallayer.AdminHandler;
+import logicallayer.CustomerHandler;
 import logicallayer.SessionHandler;
 import model.Account;
 import model.User;
+import utility.Utils;
 
 @WebServlet("/controller/*")
 public class ControllerServlet extends HttpServlet {
@@ -26,12 +28,62 @@ public class ControllerServlet extends HttpServlet {
 			throws ServletException, IOException {
 		String path = request.getPathInfo();
 		switch (path) {
+
 		case "/login":
-			request.getRequestDispatcher("/index.jsp").forward(request, response);
+			request.getRequestDispatcher("/WEB-INF/jsp/index.jsp").forward(request, response);
 			break;
 
 		case "/home":
 			redirectToHomePage(request, response);
+			break;
+
+		case "/account":
+			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
+			int months = Math.abs(Utils.parseInt(request.getParameter("months")));
+			int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
+			if (accountNo != -1) {
+				CustomerHandler customerHandler = new CustomerHandler();
+				HttpSession session = request.getSession();
+				User user = (User) session.getAttribute("user");
+				try {
+					request.setAttribute("totalPages",
+							customerHandler.getTransactionPageCount(user.getUserId(), accountNo, months, 10));
+					request.setAttribute("transactions",
+							customerHandler.getTransactions(user.getUserId(), accountNo, months, pageNo, 10));
+					request.getRequestDispatcher("/WEB-INF/jsp/customerAccount.jsp").forward(request, response);
+				} catch (InvalidValueException | CustomException e) {
+					e.printStackTrace();
+					response.sendError(401, e.getMessage());
+				}
+			}
+			break;
+
+		case "/moneyTransfer":
+			request.getRequestDispatcher("/WEB-INF/jsp/moneyTransfer.jsp").forward(request, response);
+			break;
+
+		case "/withdrawl":
+			request.setAttribute("path", "withdrawl");
+			request.getRequestDispatcher("/WEB-INF/jsp/transactionForm.jsp").forward(request, response);
+			break;
+
+		case "/deposit":
+			request.setAttribute("path", "deposit");
+			request.getRequestDispatcher("/WEB-INF/jsp/transactionForm.jsp").forward(request, response);
+			break;
+
+		case "/error":
+			request.getRequestDispatcher("/WEB-INF/jsp/error.jsp").forward(request, response);
+			break;
+
+		case "/logout":
+			HttpSession session = request.getSession();
+			session.removeAttribute("user");
+			session.invalidate();
+			break;
+
+		default:
+			response.sendError(404);
 		}
 	}
 
@@ -49,12 +101,27 @@ public class ControllerServlet extends HttpServlet {
 				User user = sessionHandler.authenticate(userId, password);
 				HttpSession session = request.getSession();
 				session.setAttribute("user", user);
+				System.out.println(user);
 				response.sendRedirect(request.getContextPath() + "/controller/home");
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
 			}
 			break;
 		}
+
+		case "/moneyTransfer":
+			request.getRequestDispatcher("/WEB-INF/jsp/moneyTransfer.jsp").forward(request, response);
+			break;
+
+		case "/withdrawl":
+			request.setAttribute("path", "withdrawl");
+			request.getRequestDispatcher("/WEB-INF/jsp/transactionForm.jsp").forward(request, response);
+			break;
+
+		case "/deposit":
+			request.setAttribute("path", "deposit");
+			request.getRequestDispatcher("/WEB-INF/jsp/transactionForm.jsp").forward(request, response);
+			break;
 
 		default:
 			response.sendError(404);
@@ -79,19 +146,34 @@ public class ControllerServlet extends HttpServlet {
 					}
 					request.setAttribute("accounts", accounts);
 					request.getRequestDispatcher("/WEB-INF/jsp/accounts.jsp").forward(request, response);
+
 				} catch (InvalidValueException | CustomException e) {
 					e.printStackTrace();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-
+				break;
 			}
 
 			case USER:
-				request.getRequestDispatcher("/WEB-INF/jsp/customer.jsp").forward(request, response);
+				try {
+					CustomerHandler customerHandler = new CustomerHandler();
+					User customer = (User) request.getSession().getAttribute("user");
+					int customerId = customer.getUserId();
+					Map<Integer, Account> accounts = customerHandler.getAccounts(customerId);
+					request.setAttribute("accounts", accounts);
+					double totalBalance = accounts.entrySet().stream()
+							.mapToDouble(e -> e.getValue().getCurrentBalance()).sum();
+					request.setAttribute("totalBalance", totalBalance);
+					request.getRequestDispatcher("/WEB-INF/jsp/customer.jsp").forward(request, response);
+				} catch (CustomException | InvalidValueException e) {
+					e.printStackTrace();
+				}
+				break;
 
 			case EMPLOYEE:
 				request.getRequestDispatcher("/WEB-INF/jsp/accounts.jsp").forward(request, response);
+				break;
 
 			default:
 				request.getRequestDispatcher("/login").forward(request, response);

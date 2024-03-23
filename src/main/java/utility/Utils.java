@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -34,6 +35,10 @@ public class Utils {
 
 	public static LocalDateTime millisToLocalDateTime(long millis, ZoneId zoneId) {
 		return LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), zoneId);
+	}
+
+	public static String formatLocalDateTime(LocalDateTime time) {
+		return time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 	}
 
 	public static long getMillis(LocalDate date) {
@@ -130,5 +135,13 @@ public class Utils {
 			hexString.insert(0, '0');
 		}
 		return hexString.toString();
+	}
+
+	public static int parseInt(String num) {
+		try {
+			return Integer.parseInt(num);
+		} catch (NumberFormatException e) {
+			return -1;
+		}
 	}
 }

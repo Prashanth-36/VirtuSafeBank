@@ -171,6 +171,23 @@ public class AccountDao implements AccountManager {
 		}
 	}
 
+	@Override
+	public int getBranchAccountsCount(int branchId, int limit) throws CustomException {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection
+						.prepareStatement("SELECT COUNT(*) FROM account WHERE branchId = ?")) {
+			statement.setInt(1, branchId);
+			try (ResultSet result = statement.executeQuery();) {
+				if (result.next()) {
+					return result.getInt(1);
+				}
+				return 0;
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			throw new CustomException("Account Validation failed!", e);
+		}
+	}
+
 	private Account resultSetToAccount(ResultSet result) throws SQLException {
 		Account account = new Account();
 		account.setAccountNo(result.getInt("accountNo"));
@@ -246,5 +263,4 @@ public class AccountDao implements AccountManager {
 			throw new CustomException("Request Validation failed!");
 		}
 	}
-
 }

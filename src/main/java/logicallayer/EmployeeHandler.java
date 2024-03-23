@@ -106,6 +106,12 @@ public class EmployeeHandler {
 		return accountManager.getBranchAccounts(branchId);
 	}
 
+	public int getBranchAccountsPageCount(int branchId, int limit) throws InvalidValueException, CustomException {
+		int totalRecords = accountManager.getBranchAccountsCount(branchId, limit);
+		int totalPages = (int) Math.ceil((double) totalRecords / limit);
+		return totalPages;
+	}
+
 	public void setAccountStatus(int accountNo, ActiveStatus status) throws CustomException {
 		accountManager.setAccountStatus(accountNo, status);
 	}

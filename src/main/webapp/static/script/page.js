@@ -1,12 +1,15 @@
 function nextPage() {
-  const currentPage = document.querySelector(".activePage").textContent;
-  updatePageParameter(+currentPage + 1);
+	const totalPage=decument.getElementByClassName("page").length;
+	const currentPage = document.querySelector(".activePage").textContent;
+	if(currentPage<totalPage){
+  		updatePageParameter(+currentPage + 1);
+  	}
 }
 function previousPage() {
   const currentPage = document.querySelector(".activePage").textContent;
-  // if (currentPage > 1) {
-  updatePageParameter(+currentPage - 1);
-  // }
+  if (currentPage > 1) {
+  	updatePageParameter(+currentPage - 1);
+  }
 }
 function updatePageParameter(pageNumber) {
   const queryParam = new URLSearchParams(window.location.search);

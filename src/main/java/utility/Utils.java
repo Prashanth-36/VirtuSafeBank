@@ -144,4 +144,12 @@ public class Utils {
 			return -1;
 		}
 	}
+
+	public static Double parseDouble(String num) {
+		try {
+			return Double.parseDouble(num);
+		} catch (NumberFormatException e) {
+			return -1d;
+		}
+	}
 }

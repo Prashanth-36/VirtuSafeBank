@@ -13,12 +13,13 @@
     <link rel="stylesheet" href="<%=request.getContextPath()%>/static/css/home.css" />
   </head>
   <body>
+  <% request.setAttribute("selected","myAccounts"); %>
 	<%@ include file="customerHeader.jsp" %>
       <main class="main">
         <div class="options" style="margin-top: 3rem">
           <div
             class="card"
-            onclick="window.location.href=window.location.href+'&setPrimary=1'"
+            onclick="document.getElementById('setPrimary').submit()"
           >
             <img src="<%=request.getContextPath()%>/static/images/financial.png" alt="" width="50rem" />
             <p>Set as Primary Account</p>
@@ -76,17 +77,24 @@
 
     <div id="back-drop" class="back-drop" onclick="toggle()">
       <form
+        method="post"
         onclick="event.stopPropagation()"
-        action=""
+        action="<%=request.getContextPath() %>/controller/changeMpin"
         id="form"
         style="width: 40%; height: fit-content"
         class="form-container"
       >
         <h3>Change MPIN</h3>
         <input
+          type="hidden"
+          name="accountNo"
+          id="accountNo"
+          value="<%=request.getParameter("accountNo") %>"
+        />
+        <input
           type="password"
-          name="oldMpin"
-          id="oldMpin"
+          name="currentMpin"
+          id="currentMpin"
           placeholder="Current MPIN"
         />
         <input
@@ -104,6 +112,14 @@
         <button>Update</button>
       </form>
     </div>
+    <form action="<%=request.getContextPath() %>/controller/setPrimary" method="post"  id="setPrimary">
+      <input
+            type="hidden"
+            name="accountNo"
+            id="accountNo"
+            value="<%=request.getParameter("accountNo") %>"
+          />
+    </form>
     <script>
       function toggle() {
         const backDrop = document.getElementById("back-drop");

@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import customexceptions.CustomException;
+import customexceptions.InsufficientFundException;
 import customexceptions.InvalidOperationException;
 import customexceptions.InvalidValueException;
 import logicallayer.AdminHandler;
@@ -27,17 +28,21 @@ public class ControllerServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String path = request.getPathInfo();
+		System.out.println(path);
 		switch (path) {
 
-		case "/login":
+		case "/login": {
 			request.getRequestDispatcher("/WEB-INF/jsp/index.jsp").forward(request, response);
 			break;
+		}
 
-		case "/home":
+		case "/home": {
+			System.out.println(path);
 			redirectToHomePage(request, response);
 			break;
+		}
 
-		case "/account":
+		case "/account": {
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			int months = Math.abs(Utils.parseInt(request.getParameter("months")));
 			int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
@@ -45,6 +50,10 @@ public class ControllerServlet extends HttpServlet {
 				CustomerHandler customerHandler = new CustomerHandler();
 				HttpSession session = request.getSession();
 				User user = (User) session.getAttribute("user");
+				if (user == null) {
+					response.sendRedirect(request.getContextPath() + "/controller/login");
+					break;
+				}
 				try {
 					request.setAttribute("totalPages",
 							customerHandler.getTransactionPageCount(user.getUserId(), accountNo, months, 10));
@@ -57,20 +66,63 @@ public class ControllerServlet extends HttpServlet {
 				}
 			}
 			break;
+		}
 
-		case "/moneyTransfer":
-			request.getRequestDispatcher("/WEB-INF/jsp/moneyTransfer.jsp").forward(request, response);
+		case "/moneyTransfer": {
+			CustomerHandler customerHandler = new CustomerHandler();
+			User user = (User) request.getSession().getAttribute("user");
+			if (user == null) {
+				response.sendRedirect(request.getContextPath() + "/controller/login");
+				break;
+			}
+			try {
+				Map<Integer, Account> accounts = (Map<Integer, Account>) customerHandler.getAccounts(user.getUserId());
+				request.setAttribute("accounts", accounts);
+				request.getRequestDispatcher("/WEB-INF/jsp/moneyTransfer.jsp").forward(request, response);
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
 			break;
+		}
 
-		case "/withdrawl":
-			request.setAttribute("path", "withdrawl");
-			request.getRequestDispatcher("/WEB-INF/jsp/transactionForm.jsp").forward(request, response);
+		case "/withdrawl": {
+			CustomerHandler customerHandler = new CustomerHandler();
+			User user = (User) request.getSession().getAttribute("user");
+			if (user == null) {
+				response.sendRedirect(request.getContextPath() + "/controller/login");
+				break;
+			}
+			try {
+				Map<Integer, Account> accounts = (Map<Integer, Account>) customerHandler.getAccounts(user.getUserId());
+				request.setAttribute("accounts", accounts);
+				request.setAttribute("path", "withdrawl");
+				request.getRequestDispatcher("/WEB-INF/jsp/transactionForm.jsp").forward(request, response);
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
 			break;
+		}
 
-		case "/deposit":
-			request.setAttribute("path", "deposit");
-			request.getRequestDispatcher("/WEB-INF/jsp/transactionForm.jsp").forward(request, response);
+		case "/deposit": {
+			CustomerHandler customerHandler = new CustomerHandler();
+			User user = (User) request.getSession().getAttribute("user");
+			if (user == null) {
+				response.sendRedirect(request.getContextPath() + "/controller/login");
+				break;
+			}
+			try {
+				Map<Integer, Account> accounts = (Map<Integer, Account>) customerHandler.getAccounts(user.getUserId());
+				request.setAttribute("accounts", accounts);
+				request.setAttribute("path", "deposit");
+				request.getRequestDispatcher("/WEB-INF/jsp/transactionForm.jsp").forward(request, response);
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
 			break;
+		}
 
 		case "/error":
 			request.getRequestDispatcher("/WEB-INF/jsp/error.jsp").forward(request, response);
@@ -99,32 +151,153 @@ public class ControllerServlet extends HttpServlet {
 				String password = request.getParameter("password");
 				SessionHandler sessionHandler = new SessionHandler();
 				User user = sessionHandler.authenticate(userId, password);
+				if (user == null) {
+					response.sendRedirect(request.getContextPath() + "/controller/login");
+					break;
+				}
 				HttpSession session = request.getSession();
 				session.setAttribute("user", user);
 				System.out.println(user);
 				response.sendRedirect(request.getContextPath() + "/controller/home");
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
 			}
 			break;
 		}
 
-		case "/moneyTransfer":
-			request.getRequestDispatcher("/WEB-INF/jsp/moneyTransfer.jsp").forward(request, response);
+		case "/changeMpin": {
+			CustomerHandler customerHandler = new CustomerHandler();
+			User user = (User) request.getSession().getAttribute("user");
+			if (user == null) {
+				response.sendRedirect(request.getContextPath() + "/controller/login");
+				break;
+			}
+			try {
+				int id = user.getUserId();
+				int accountNo = Utils.parseInt(request.getParameter("accountNo"));
+				String currentMin = request.getParameter("currentMpin");
+				String newMpin = request.getParameter("newMpin");
+				String confirmMpin = request.getParameter("confirmMpin");
+				if (!newMpin.equals(confirmMpin)) {
+					throw new InvalidValueException("Please re-enter new Mpin correctly!");
+				}
+				System.out.println(accountNo);
+				customerHandler.changeMpin(id, accountNo, currentMin, newMpin);
+				String message = "MPIN Updated Successful!";
+				String redirectUrl = request.getContextPath() + "/controller/home";
+				response.getWriter().println(
+						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
 			break;
+		}
 
-		case "/withdrawl":
-			request.setAttribute("path", "withdrawl");
-			request.getRequestDispatcher("/WEB-INF/jsp/transactionForm.jsp").forward(request, response);
+		case "/setPrimary": {
+			CustomerHandler customerHandler = new CustomerHandler();
+			User user = (User) request.getSession().getAttribute("user");
+			if (user == null) {
+				response.sendRedirect(request.getContextPath() + "/controller/login");
+				break;
+			}
+			try {
+				int id = user.getUserId();
+				int accountNo = Utils.parseInt(request.getParameter("accountNo"));
+				customerHandler.setPrimaryAccount(id, accountNo);
+				String message = "Primary Account Updated Successful!";
+				String redirectUrl = request.getContextPath() + "/controller/home";
+				response.getWriter().println(
+						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
 			break;
+		}
 
-		case "/deposit":
-			request.setAttribute("path", "deposit");
-			request.getRequestDispatcher("/WEB-INF/jsp/transactionForm.jsp").forward(request, response);
+		case "/moneyTransfer": {
+			CustomerHandler customerHandler = new CustomerHandler();
+			User user = (User) request.getSession().getAttribute("user");
+			if (user == null) {
+				response.sendRedirect(request.getContextPath() + "/controller/login");
+				break;
+			}
+			int id = user.getUserId();
+			String mpin = request.getParameter("mpin");
+			Double amount = Utils.parseDouble(request.getParameter("amount"));
+			int accountNo = Utils.parseInt(request.getParameter("senderAccountNo"));
+			int benificiaryAccountNo = Utils.parseInt(request.getParameter("beneficiaryAccNo"));
+			String ifsc = request.getParameter("beneficiaryIfsc");
+			String description = request.getParameter("description");
+			try {
+				customerHandler.moneyTransfer(id, mpin, accountNo, benificiaryAccountNo, amount, ifsc, description);
+				String message = "Transaction Successful!";
+				String redirectUrl = request.getContextPath() + "/controller/home";
+				response.getWriter().println(
+						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+			} catch (CustomException | InvalidValueException | InsufficientFundException
+					| InvalidOperationException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
 			break;
+		}
+
+		case "/withdrawl": {
+			CustomerHandler customerHandler = new CustomerHandler();
+			User user = (User) request.getSession().getAttribute("user");
+			if (user == null) {
+				response.sendRedirect(request.getContextPath() + "/controller/login");
+				break;
+			}
+			int id = user.getUserId();
+			String mpin = request.getParameter("mpin");
+			Double amount = Utils.parseDouble(request.getParameter("amount"));
+			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
+			String description = request.getParameter("description");
+			try {
+				customerHandler.withdrawl(id, mpin, accountNo, amount, description);
+				String message = "Withdraw Successful!";
+				String redirectUrl = request.getContextPath() + "/controller/home";
+				response.getWriter().println(
+						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+			} catch (CustomException | InvalidValueException | InsufficientFundException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
+		case "/deposit": {
+			CustomerHandler customerHandler = new CustomerHandler();
+			User user = (User) request.getSession().getAttribute("user");
+			if (user == null) {
+				response.sendRedirect(request.getContextPath() + "/controller/login");
+				break;
+			}
+			int id = user.getUserId();
+			String mpin = request.getParameter("mpin");
+			Double amount = Utils.parseDouble(request.getParameter("amount"));
+			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
+			String description = request.getParameter("description");
+			try {
+				customerHandler.deposit(id, mpin, accountNo, amount, description);
+				String message = "Deposit Successful!";
+				String redirectUrl = request.getContextPath() + "/controller/home";
+				response.getWriter().println(
+						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
 
 		default:
-			response.sendError(404);
+			response.getWriter().println("wrong url!");
+//			response.sendError(404);
 			break;
 		}
 	}
@@ -149,16 +322,22 @@ public class ControllerServlet extends HttpServlet {
 
 				} catch (InvalidValueException | CustomException e) {
 					e.printStackTrace();
+					response.getWriter().println(e.getMessage());
 				} catch (Exception e) {
 					e.printStackTrace();
+					response.getWriter().println(e.getMessage());
 				}
 				break;
 			}
 
-			case USER:
+			case USER: {
 				try {
 					CustomerHandler customerHandler = new CustomerHandler();
 					User customer = (User) request.getSession().getAttribute("user");
+					if (customer == null) {
+						response.sendRedirect(request.getContextPath() + "/controller/login");
+						break;
+					}
 					int customerId = customer.getUserId();
 					Map<Integer, Account> accounts = customerHandler.getAccounts(customerId);
 					request.setAttribute("accounts", accounts);
@@ -168,12 +347,15 @@ public class ControllerServlet extends HttpServlet {
 					request.getRequestDispatcher("/WEB-INF/jsp/customer.jsp").forward(request, response);
 				} catch (CustomException | InvalidValueException e) {
 					e.printStackTrace();
+					response.getWriter().println(e.getMessage());
 				}
 				break;
+			}
 
-			case EMPLOYEE:
+			case EMPLOYEE: {
 				request.getRequestDispatcher("/WEB-INF/jsp/accounts.jsp").forward(request, response);
 				break;
+			}
 
 			default:
 				request.getRequestDispatcher("/login").forward(request, response);

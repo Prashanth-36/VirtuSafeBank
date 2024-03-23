@@ -1,3 +1,5 @@
+<%@page import="java.util.Map"%>
+<%@page import="model.Account"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
   pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -10,19 +12,27 @@
   href="<%=request.getContextPath()%>/static/css/home.css" />
 </head>
 <body>
+<% request.setAttribute("selected","moneyTransfer"); %>
   <%@ include file="customerHeader.jsp"%>
   <%@include file="customerSideNav.jsp"%>
   <main class="main">
     <form action="<%=request.getContextPath()%>/controller/<%=path%>"
       method="post" class="form-container">
       <label for="accountNo">Select Account Number <select
-        name="accountNo" id="accountNo" class="account-selection">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
+        name="accountNo" id="accountNo" class="account-selection" required>
+           <option value="">Select</option>
+          <% 
+          Map<Integer,Account> accounts=(Map<Integer,Account>)request.getAttribute("accounts");
+            for(int accountNo:accounts.keySet()){
+          %>
+            <option value="<%=accountNo %>"><%=accountNo %></option>
+          <%
+            }
+          %>
       </select>
       </label> <input type="text" name="amount" id="amount" placeholder="Amount" />
       <input type="password" name="mpin" id="mpin" placeholder="MPIN" />
+      <input type="text" name="description" id="description" placeholder="Description" />
       <button><%=path.equals("withdrawl") ? "Withdraw" : "Deposit"%></button>
     </form>
   </main>

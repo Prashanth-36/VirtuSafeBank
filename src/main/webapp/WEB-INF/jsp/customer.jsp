@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="<%=request.getContextPath()%>/static/css/home.css" />
 </head>
 <body>
+<% request.setAttribute("selected","myAccounts"); %>
   <%@ include file="customerHeader.jsp"%>
   <main class="main">
     <div class="totalBalance">

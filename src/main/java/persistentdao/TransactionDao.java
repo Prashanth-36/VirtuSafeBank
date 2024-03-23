@@ -35,7 +35,8 @@ public class TransactionDao implements TransactionManager {
 			transactionStatement.setInt(6, transaction.getTransactionalAccount());
 			transactionStatement.setString(7, transaction.getDescription());
 			transactionStatement.setInt(8, transaction.getCustomerId());
-			transactionStatement.setString(9, transaction.getIfsc());
+			transactionStatement.setDouble(9, transaction.getBalance());
+			transactionStatement.setString(10, transaction.getIfsc());
 
 			balanceStatement.setInt(1, transaction.getPrimaryAccount());
 

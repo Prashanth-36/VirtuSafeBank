@@ -76,9 +76,16 @@ public class CustomerHandler {
 		return account;
 	}
 
-	public void setPrimaryAccount(int customerId, String mpin, int accountNo)
-			throws CustomException, InvalidValueException {
-		checkValidRequest(customerId, mpin, accountNo);
+	public void setPrimaryAccount(int customerId, int accountNo) throws CustomException, InvalidValueException {
+		if (!getAccounts(customerId).keySet().contains(accountNo)) {
+			throw new InvalidValueException("Invalid Account Number / Restricted Access");
+		}
+		List<Integer> accounts = userAccountsCache.get(customerId);
+		if (accounts != null) {
+			for (int num : accounts) {
+				accountCache.remove(num);
+			}
+		}
 		accountManager.setPrimaryAccount(customerId, accountNo);
 	}
 
@@ -111,7 +118,7 @@ public class CustomerHandler {
 	}
 
 	public void moneyTransfer(int customerId, String mpin, int sourceAccountNo, int targetAccountNo, double amount,
-			String description)
+			String ifsc, String description)
 			throws InvalidValueException, CustomException, InsufficientFundException, InvalidOperationException {
 
 		if (sourceAccountNo == targetAccountNo) {
@@ -128,6 +135,7 @@ public class CustomerHandler {
 		primaryTransaction.setType(TransactionType.DEBIT);
 		primaryTransaction.setDescription(description);
 		primaryTransaction.setCustomerId(customerId);
+		primaryTransaction.setIfsc(ifsc);
 
 		try {
 			Account transactionalAccount = getAccount(targetAccountNo);
@@ -138,6 +146,7 @@ public class CustomerHandler {
 			secondaryTransaction.setAmount(amount);
 			secondaryTransaction.setType(TransactionType.CREDIT);
 			secondaryTransaction.setDescription(description);
+			secondaryTransaction.setIfsc(ifsc);
 			secondaryTransaction.setCustomerId(transactionalAccount.getCustomerId());
 
 			List<Transaction> transactions = new ArrayList<Transaction>();

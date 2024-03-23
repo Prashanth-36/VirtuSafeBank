@@ -1,13 +1,14 @@
+<% String selected=(String)request.getAttribute("selected"); %>
 <nav>
   <ul class="top-nav">
     <li><img
       src="<%=request.getContextPath()%>/static/images/logo.png" alt=""
       id="logo" /></li>
     <li><a href="<%=request.getContextPath()%>/controller/home"
-      class=<%=request.getRequestURI().contains("customer.jsp") ? "active" : ""%>>My Accounts</a></li>
+      class=<%=selected.equals("myAccounts") ? "active" : ""%>>My Accounts</a></li>
     <li><a
       href="<%=request.getContextPath()%>/controller/moneyTransfer"
-      class=<%=request.getRequestURI().contains("moneyTransfer.jsp") ? "active" : ""%>>Money
+      class=<%=selected.equals("moneyTransfer") ? "active" : ""%>>Money
         Transfer</a></li>
   </ul>
   <img

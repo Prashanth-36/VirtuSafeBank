@@ -19,6 +19,7 @@ import logicallayer.CustomerHandler;
 import logicallayer.SessionHandler;
 import model.Account;
 import model.User;
+import utility.ActiveStatus;
 import utility.Utils;
 
 @WebServlet("/controller/*")
@@ -120,6 +121,29 @@ public class ControllerServlet extends HttpServlet {
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
 				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
+		case "/manageAccount": {
+			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
+			if (accountNo != -1) {
+				AdminHandler adminHandler = new AdminHandler();
+				HttpSession session = request.getSession();
+				User user = (User) session.getAttribute("user");
+				if (user == null) {
+					response.sendRedirect(request.getContextPath() + "/controller/login");
+					break;
+				}
+				try {
+					request.setAttribute("account", adminHandler.getAccount(accountNo));
+					request.getRequestDispatcher("/WEB-INF/jsp/viewAccount.jsp").forward(request, response);
+				} catch (InvalidValueException | CustomException e) {
+					e.printStackTrace();
+					response.sendError(401, e.getMessage());
+				}
+			} else {
+				response.getWriter().println("<script>alert('Invalid Account No!')</script>");
 			}
 			break;
 		}
@@ -306,61 +330,69 @@ public class ControllerServlet extends HttpServlet {
 			throws ServletException, IOException {
 		HttpSession session = request.getSession();
 		User user = (User) session.getAttribute("user");
-		if (user != null) {
-			switch (user.getType()) {
-			case ADMIN: {
-				try {
-					AdminHandler handler = new AdminHandler();
-					String id = request.getParameter("branchId");
-					Map<Integer, Account> accounts = null;
-					if (id != null && !id.isEmpty()) {
-						int branchId = Integer.parseInt(id);
-						accounts = handler.getBranchAccounts(branchId);
-					}
-					request.setAttribute("accounts", accounts);
-					request.getRequestDispatcher("/WEB-INF/jsp/accounts.jsp").forward(request, response);
-
-				} catch (InvalidValueException | CustomException e) {
-					e.printStackTrace();
-					response.getWriter().println(e.getMessage());
-				} catch (Exception e) {
-					e.printStackTrace();
-					response.getWriter().println(e.getMessage());
+		if (user == null) {
+			request.getRequestDispatcher("/login").forward(request, response);
+			return;
+		}
+		switch (user.getType()) {
+		case ADMIN: {
+			try {
+				AdminHandler handler = new AdminHandler();
+				String id = request.getParameter("branchId");
+				Map<Integer, Account> accounts = null;
+				int pages = 0;
+				if (id != null && !id.isEmpty()) {
+					int branchId = Integer.parseInt(id);
+					accounts = handler.getBranchAccounts(branchId);
+					pages = handler.getBranchAccountsPageCount(branchId, 10);
+					request.setAttribute("branchId", branchId);
 				}
-				break;
-			}
-
-			case USER: {
-				try {
-					CustomerHandler customerHandler = new CustomerHandler();
-					User customer = (User) request.getSession().getAttribute("user");
-					if (customer == null) {
-						response.sendRedirect(request.getContextPath() + "/controller/login");
-						break;
-					}
-					int customerId = customer.getUserId();
-					Map<Integer, Account> accounts = customerHandler.getAccounts(customerId);
-					request.setAttribute("accounts", accounts);
-					double totalBalance = accounts.entrySet().stream()
-							.mapToDouble(e -> e.getValue().getCurrentBalance()).sum();
-					request.setAttribute("totalBalance", totalBalance);
-					request.getRequestDispatcher("/WEB-INF/jsp/customer.jsp").forward(request, response);
-				} catch (CustomException | InvalidValueException e) {
-					e.printStackTrace();
-					response.getWriter().println(e.getMessage());
-				}
-				break;
-			}
-
-			case EMPLOYEE: {
+				request.setAttribute("totalPages", pages);
+				request.setAttribute("accounts", accounts);
+				int status = Math.abs(Utils.parseInt(request.getParameter("branchStatus")));
+				ActiveStatus branchStatus = ActiveStatus.values()[status];
+				request.setAttribute("status", status);
+				request.setAttribute("branches", handler.getBranches(branchStatus));
 				request.getRequestDispatcher("/WEB-INF/jsp/accounts.jsp").forward(request, response);
-				break;
-			}
 
-			default:
-				request.getRequestDispatcher("/login").forward(request, response);
+			} catch (InvalidValueException | CustomException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			} catch (Exception e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
 			}
-		} else {
+			break;
+		}
+
+		case USER: {
+			try {
+				CustomerHandler customerHandler = new CustomerHandler();
+				User customer = (User) request.getSession().getAttribute("user");
+				if (customer == null) {
+					response.sendRedirect(request.getContextPath() + "/controller/login");
+					break;
+				}
+				int customerId = customer.getUserId();
+				Map<Integer, Account> accounts = customerHandler.getAccounts(customerId);
+				request.setAttribute("accounts", accounts);
+				double totalBalance = accounts.entrySet().stream().mapToDouble(e -> e.getValue().getCurrentBalance())
+						.sum();
+				request.setAttribute("totalBalance", totalBalance);
+				request.getRequestDispatcher("/WEB-INF/jsp/customer.jsp").forward(request, response);
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
+		case EMPLOYEE: {
+			request.getRequestDispatcher("/WEB-INF/jsp/accounts.jsp").forward(request, response);
+			break;
+		}
+
+		default:
 			request.getRequestDispatcher("/login").forward(request, response);
 		}
 	}

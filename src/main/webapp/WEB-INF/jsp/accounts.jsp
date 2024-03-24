@@ -1,3 +1,4 @@
+<%@page import="model.Branch"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
   pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -27,15 +28,29 @@
 
   <main class="main">
     <form id="form" action="" method="get" class="search">
-      <label for="branchId">Branch ID</label> <select name="branchId"
+      <label for="branchId">Branch ID</label> 
+      <select name="branchId"
         id="branchId"
         onchange="document.getElementById('form').submit()">
         <option value="">select</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-      </select> <img src="<%=request.getContextPath() %>/static/images/search.png"
-        alt="" width="50rem" />
+        <% 
+          Map<Integer,Branch> branches=(Map<Integer,Branch>)request.getAttribute("branches");
+          if(branches!=null){
+    		  for(int branchId:branches.keySet()){
+    			  Object id=request.getAttribute("branchId");
+        %>
+        <option value="<%=branchId%>" <%= (id!=null && (int)id==branchId)?"selected":"" %>><%=branchId%></option>
+        <%
+    		  }
+          }
+        %>
+      </select>
+      <select name="branchStatus"
+        id="branchStatus"
+        onchange="document.getElementById('form').submit()">
+        <option value="1" <%= (1==(int)request.getAttribute("status"))?"selected":"" %>>ACTIVE</option>
+        <option value="0" <%= (0==(int)request.getAttribute("status"))?"selected":"" %>>INACTIVE</option>
+      </select> 
     </form>
     <table class="border-table">
       <tr style="position: relative">
@@ -68,7 +83,7 @@
           		int id=e.getKey();
           		Account account=e.getValue();
           %>
-      <tr onclick="window.location.href='?id=<%=id%>'">
+      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/manageAccount?accountNo=<%=id%>'">
         <td><%=id %></td>
         <td><%=account.getCustomerId() %></td>
         <td><%=account.getCurrentBalance() %></td>

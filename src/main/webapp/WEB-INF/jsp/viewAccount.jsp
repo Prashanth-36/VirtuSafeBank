@@ -1,3 +1,8 @@
+<%@page import="utility.ActiveStatus"%>
+<%@page import="java.time.ZoneId"%>
+<%@page import="utility.Utils"%>
+<%@page import="model.Account"%>
+<%@page import="java.util.List"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
   pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -6,12 +11,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Home</title>
-<link rel="stylesheet" href="static/css/home.css" />
+<link rel="stylesheet" href="<%=request.getContextPath() %>/static/css/home.css" />
 </head>
 <body>
   <nav>
     <ul class="top-nav">
-      <li><img src="static/images/logo.png" alt="" id="logo" /></li>
+      <li><img src="<%=request.getContextPath() %>/static/images/logo.png" alt="" id="logo" /></li>
       <li><a href="accounts.html" class="active">Accounts
           Management</a></li>
       <li><a href="branches.html">Branch Management</a></li>
@@ -29,50 +34,56 @@
           style="text-align: center; background-color: var(--blue); color: white;">
           Account Details</th>
       </tr>
+      <%
+        Account account=(Account)request.getAttribute("account");
+      %>
       <tr>
         <th>Account Number</th>
-        <td>1</td>
+        <td><%=account.getAccountNo() %></td>
       </tr>
       <tr>
         <th>Customer ID</th>
-        <td>121</td>
+        <td><%=account.getCustomerId() %></td>
       </tr>
       <tr>
         <th>Current Balance</th>
-        <td>30000</td>
+        <td><%=account.getCurrentBalance() %></td>
       </tr>
       <tr>
         <th>Is Primary Accout</th>
-        <td>Yes</td>
+        <td><%=account.isPrimaryAccout()?"YES":"NO" %></td>
       </tr>
       <tr>
         <th>Account Open Date</th>
-        <td>2023-05-18</td>
+        <td><%=Utils.millisToLocalDate(account.getOpenDate(), ZoneId.systemDefault()) %></td>
       </tr>
       <tr>
         <th>Branch ID</th>
-        <td>1223</td>
+        <td><%=account.getBranchId() %></td>
       </tr>
       <tr>
         <th>Account Status</th>
-        <td>Active</td>
+        <td><%=account.getStatus() %></td>
       </tr>
     </table>
-    <!-- <button
-          style="
-            font-size: large;
-            padding: 0.5rem;
-            margin: auto;
-            display: block;
-            background-color: #009e60;
-            color: white;
-          "
-        >
-          Activate
-        </button> -->
-    <button
-      style="font-size: large; padding: 0.5rem; margin: auto; display: block; background-color: #e34234; color: white;">
-      Deactivate</button>
+    <% if(account.getStatus()==ActiveStatus.INACTIVE){ %>
+      <button
+            style="
+              font-size: large;
+              padding: 0.5rem;
+              margin: auto;
+              display: block;
+              background-color: #009e60;
+              color: white;
+            "
+          >
+            Activate
+          </button> 
+        <%}else{ %>
+      <button
+        style="font-size: large; padding: 0.5rem; margin: auto; display: block; background-color: #e34234; color: white;">
+        Deactivate</button>
+     <%} %>
   </main>
 </body>
 </html>

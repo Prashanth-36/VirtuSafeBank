@@ -1,4 +1,5 @@
 <%
+
 	int totalPages = (int)request.getAttribute("totalPages");
 	if (totalPages > 0) {
 %>

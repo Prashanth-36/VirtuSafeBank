@@ -18,6 +18,7 @@ import logicallayer.AdminHandler;
 import logicallayer.CustomerHandler;
 import logicallayer.SessionHandler;
 import model.Account;
+import model.Branch;
 import model.User;
 import utility.ActiveStatus;
 import utility.Utils;
@@ -28,6 +29,11 @@ public class ControllerServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		HttpSession session = request.getSession(false);
+		if (session == null || session.getAttribute("user") == null) {
+			response.sendRedirect(request.getContextPath() + "/");
+			return;
+		}
 		String path = request.getPathInfo();
 		System.out.println(path);
 		switch (path) {
@@ -49,7 +55,6 @@ public class ControllerServlet extends HttpServlet {
 			int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
 			if (accountNo != -1) {
 				CustomerHandler customerHandler = new CustomerHandler();
-				HttpSession session = request.getSession();
 				User user = (User) session.getAttribute("user");
 				if (user == null) {
 					response.sendRedirect(request.getContextPath() + "/controller/login");
@@ -69,9 +74,23 @@ public class ControllerServlet extends HttpServlet {
 			break;
 		}
 
+		case "/addAccount": {
+			AdminHandler adminHandler = new AdminHandler();
+			Map<Integer, Branch> branches;
+			try {
+				branches = adminHandler.getBranches(ActiveStatus.ACTIVE);
+				request.setAttribute("branches", branches);
+				request.getRequestDispatcher("/WEB-INF/jsp/accountForm.jsp").forward(request, response);
+			} catch (CustomException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
 		case "/moneyTransfer": {
 			CustomerHandler customerHandler = new CustomerHandler();
-			User user = (User) request.getSession().getAttribute("user");
+			User user = (User) request.getSession(false).getAttribute("user");
 			if (user == null) {
 				response.sendRedirect(request.getContextPath() + "/controller/login");
 				break;
@@ -89,7 +108,7 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/withdrawl": {
 			CustomerHandler customerHandler = new CustomerHandler();
-			User user = (User) request.getSession().getAttribute("user");
+			User user = (User) request.getSession(false).getAttribute("user");
 			if (user == null) {
 				response.sendRedirect(request.getContextPath() + "/controller/login");
 				break;
@@ -108,7 +127,7 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/deposit": {
 			CustomerHandler customerHandler = new CustomerHandler();
-			User user = (User) request.getSession().getAttribute("user");
+			User user = (User) request.getSession(false).getAttribute("user");
 			if (user == null) {
 				response.sendRedirect(request.getContextPath() + "/controller/login");
 				break;
@@ -129,7 +148,6 @@ public class ControllerServlet extends HttpServlet {
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			if (accountNo != -1) {
 				AdminHandler adminHandler = new AdminHandler();
-				HttpSession session = request.getSession();
 				User user = (User) session.getAttribute("user");
 				if (user == null) {
 					response.sendRedirect(request.getContextPath() + "/controller/login");
@@ -143,7 +161,45 @@ public class ControllerServlet extends HttpServlet {
 					response.sendError(401, e.getMessage());
 				}
 			} else {
-				response.getWriter().println("<script>alert('Invalid Account No!')</script>");
+				response.sendRedirect(request.getContextPath() + "/controller/home");
+//				response.getWriter().println("<script>alert('Invalid Account No!');window.location.href='"
+//						+ request.getContextPath() + "/controller/home';</script>");
+			}
+			break;
+		}
+
+		case "/branches": {
+			AdminHandler handler = new AdminHandler();
+			try {
+				int branchStatus = Math.abs(Utils.parseInt(request.getParameter("branchStatus")));
+				request.setAttribute("status", branchStatus);
+				ActiveStatus status = ActiveStatus.values()[branchStatus];
+				Map<Integer, Branch> branches = handler.getBranches(status);
+				request.setAttribute("branches", branches);
+				request.getRequestDispatcher("/WEB-INF/jsp/branches.jsp").forward(request, response);
+			} catch (CustomException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
+		case "/addBranch": {
+			request.getRequestDispatcher("/WEB-INF/jsp/branchForm.jsp").forward(request, response);
+			break;
+		}
+
+		case "/branch": {
+			int branchId = Utils.parseInt(request.getParameter("id"));
+			request.setAttribute("branchId", branchId);
+			AdminHandler adminHandler = new AdminHandler();
+			try {
+				Branch branch = adminHandler.getBranch(branchId);
+				request.setAttribute("branch", branch);
+				request.getRequestDispatcher("/WEB-INF/jsp/viewBranch.jsp").forward(request, response);
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
 			}
 			break;
 		}
@@ -153,9 +209,9 @@ public class ControllerServlet extends HttpServlet {
 			break;
 
 		case "/logout":
-			HttpSession session = request.getSession();
 			session.removeAttribute("user");
 			session.invalidate();
+			response.sendRedirect(request.getContextPath() + "/controller/login");
 			break;
 
 		default:
@@ -167,6 +223,11 @@ public class ControllerServlet extends HttpServlet {
 			throws ServletException, IOException {
 		String path = request.getPathInfo();
 		System.out.println(path + " post");
+		HttpSession session = request.getSession(false);
+		if (!path.equals("/login") && (session == null || session.getAttribute("user") == null)) {
+			response.sendRedirect(request.getContextPath() + "/");
+			return;
+		}
 		switch (path) {
 
 		case "/login": {
@@ -179,8 +240,8 @@ public class ControllerServlet extends HttpServlet {
 					response.sendRedirect(request.getContextPath() + "/controller/login");
 					break;
 				}
-				HttpSession session = request.getSession();
-				session.setAttribute("user", user);
+				HttpSession newSession = request.getSession();
+				newSession.setAttribute("user", user);
 				System.out.println(user);
 				response.sendRedirect(request.getContextPath() + "/controller/home");
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
@@ -192,7 +253,7 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/changeMpin": {
 			CustomerHandler customerHandler = new CustomerHandler();
-			User user = (User) request.getSession().getAttribute("user");
+			User user = (User) request.getSession(false).getAttribute("user");
 			if (user == null) {
 				response.sendRedirect(request.getContextPath() + "/controller/login");
 				break;
@@ -221,7 +282,7 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/setPrimary": {
 			CustomerHandler customerHandler = new CustomerHandler();
-			User user = (User) request.getSession().getAttribute("user");
+			User user = (User) request.getSession(false).getAttribute("user");
 			if (user == null) {
 				response.sendRedirect(request.getContextPath() + "/controller/login");
 				break;
@@ -243,7 +304,7 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/moneyTransfer": {
 			CustomerHandler customerHandler = new CustomerHandler();
-			User user = (User) request.getSession().getAttribute("user");
+			User user = (User) request.getSession(false).getAttribute("user");
 			if (user == null) {
 				response.sendRedirect(request.getContextPath() + "/controller/login");
 				break;
@@ -271,7 +332,7 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/withdrawl": {
 			CustomerHandler customerHandler = new CustomerHandler();
-			User user = (User) request.getSession().getAttribute("user");
+			User user = (User) request.getSession(false).getAttribute("user");
 			if (user == null) {
 				response.sendRedirect(request.getContextPath() + "/controller/login");
 				break;
@@ -296,7 +357,7 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/deposit": {
 			CustomerHandler customerHandler = new CustomerHandler();
-			User user = (User) request.getSession().getAttribute("user");
+			User user = (User) request.getSession(false).getAttribute("user");
 			if (user == null) {
 				response.sendRedirect(request.getContextPath() + "/controller/login");
 				break;
@@ -319,6 +380,87 @@ public class ControllerServlet extends HttpServlet {
 			break;
 		}
 
+		case "/manageAccount": {
+			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
+			String activate = request.getParameter("activate");
+			String deactivate = request.getParameter("deactivate");
+			ActiveStatus status = null;
+			if (activate != null && activate.equals("1")) {
+				status = ActiveStatus.values()[1];
+			} else if (deactivate != null && deactivate.equals("1")) {
+				status = ActiveStatus.values()[0];
+			}
+			AdminHandler adminHandler = new AdminHandler();
+			try {
+				if (status != null) {
+					adminHandler.setAccountStatus(accountNo, status);
+					String message = "Account Status Updated!";
+					String redirectUrl = request.getContextPath() + "/controller/manageAccount?accountNo=" + accountNo;
+					response.getWriter().println(
+							"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+				} else {
+					response.sendRedirect(
+							request.getContextPath() + "/controller/manageAccount?accountNo=" + accountNo);
+				}
+			} catch (CustomException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
+		case "/addAccount": {
+			AdminHandler adminHandler = new AdminHandler();
+			try {
+				int customerId = Utils.parseInt(request.getParameter("customerId"));
+				int branchId = Utils.parseInt(request.getParameter("branchId"));
+				adminHandler.createAccount(customerId, branchId);
+				response.sendRedirect(request.getContextPath() + "/controller/home");
+			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
+		case "/addBranch": {
+			AdminHandler adminHandler = new AdminHandler();
+			try {
+				Branch branch = new Branch();
+				branch.setIfsc(request.getParameter("ifsc"));
+				branch.setLocation(request.getParameter("location"));
+				branch.setCity(request.getParameter("city"));
+				branch.setState(request.getParameter("state"));
+				adminHandler.addBranch(branch);
+				response.sendRedirect(request.getContextPath() + "/controller/branches");
+			} catch (CustomException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
+		case "/branch": {
+			int branchId = Utils.parseInt(request.getParameter("branchId"));
+			String deactivate = request.getParameter("deactivate");
+			AdminHandler adminHandler = new AdminHandler();
+			try {
+				if (deactivate != null && deactivate.equals("1")) {
+					adminHandler.removeBranch(branchId);
+					String message = "Removed Branch!";
+					String redirectUrl = request.getContextPath() + "/controller/branch?id=" + branchId;
+					response.getWriter().println(
+							"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+				} else {
+					response.sendRedirect(request.getContextPath() + "/controller/branch?id=" + branchId);
+				}
+			} catch (CustomException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
 		default:
 			response.getWriter().println("wrong url!");
 //			response.sendError(404);
@@ -328,7 +470,7 @@ public class ControllerServlet extends HttpServlet {
 
 	private void redirectToHomePage(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		HttpSession session = request.getSession();
+		HttpSession session = request.getSession(false);
 		User user = (User) session.getAttribute("user");
 		if (user == null) {
 			request.getRequestDispatcher("/login").forward(request, response);
@@ -368,7 +510,7 @@ public class ControllerServlet extends HttpServlet {
 		case USER: {
 			try {
 				CustomerHandler customerHandler = new CustomerHandler();
-				User customer = (User) request.getSession().getAttribute("user");
+				User customer = (User) request.getSession(false).getAttribute("user");
 				if (customer == null) {
 					response.sendRedirect(request.getContextPath() + "/controller/login");
 					break;

@@ -1,3 +1,5 @@
+<%@page import="model.Branch"%>
+<%@page import="java.util.Map"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -6,24 +8,13 @@ pageEncoding="UTF-8"%>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Home</title>
-    <link rel="stylesheet" href="static/css/home.css" />
+    <link rel="stylesheet" href="<%=request.getContextPath() %>/static/css/home.css" />
   </head>
   <body>
-    <nav>
-      <ul class="top-nav">
-        <li><img src="/static/images/logo.png" alt="" id="logo" /></li>
-        <li>
-          <a href="accountForm.html" class="active">Accounts Management</a>
-        </li>
-        <li><a href="branches.html">Branch Management</a></li>
-        <li><a href="customerManagement.html">Customer Management</a></li>
-        <li><a href="">Employee Management</a></li>
-        <li><a href="">Fund Transfer</a></li>
-      </ul>
-      <a href="" class="top-nav" id="logout">Logout</a>
-    </nav>
+  <% request.setAttribute("activePath", "accounts"); %>
+  <%@include file="adminHeader.jsp" %>
     <main class="main">
-      <form action="" class="form-container">
+      <form action="<%=request.getContextPath() %>/controller/addAccount" method="post" class="form-container">
         <h3>Create Account</h3>
         <label for="customerId">Customer ID *</label>
         <input
@@ -32,20 +23,21 @@ pageEncoding="UTF-8"%>
           id="customerId"
           placeholder="Customer ID"
         />
-        <label for="branchId">Branch ID *</label>
-        <input
-          type="text"
-          name="branchId"
-          id="branchId"
-          placeholder="Branch ID"
-        />
-        <label for="mpin">MPIN</label>
-        <input
-          type="password"
-          name="mpin"
-          id="mpin"
-          placeholder="Default MPIN"
-        />
+        <label for="branchId">Branch ID * 
+        <select name="branchId" id="branchId" style="margin:1rem" class="selection" required>
+              <option value="">Select</option>
+        <% 
+          Map<Integer,Branch> branches=(Map<Integer,Branch>)request.getAttribute("branches");
+          if(branches!=null){
+            for(int branchId:branches.keySet()){
+        %>
+              <option value="<%=branchId%>"><%=branchId%></option>
+        <%
+            }
+          }
+        %>
+        </select>
+        </label>
         <button>Create</button>
       </form>
     </main>

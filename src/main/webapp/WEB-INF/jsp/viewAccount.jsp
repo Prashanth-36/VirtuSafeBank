@@ -14,19 +14,8 @@
 <link rel="stylesheet" href="<%=request.getContextPath() %>/static/css/home.css" />
 </head>
 <body>
-  <nav>
-    <ul class="top-nav">
-      <li><img src="<%=request.getContextPath() %>/static/images/logo.png" alt="" id="logo" /></li>
-      <li><a href="accounts.html" class="active">Accounts
-          Management</a></li>
-      <li><a href="branches.html">Branch Management</a></li>
-      <li><a href="">Customer Management</a></li>
-      <li><a href="">Employee Management</a></li>
-      <li><a href="">Fund Transfer</a></li>
-    </ul>
-    <a href="" class="top-nav" id="logout">Logout</a>
-  </nav>
-
+  <% request.setAttribute("activePath", "accounts"); %>
+  <%@include file="adminHeader.jsp" %>
   <main class="main">
     <table class="table" style="margin-top: 5rem">
       <tr>
@@ -67,6 +56,9 @@
       </tr>
     </table>
     <% if(account.getStatus()==ActiveStatus.INACTIVE){ %>
+    <form method="post" action="<%=request.getContextPath() %>/controller/manageAccount">
+      <input type="hidden" name="activate" value="1" />
+      <input type="hidden" name="accountNo" value="<%=account.getAccountNo() %>" />
       <button
             style="
               font-size: large;
@@ -79,10 +71,15 @@
           >
             Activate
           </button> 
+    </form>
         <%}else{ %>
+      <form method="post" action="<%=request.getContextPath() %>/controller/manageAccount">
+      <input type="hidden" name="deactivate" value="1" />
+      <input type="hidden" name="accountNo" value="<%=account.getAccountNo() %>" />
       <button
         style="font-size: large; padding: 0.5rem; margin: auto; display: block; background-color: #e34234; color: white;">
         Deactivate</button>
+      </form>
      <%} %>
   </main>
 </body>

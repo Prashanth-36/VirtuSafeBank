@@ -1,3 +1,5 @@
+<%@page import="java.time.ZoneId"%>
+<%@page import="utility.Utils"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
   pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -45,7 +47,7 @@
         <td><%=id%></td>
         <td><%=account.getCurrentBalance()%></td>
         <td><%=account.isPrimaryAccout() ? "YES" : "NO"%></td>
-        <td><%=account.getOpenDate()%></td>
+        <td><%=Utils.millisToLocalDate((account.getOpenDate()),ZoneId.systemDefault()) %></td>
         <td><%=account.getBranchId()%></td>
         <td><%=account.getStatus()%></td>
       </tr>

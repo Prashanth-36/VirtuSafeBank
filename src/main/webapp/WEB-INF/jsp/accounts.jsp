@@ -1,3 +1,5 @@
+<%@page import="java.time.ZoneId"%>
+<%@page import="utility.Utils"%>
 <%@page import="model.Branch"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
   pageEncoding="UTF-8"%>
@@ -12,24 +14,13 @@
   href="<%=request.getContextPath() %>/static/css/home.css" />
 </head>
 <body>
-  <nav>
-    <ul class="top-nav">
-      <li><img src="<%=request.getContextPath() %>/static/images/logo.png"
-        alt="" id="logo" /></li>
-      <li><a href="accounts.html" class="active">Accounts
-          Management</a></li>
-      <li><a href="branches.html">Branch Management</a></li>
-      <li><a href="">Customer Management</a></li>
-      <li><a href="">Employee Management</a></li>
-      <li><a href="">Fund Transfer</a></li>
-    </ul>
-    <a href="" class="top-nav" id="logout">Logout</a>
-  </nav>
-
+  <% request.setAttribute("activePath", "accounts"); %>
+  <%@include file="adminHeader.jsp" %>
   <main class="main">
     <form id="form" action="" method="get" class="search">
-      <label for="branchId">Branch ID</label> 
+      <label for="branchId">Branch ID:</label> 
       <select name="branchId"
+      class="selection"
         id="branchId"
         onchange="document.getElementById('form').submit()">
         <option value="">select</option>
@@ -45,23 +36,30 @@
           }
         %>
       </select>
+      <label for="branchStatus">Branch Status:</label>
       <select name="branchStatus"
+      class="selection"
         id="branchStatus"
         onchange="document.getElementById('form').submit()">
         <option value="1" <%= (1==(int)request.getAttribute("status"))?"selected":"" %>>ACTIVE</option>
         <option value="0" <%= (0==(int)request.getAttribute("status"))?"selected":"" %>>INACTIVE</option>
       </select> 
-    </form>
+        <label for="accountNo">Account No:</label>
+        <input
+          type="search"
+          id="accountNo"
+          placeholder="Account No"
+        />
+        <img src="<%=request.getContextPath() %>/static/images/search.png" alt="" width="50rem" onclick="redirect()"/>
+      </form>
     <table class="border-table">
       <tr style="position: relative">
         <th colspan="7"
-          style="text-align: center; background-color: var(--blue); color: white;">
+          style="text-align: center; background-color: var(--blue); color: white;position:reletive;height:3rem">
           Account Details
-          <form action="/account" method="post">
-            <button
-              style="position: absolute; font-size: larger; right: 1rem; width: 2rem;">
+            <button onclick="window.location.href='<%=request.getContextPath() %>/controller/addAccount'"
+              style="position: absolute; font-size: larger; right: 1rem;top:.7rem; height:2rem;width: 2rem;">
               +</button>
-          </form>
         </th>
       </tr>
       <tr>
@@ -88,7 +86,7 @@
         <td><%=account.getCustomerId() %></td>
         <td><%=account.getCurrentBalance() %></td>
         <td><%=account.isPrimaryAccout()?"YES":"NO"%></td>
-        <td><%=account.getOpenDate() %></td>
+        <td><%=Utils.millisToLocalDate((account.getOpenDate()),ZoneId.systemDefault()) %></td>
         <td><%=account.getBranchId() %></td>
         <td><%=account.getStatus() %></td>
       </tr>
@@ -98,7 +96,12 @@
           %>
     </table>
   </main>
-
   <%@ include file="pagination.jsp"%>
+  
+  <script>
+  function redirect(){
+  	window.location.href='<%=request.getContextPath()%>/controller/manageAccount?accountNo='+document.getElementById('accountNo').value;
+		  }
+  </script>
 </body>
 </html>

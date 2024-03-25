@@ -71,13 +71,12 @@ public class EmployeeHandler {
 		return pageCount;
 	}
 
-	public void createAccount(Account account)
+	public void createAccount(int customerId, int branchId)
 			throws CustomException, InvalidValueException, InvalidOperationException {
-		Utils.checkNull(account);
-		int customerId = account.getCustomerId();
+		Account account = new Account();
 		customerManager.getCustomer(customerId); // to validate existing customer
 		List<Integer> customerBranches = customerManager.getCustomerBranches(customerId);
-		if (customerBranches.contains(account.getBranchId())) {
+		if (customerBranches.contains(branchId)) {
 			throw new InvalidOperationException("Customer has an existing account in this branch!");
 		}
 		if (customerBranches.isEmpty()) {
@@ -85,6 +84,8 @@ public class EmployeeHandler {
 		} else {
 			account.setPrimaryAccout(false);
 		}
+		account.setCustomerId(customerId);
+		account.setBranchId(branchId);
 		accountManager.createAccount(account);
 	}
 
@@ -113,6 +114,7 @@ public class EmployeeHandler {
 	}
 
 	public void setAccountStatus(int accountNo, ActiveStatus status) throws CustomException {
+		CustomerHandler.accountCache.remove(accountNo);
 		accountManager.setAccountStatus(accountNo, status);
 	}
 

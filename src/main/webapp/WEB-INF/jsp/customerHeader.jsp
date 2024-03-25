@@ -14,5 +14,5 @@
   <img
     src="<%=request.getContextPath()%>/static/images/profile-user.png"
     alt="" style="width: 2.6rem" /> <a
-    href="<%=request.getContextPath()%>/" class="top-nav" id="logout">Logout</a>
+    href="<%=request.getContextPath()%>/controller/logout" class="top-nav" id="logout">Logout</a>
 </nav>

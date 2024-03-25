@@ -1,3 +1,5 @@
+<%@page import="model.Branch"%>
+<%@page import="java.util.Map"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -6,34 +8,28 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Home</title>
-<link rel="stylesheet" href="static/css/home.css" />
+<link rel="stylesheet" href="<%=request.getContextPath() %>/static/css/home.css" />
 </head>
 <body>
-	<nav>
-		<ul class="top-nav">
-			<li><img src="static/images/logo.png" alt="" id="logo" /></li>
-			<li><a href="accounts.html">Accounts Management</a></li>
-			<li><a href="branches.html" class="active">Branch Management</a>
-			</li>
-			<li><a href="">Customer Management</a></li>
-			<li><a href="">Employee Management</a></li>
-			<li><a href="">Fund Transfer</a></li>
-		</ul>
-		<a href="" class="top-nav" id="logout">Logout</a>
-	</nav>
-
+    <% request.setAttribute("activePath", "branches"); %>
+    <%@include file="adminHeader.jsp" %>
+     <form id="form" action="<%=request.getContextPath() %>/controller/branches" method="get" class="search">
+      <label for="branchStatus">Branch Status:</label>
+      <select name="branchStatus"
+        class="selection"
+        id="branchStatus"
+        onchange="document.getElementById('form').submit()">
+        <option value="1" <%= (1==(int)request.getAttribute("status"))?"selected":"" %>>ACTIVE</option>
+        <option value="0" <%= (0==(int)request.getAttribute("status"))?"selected":"" %>>INACTIVE</option>
+      </select> 
+      </form>
 	<main class="main">
-		<form action="" method="get" class="search">
-			<label for="branchId">Branch ID</label> <input type="search"
-				name="branchId" id="branchId" placeholder="Branch ID" />
-			<img src="static/images/search.png" alt="" width="50rem" />
-		</form>
 		<table id="table" class="border-table">
 			<tr>
 				<th colspan="6"
 					style="text-align: center; position: relative; background-color: var(--blue); color: white;">
 					Branch Details
-					<button onclick="window.location.href='branchForm.html'"
+					<button onclick="window.location.href='<%=request.getContextPath() %>/controller/addBranch'"
 						style="position: absolute; font-size: larger; right: 1rem; width: 2rem;">
 						+</button>
 				</th>
@@ -46,33 +42,26 @@
 				<th>State</th>
 				<th>Branch Status</th>
 			</tr>
-			<tr onclick="window.location.href='viewBranch.html?id=1'">
-				<td>1</td>
-				<td>VSB0001</td>
-				<td>1st street</td>
-				<td>Coimbatore</td>
-				<td>Tamil Nadu</td>
-				<td>Active</td>
+            <%
+              Map<Integer,Branch> branches=( Map<Integer,Branch>)request.getAttribute("branches");
+              if(branches!=null){
+                for(Map.Entry<Integer,Branch> e:branches.entrySet()){
+                    int id=e.getKey();                
+                    Branch branch=e.getValue();
+            %>
+			<tr onclick="window.location.href='<%=request.getContextPath() %>/controller/branch?id=<%=id%>'">
+				<td><%=id %></td>
+				<td><%=branch.getIfsc() %></td>
+				<td><%=branch.getLocation()%></td>
+				<td><%=branch.getCity()%></td>
+				<td><%=branch.getState()%></td>
+				<td><%=branch.getStatus()%></td>
 			</tr>
-			<tr onclick="window.location.href='viewBranch.html?id=2'">
-				<td>1</td>
-				<td>VSB0001</td>
-				<td>1st street</td>
-				<td>Coimbatore</td>
-				<td>Tamil Nadu</td>
-				<td>Active</td>
-			</tr>
+            <%
+                }
+              }
+            %>
 		</table>
 	</main>
-	<div class="pages" id="pages">
-		<a id="previousPage" onclick="previousPage()"><img
-			src="static/images/left.png" alt="previous" style="width: 1rem" /></a> <a
-			href="" class="page activePage">1</a> <a href="" class="page">2</a> <a
-			href="" class="page">3</a> <a href="" class="page">4</a> <a href=""
-			class="page">5</a> <a id="nextPage" onclick="nextPage()"><img
-			src="static/images/right.png" alt="next" style="width: 1rem" /></a>
-	</div>
-
-	<script src="script/page.js"></script>
 </body>
 </html>

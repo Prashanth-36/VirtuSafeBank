@@ -206,21 +206,22 @@ label {
   text-align: center;
 }
 .search {
+  display: flex;
+  gap:1rem;
+  align-items: center;
+  justify-content: flex-end;
   width: 80%;
   margin: 3rem auto;
   text-align: end;
   font-size: large;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
 }
 .search input {
   padding: 0.5rem;
   font-size: large;
-  margin: 0 1rem;
 }
 .search label {
   text-align: end;
+  width:fit-content;
 }
 .options {
   display: flex;
@@ -268,6 +269,10 @@ label {
 }
 .account-selection {
   margin-left: 3rem;
+  padding: 0.5rem;
+  min-inline-size: 5rem;
+}
+.selection{
   padding: 0.5rem;
   min-inline-size: 5rem;
 }

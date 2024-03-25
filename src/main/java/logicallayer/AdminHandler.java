@@ -6,6 +6,7 @@ import customexceptions.CustomException;
 import customexceptions.InvalidOperationException;
 import customexceptions.InvalidValueException;
 import model.Branch;
+import model.Customer;
 import model.Employee;
 import persistentdao.BranchDao;
 import persistentdao.EmployeeDao;
@@ -42,6 +43,18 @@ public class AdminHandler extends EmployeeHandler {
 		return pages;
 	}
 
+	public Map<Integer, Employee> getAllEmployees(int pageNo, int limit) throws CustomException, InvalidValueException {
+		int offset = Utils.pagination(pageNo, limit);
+		return employeeManager.getAllEmployees(offset, limit);
+	}
+
+	public int getAllEmployeesPageCount(int limit) throws CustomException, InvalidValueException {
+		Utils.checkRange(5, limit, 50, "Limit should be within 5 to 50.");
+		int totalEmployees = employeeManager.getAllEmployeesCount();
+		int pages = (int) Math.ceil((double) totalEmployees / limit);
+		return pages;
+	}
+
 	public void removeEmployee(int id) throws CustomException, InvalidOperationException {
 		if (id == 1) {
 			throw new InvalidOperationException("Can't remove admin!");
@@ -72,6 +85,18 @@ public class AdminHandler extends EmployeeHandler {
 	public void setEmployeeStatus(int employeeId, ActiveStatus status) throws CustomException, InvalidValueException {
 		employeeManager.getEmployee(employeeId); // validate existing employee
 		employeeManager.setEmployeeStatus(employeeId, status);
+	}
+
+	public Map<Integer, Customer> getAllCustomers(int pageNo, int limit) throws CustomException, InvalidValueException {
+		int offset = Utils.pagination(pageNo, limit);
+		return customerManager.getAllCustomers(offset, limit);
+	}
+
+	public int getAllCustomerPageCount(int limit) throws CustomException, InvalidValueException {
+		Utils.checkRange(5, limit, 50, "Limit should be within 5 to 50.");
+		int totalEmployees = customerManager.getAllCustomerCount();
+		int pages = (int) Math.ceil((double) totalEmployees / limit);
+		return pages;
 	}
 
 }

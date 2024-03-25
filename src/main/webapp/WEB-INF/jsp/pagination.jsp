@@ -1,7 +1,6 @@
 <%
-
-	int totalPages = (int)request.getAttribute("totalPages");
-	if (totalPages > 0) {
+	Integer totalPages = (Integer)request.getAttribute("totalPages");
+	if (totalPages!=null && totalPages > 0) {
 %>
 	<div class="pages" id="pages">
 		<div id="previousPage" onclick="previousPage()"><img

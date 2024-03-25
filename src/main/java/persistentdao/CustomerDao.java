@@ -128,6 +128,26 @@ public class CustomerDao implements CustomerManager {
 	}
 
 	@Override
+	public Map<Integer, Customer> getAllCustomers(int offset, int limit) throws CustomException {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement(
+						"SELECT u.*,c.aadhaarNo,c.panNo from user u join customer c on c.id=u.id limit ?,?");) {
+			statement.setInt(1, offset);
+			statement.setInt(2, limit);
+			try (ResultSet resultSet = statement.executeQuery();) {
+				Map<Integer, Customer> customers = new HashMap<>();
+				while (resultSet.next()) {
+					Customer customer = resultSetToCustomer(resultSet);
+					customers.put(customer.getUserId(), customer);
+				}
+				return customers;
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			throw new CustomException("Employee fetch failed!", e);
+		}
+	}
+
+	@Override
 	public int getCustomerId(long aadhaarNo) throws CustomException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
@@ -176,6 +196,22 @@ public class CustomerDao implements CustomerManager {
 			}
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("Customer fetch failed!", e);
+		}
+	}
+
+	@Override
+	public int getAllCustomerCount() throws CustomException {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection
+						.prepareStatement("SELECT COUNT(*) from user u join customer c on c.id=u.id");) {
+			try (ResultSet resultSet = statement.executeQuery();) {
+				if (resultSet.next()) {
+					return resultSet.getInt(1);
+				}
+				return 0;
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			throw new CustomException("Employee fetch failed!", e);
 		}
 	}
 

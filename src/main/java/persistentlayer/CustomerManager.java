@@ -26,4 +26,8 @@ public interface CustomerManager {
 	List<Integer> getCustomerBranches(int customerId) throws CustomException;
 
 	void setCustomerStatus(int customerId, ActiveStatus status) throws CustomException;
+
+	Map<Integer, Customer> getAllCustomers(int offset, int limit) throws CustomException;
+
+	int getAllCustomerCount() throws CustomException;
 }

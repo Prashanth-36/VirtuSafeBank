@@ -204,6 +204,35 @@ public class ControllerServlet extends HttpServlet {
 			break;
 		}
 
+		case "/users": {
+			AdminHandler handler = new AdminHandler();
+			int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
+			int uType = Math.abs(Utils.parseInt(request.getParameter("userType")));
+			try {
+				if (uType == 0) {
+					request.setAttribute("totalPages", handler.getAllCustomerPageCount(10));
+					request.setAttribute("customers", handler.getAllCustomers(pageNo, 10));
+				} else {
+					request.setAttribute("totalPages", handler.getAllEmployeesPageCount(10));
+					request.setAttribute("employees", handler.getAllEmployees(pageNo, 10));
+				}
+				request.setAttribute("userType", uType);
+				request.getRequestDispatcher("/WEB-INF/jsp/users.jsp").forward(request, response);
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
+		case "/manageUser": {
+			AdminHandler handler = new AdminHandler();
+			int userId = Utils.parseInt(request.getParameter("userId"));
+			request.setAttribute("userId", userId);
+			request.getRequestDispatcher("/WEB-INF/jsp/viewUser.jsp").forward(request, response);
+			break;
+		}
+
 		case "/error":
 			request.getRequestDispatcher("/WEB-INF/jsp/error.jsp").forward(request, response);
 			break;

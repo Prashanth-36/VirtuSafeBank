@@ -106,6 +106,26 @@ public class EmployeeDao implements EmployeeManager {
 	}
 
 	@Override
+	public Map<Integer, Employee> getAllEmployees(int offset, int limit) throws CustomException {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement(
+						"SELECT u.*,e.branchId from user u join employee e on e.id=u.id ORDER BY e.branchId,u.id limit ?,? ");) {
+			statement.setInt(1, offset);
+			statement.setInt(2, limit);
+			try (ResultSet resultSet = statement.executeQuery();) {
+				Map<Integer, Employee> employees = new HashMap<>();
+				while (resultSet.next()) {
+					Employee employee = resultSetToEmployee(resultSet);
+					employees.put(employee.getUserId(), employee);
+				}
+				return employees;
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			throw new CustomException("Employee fetch failed!", e);
+		}
+	}
+
+	@Override
 	public void setEmployeeStatus(int employeeId, ActiveStatus status) throws CustomException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement("UPDATE user SET status = ? WHERE id = ?")) {
@@ -146,6 +166,22 @@ public class EmployeeDao implements EmployeeManager {
 						"SELECT COUNT(*) from user u join employee e on e.id=u.id where branchId = ? AND status = ?");) {
 			statement.setInt(1, branchId);
 			statement.setInt(2, status.ordinal());
+			try (ResultSet resultSet = statement.executeQuery();) {
+				if (resultSet.next()) {
+					return resultSet.getInt(1);
+				}
+				return 0;
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			throw new CustomException("Employee fetch failed!", e);
+		}
+	}
+
+	@Override
+	public int getAllEmployeesCount() throws CustomException {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection
+						.prepareStatement("SELECT COUNT(*) from user u join employee e on e.id=u.id");) {
 			try (ResultSet resultSet = statement.executeQuery();) {
 				if (resultSet.next()) {
 					return resultSet.getInt(1);

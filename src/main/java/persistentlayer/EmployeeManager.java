@@ -22,4 +22,8 @@ public interface EmployeeManager {
 
 	void setEmployeeStatus(int employeeId, ActiveStatus status) throws CustomException;
 
+	int getAllEmployeesCount() throws CustomException;
+
+	Map<Integer, Employee> getAllEmployees(int offset, int limit) throws CustomException;
+
 }

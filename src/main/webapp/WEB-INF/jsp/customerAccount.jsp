@@ -62,7 +62,7 @@
             <td><%=transaction.getId()%></td>
             <td><%=Utils.formatLocalDateTime(Utils.millisToLocalDateTime(transaction.getTimestamp(), ZoneId.systemDefault()))%></td>
             <td><%=transaction.getType()%></td>
-            <td><%=transaction.getAmount()%></td>
+            <td class="<%=transaction.getType().name().toLowerCase()%>"><%=transaction.getAmount()%></td>
             <td><%=transaction.getPrimaryAccount()%></td>
             <td><%=transaction.getTransactionalAccount()%></td>
             <td><%=(description==null || description.isEmpty())? "-" : description%></td>

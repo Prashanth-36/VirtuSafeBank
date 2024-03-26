@@ -15,12 +15,14 @@
         name="userId"
         id="userId"
         placeholder="Enter User ID"
+        required
       />
       <input
         type="password"
         name="password"
         id="password"
         placeholder="Enter Password"
+        required
       />
       <button>Login</button>
     </form>

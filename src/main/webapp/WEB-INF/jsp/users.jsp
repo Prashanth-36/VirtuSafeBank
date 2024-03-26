@@ -48,7 +48,7 @@
         <th colspan="12"
           style="text-align: center; background-color: var(--blue); color: white;position:reletive;height:3rem">
           Account Details
-            <button onclick="window.location.href='<%=request.getContextPath() %>/controller/addAccount'"
+            <button onclick="window.location.href='<%=request.getContextPath() %>/controller/addUser'"
               style="position: absolute; font-size: larger; right: 1rem;top:.7rem; height:2rem;width: 2rem;">
               +</button>
         </th>
@@ -85,7 +85,7 @@
                 int userId=e.getKey();
                 Customer customer=e.getValue();
       %>
-        <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/manageUser?userId=<%=userId%>'">
+        <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/manageUser?userId=<%=userId%>&userType=<%=customer.getType().ordinal()%>'">
           <td><%=userId %></td>
           <td><%=customer.getName() %></td>
           <td><%=Utils.millisToLocalDate(customer.getDob(), ZoneId.systemDefault())  %></td>
@@ -107,7 +107,7 @@
               int userId=e.getKey();
               Employee employee=e.getValue();
       %>
-      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/manageUser?userId=<%=userId%>'">
+      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/manageUser?userId=<%=userId%>&userType=<%=employee.getType().ordinal()%>'">
         <td><%=userId %></td>
           <td><%=employee.getName() %></td>
           <td><%=Utils.millisToLocalDate( employee.getDob(), ZoneId.systemDefault()) %></td>

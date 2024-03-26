@@ -21,7 +21,7 @@
       <!-- <h3>Edit Branch</h3> -->
       <!-- <label for="ifsc">IFSC *</label> <input type="text" name="ifsc"
         id="ifsc" placeholder="IFSC" required /> -->
-      <label for="location">location *</label> <input type="text"
+      <label for="location">Location *</label> <input type="text"
         name="location" id="location" placeholder="Location" required />
       <label for="city">City *</label> <input type="text" name="city"
         id="city" placeholder="City" required /> <label for="city">State

@@ -1,3 +1,4 @@
+<%@page import="utility.TransactionType"%>
 <%@page import="java.time.ZoneId"%>
 <%@page import="utility.Utils"%>
 <%@page import="java.util.List"%>
@@ -56,13 +57,14 @@
           	List<Transaction> transactions=(List<Transaction>)request.getAttribute("transactions");
           for(Transaction transaction:transactions){
         	  String description=transaction.getDescription();
+        	  TransactionType type= transaction.getType();
           %>
           
           <tr>
             <td><%=transaction.getId()%></td>
             <td><%=Utils.formatLocalDateTime(Utils.millisToLocalDateTime(transaction.getTimestamp(), ZoneId.systemDefault()))%></td>
-            <td><%=transaction.getType()%></td>
-            <td class="<%=transaction.getType().name().toLowerCase()%>"><%=transaction.getAmount()%></td>
+            <td><%=type%></td>
+            <td class="<%=type.name().toLowerCase()%>"><%=(type==TransactionType.DEBIT?"-":"+")+transaction.getAmount()%></td>
             <td><%=transaction.getPrimaryAccount()%></td>
             <td><%=transaction.getTransactionalAccount()%></td>
             <td><%=(description==null || description.isEmpty())? "-" : description%></td>

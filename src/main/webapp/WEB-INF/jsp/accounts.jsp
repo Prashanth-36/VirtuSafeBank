@@ -56,7 +56,7 @@
       <tr style="position: relative">
         <th colspan="7"
           style="text-align: center; background-color: var(--blue); color: white;position:reletive;height:3rem">
-          Account Details
+          Accounts
             <button onclick="window.location.href='<%=request.getContextPath() %>/controller/addAccount'"
               style="position: absolute; font-size: larger; right: 1rem;top:.7rem; height:2rem;width: 2rem;">
               +</button>

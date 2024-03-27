@@ -57,6 +57,7 @@ public class ControllerServlet extends HttpServlet {
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			int months = Math.abs(Utils.parseInt(request.getParameter("months")));
 			int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
+			request.setAttribute("page", pageNo);
 			if (accountNo != -1) {
 				CustomerHandler customerHandler = new CustomerHandler();
 				User user = (User) session.getAttribute("user");
@@ -212,6 +213,7 @@ public class ControllerServlet extends HttpServlet {
 			AdminHandler handler = new AdminHandler();
 			int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
 			int uType = Math.abs(Utils.parseInt(request.getParameter("userType")));
+			request.setAttribute("page", pageNo);
 			try {
 				if (uType == 0) {
 					request.setAttribute("totalPages", handler.getAllCustomerPageCount(10));
@@ -600,8 +602,8 @@ public class ControllerServlet extends HttpServlet {
 
 	private void redirectToHomePage(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		HttpSession session = request.getSession(false);
-		User user = (User) session.getAttribute("user");
+		HttpSession httpSession = request.getSession(false);
+		User user = (User) httpSession.getAttribute("user");
 		if (user == null) {
 			request.getRequestDispatcher("/login").forward(request, response);
 			return;
@@ -612,6 +614,8 @@ public class ControllerServlet extends HttpServlet {
 				AdminHandler handler = new AdminHandler();
 				String id = request.getParameter("branchId");
 				Map<Integer, Account> accounts = null;
+				int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
+				request.setAttribute("page", pageNo);
 				int pages = 0;
 				if (id != null && !id.isEmpty()) {
 					int branchId = Integer.parseInt(id);
@@ -662,17 +666,17 @@ public class ControllerServlet extends HttpServlet {
 		case EMPLOYEE: {
 			try {
 				EmployeeHandler handler = new EmployeeHandler();
-				String id = request.getParameter("branchId");
+				HttpSession session = request.getSession(false);
+				Employee employee = (Employee) session.getAttribute("user");
+				int branchId = employee.getBranchId();
 				Map<Integer, Account> accounts = null;
+				int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
+				request.setAttribute("page", pageNo);
 				int pages = 0;
-				if (id != null && !id.isEmpty()) {
-					int branchId = Integer.parseInt(id);
-					accounts = handler.getBranchAccounts(branchId);
-					pages = handler.getBranchAccountsPageCount(branchId, 10);
-					request.setAttribute("branchId", branchId);
-				}
-				request.setAttribute("totalPages", pages);
+				accounts = handler.getBranchAccounts(branchId);
+				pages = handler.getBranchAccountsPageCount(branchId, 10);
 				request.setAttribute("accounts", accounts);
+				request.setAttribute("totalPages", pages);
 				request.getRequestDispatcher("/WEB-INF/jsp/employee.jsp").forward(request, response);
 			} catch (InvalidValueException | CustomException e) {
 				e.printStackTrace();

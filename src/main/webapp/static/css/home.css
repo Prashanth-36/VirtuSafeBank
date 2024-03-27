@@ -1,6 +1,8 @@
 * {
   box-sizing: border-box;
   font-family: Arial, Helvetica, sans-serif;
+   -ms-overflow-style: none;
+   scrollbar-width: none; 
 }
 :root {
   --blue: #004b8e;
@@ -276,15 +278,22 @@ ul a {
   padding: 0.5rem;
   min-inline-size: 5rem;
 }
+.page-container {
+  display: flex;
+  overflow:scroll;
+}
 .pages {
   display: flex;
   margin: auto;
-  width: fit-content;
+  width: 36rem;
+  justify-content:center;
+}
+.page {
+  padding: 1rem;
+  width:3rem;
 }
 .pages div {
   border: 1px solid white;
-  width: 3em;
-  padding: 1rem;
   text-decoration: none;
   text-align: center;
   color: white;
@@ -393,9 +402,9 @@ tr:hover {
   background-color: rgba(128, 128, 128, 0.224);
 }
 
-.credit{
-	color:green;
+.credit {
+  color: green;
 }
-.debit{
-	color:red;
+.debit {
+  color: red;
 }

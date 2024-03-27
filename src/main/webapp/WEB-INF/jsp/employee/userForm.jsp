@@ -52,17 +52,17 @@
               <label for="email">Email</label>
               <input type="email" name="email" value="<%=user!=null?user.getEmail():""%>"  id="email" placeholder="Email" required>
             </div>
-            <div class="form-row" style="display:<%=user==null?"flex":"none"%>">
-              <label for="password">Password</label>
-              <input type="password" name="password"  id="password" placeholder="password" <%=user==null?"required":"" %>>
-            </div>
-          </div>
-          <div class="form-column">
             <div class="form-row">
                 <label for="userType">User Type</label>
                 <select name="userType" id="userType" style="margin:1rem" class="selection" onchange="toggleInputs()" required >
                   <option value="0" readonly>Customer</option>
                 </select>
+            </div>
+          </div>
+          <div class="form-column">
+            <div class="form-row" style="display:<%=user==null?"flex":"none"%>">
+              <label for="password">Password</label>
+              <input type="password" name="password"  id="password" placeholder="password" <%=user==null?"required":"" %>>
             </div>
             <div style="width:100%;" id="customer">
               <div class="form-row">

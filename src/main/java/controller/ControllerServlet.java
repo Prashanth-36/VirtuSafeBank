@@ -275,6 +275,19 @@ public class ControllerServlet extends HttpServlet {
 			break;
 		}
 
+		case "/admin/modifyBranch": {
+			int branchId = Utils.parseInt(request.getParameter("id"));
+			AdminHandler adminHandler = new AdminHandler();
+			try {
+				request.setAttribute("branch", adminHandler.getBranch(branchId));
+				request.getRequestDispatcher("/WEB-INF/jsp/admin/branchForm.jsp").forward(request, response);
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
 		case "/admin/users": {
 			AdminHandler handler = new AdminHandler();
 			int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
@@ -395,6 +408,11 @@ public class ControllerServlet extends HttpServlet {
 				e.printStackTrace();
 				response.getWriter().println(e.getMessage());
 			}
+			break;
+		}
+
+		case "/employee/addUser": {
+			request.getRequestDispatcher("/WEB-INF/jsp/employee/userForm.jsp").forward(request, response);
 			break;
 		}
 
@@ -752,6 +770,7 @@ public class ControllerServlet extends HttpServlet {
 //			}
 //			break;
 //		}
+
 		case "/employee/manageAccount": {
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			String activate = request.getParameter("activate");
@@ -781,6 +800,20 @@ public class ControllerServlet extends HttpServlet {
 			}
 			break;
 		}
+
+//		case "/addUser": {
+//		AdminHandler adminHandler = new AdminHandler();
+//		try {
+//			int userId = Utils.parseInt(request.getParameter("userId"));
+////			int branchId = Utils.parseInt(request.getParameter("branchId"));
+////			adminHandler.createAccount(customerId, branchId);
+//			response.sendRedirect(request.getContextPath() + "/controller/home");
+//		} catch (CustomException | InvalidValueException | InvalidOperationException e) {
+//			e.printStackTrace();
+//			response.getWriter().println(e.getMessage());
+//		}
+//		break;
+//	}
 
 		case "/employee/manageUser": {
 			int userId = Utils.parseInt(request.getParameter("userId"));

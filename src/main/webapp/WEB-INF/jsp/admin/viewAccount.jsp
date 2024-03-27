@@ -15,7 +15,7 @@
 </head>
 <body>
   <% request.setAttribute("activePath", "accounts"); %>
-  <%@include file="adminHeader.jsp" %>
+  <%@include file="../addOns/adminHeader.jsp" %>
   <main class="main">
     <table class="table" style="margin-top: 5rem">
       <tr>
@@ -56,7 +56,7 @@
       </tr>
     </table>
     <% if(account.getStatus()==ActiveStatus.INACTIVE){ %>
-    <form method="post" action="<%=request.getContextPath() %>/controller/manageAccount">
+    <form method="post" action="<%=request.getContextPath() %>/controller/admin/manageAccount">
       <input type="hidden" name="activate" value="1" />
       <input type="hidden" name="accountNo" value="<%=account.getAccountNo() %>" />
       <button
@@ -73,7 +73,7 @@
           </button> 
     </form>
         <%}else{ %>
-      <form method="post" action="<%=request.getContextPath() %>/controller/manageAccount">
+      <form method="post" action="<%=request.getContextPath() %>/controller/admin/manageAccount">
       <input type="hidden" name="deactivate" value="1" />
       <input type="hidden" name="accountNo" value="<%=account.getAccountNo() %>" />
       <button

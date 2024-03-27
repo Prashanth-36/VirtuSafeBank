@@ -12,8 +12,8 @@
 </head>
 <body>
     <% request.setAttribute("activePath", "branches"); %>
-    <%@include file="adminHeader.jsp" %>
-     <form id="form" action="<%=request.getContextPath() %>/controller/branches" method="get" class="search">
+    <%@include file="../addOns/adminHeader.jsp" %>
+     <form id="form" action="<%=request.getContextPath() %>/controller/admin/branches" method="get" class="search">
       <label for="branchStatus">Branch Status:</label>
       <select name="branchStatus"
         class="selection"
@@ -29,7 +29,7 @@
 				<th colspan="6"
 					style="text-align: center; position: relative; background-color: var(--blue); color: white;">
 					Branch Details
-					<button onclick="window.location.href='<%=request.getContextPath() %>/controller/addBranch'"
+					<button onclick="window.location.href='<%=request.getContextPath() %>/controller/admin/addBranch'"
 						style="position: absolute; font-size: larger; right: 1rem; width: 2rem;">
 						+</button>
 				</th>
@@ -49,7 +49,7 @@
                     int id=e.getKey();                
                     Branch branch=e.getValue();
             %>
-			<tr onclick="window.location.href='<%=request.getContextPath() %>/controller/branch?id=<%=id%>'">
+			<tr onclick="window.location.href='<%=request.getContextPath() %>/controller/admin/branch?id=<%=id%>'">
 				<td><%=id %></td>
 				<td><%=branch.getIfsc() %></td>
 				<td><%=branch.getLocation()%></td>

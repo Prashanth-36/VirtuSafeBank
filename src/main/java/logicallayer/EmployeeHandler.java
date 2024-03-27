@@ -151,13 +151,13 @@ public class EmployeeHandler {
 		if (amount < 1) {
 			throw new InvalidValueException("Invalid amount!");
 		}
+		Account account = getAccount(accountNo);
 		CustomerHandler.accountCache.remove(accountNo);
 		Transaction transaction = new Transaction();
 		transaction.setPrimaryAccount(accountNo);
 		transaction.setAmount(amount);
 		transaction.setType(TransactionType.CREDIT);
 		transaction.setDescription(description);
-		Account account = getAccount(accountNo);
 		transaction.setCustomerId(account.getCustomerId());
 		transactionManager.initTransaction(transaction);
 	}

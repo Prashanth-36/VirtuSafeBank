@@ -11,7 +11,7 @@
     <form action="<%=request.getContextPath() %>/controller/login" id="form-container" method="post">
       <img src="<%=request.getContextPath() %>/static/images/logo.png" alt="VirtuSafe Bank" id="logo" />
       <input
-        type="text"
+        type="number"
         name="userId"
         id="userId"
         placeholder="Enter User ID"

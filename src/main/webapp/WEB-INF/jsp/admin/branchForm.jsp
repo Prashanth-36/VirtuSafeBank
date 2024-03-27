@@ -13,9 +13,9 @@
   <%
   request.setAttribute("activePath", "branches");
   %>
-  <%@include file="adminHeader.jsp"%>
+  <%@include file="../addOns/adminHeader.jsp"%>
   <main class="main">
-    <form action="<%=request.getContextPath()%>/controller/addBranch"
+    <form action="<%=request.getContextPath()%>/controller/admin/addBranch"
       method="post" class="form-container">
       <h3>Create Branch</h3>
       <!-- <h3>Edit Branch</h3> -->

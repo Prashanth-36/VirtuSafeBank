@@ -12,9 +12,9 @@ pageEncoding="UTF-8"%>
   </head>
   <body>
   <% request.setAttribute("activePath", "accounts"); %>
-  <%@include file="adminHeader.jsp" %>
+  <%@include file="../addOns/adminHeader.jsp" %>
     <main class="main">
-      <form action="<%=request.getContextPath() %>/controller/addAccount" method="post" class="form-container">
+      <form action="<%=request.getContextPath() %>/controller/admin/addAccount" method="post" class="form-container">
         <h3>Create Account</h3>
         <label for="customerId">Customer ID *</label>
         <input

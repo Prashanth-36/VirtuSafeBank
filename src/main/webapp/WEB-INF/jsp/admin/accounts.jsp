@@ -15,9 +15,35 @@
 </head>
 <body>
   <% request.setAttribute("activePath", "accounts"); %>
-  <%@include file="employeeHeader.jsp" %>
+  <%@include file="../addOns/adminHeader.jsp" %>
   <main class="main">
     <form id="form" action="" method="get" class="search">
+      <label for="branchId">Branch ID:</label> 
+      <select name="branchId"
+      class="selection"
+        id="branchId"
+        onchange="document.getElementById('form').submit()">
+        <option value="">select</option>
+        <% 
+          Map<Integer,Branch> branches=(Map<Integer,Branch>)request.getAttribute("branches");
+          if(branches!=null){
+    		  for(int branchId:branches.keySet()){
+    			  Object id=request.getAttribute("branchId");
+        %>
+        <option value="<%=branchId%>" <%= (id!=null && (int)id==branchId)?"selected":"" %>><%=branchId%></option>
+        <%
+    		  }
+          }
+        %>
+      </select>
+      <label for="branchStatus">Branch Status:</label>
+      <select name="branchStatus"
+      class="selection"
+        id="branchStatus"
+        onchange="document.getElementById('form').submit()">
+        <option value="1" <%= (1==(int)request.getAttribute("status"))?"selected":"" %>>ACTIVE</option>
+        <option value="0" <%= (0==(int)request.getAttribute("status"))?"selected":"" %>>INACTIVE</option>
+      </select> 
         <label for="accountNo">Account No:</label>
         <input
           type="search"
@@ -31,7 +57,7 @@
         <th colspan="7"
           style="text-align: center; background-color: var(--blue); color: white;position:reletive;height:3rem">
           Accounts
-            <button onclick="window.location.href='<%=request.getContextPath() %>/controller/addAccount'"
+            <button onclick="window.location.href='<%=request.getContextPath() %>/controller/admin/addAccount'"
               style="position: absolute; font-size: larger; right: 1rem;top:.7rem; height:2rem;width: 2rem;">
               +</button>
         </th>
@@ -55,7 +81,7 @@
           		int id=e.getKey();
           		Account account=e.getValue();
           %>
-      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/manageAccount?accountNo=<%=id%>'">
+      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/admin/manageAccount?accountNo=<%=id%>'">
         <td><%=id %></td>
         <td><%=account.getCustomerId() %></td>
         <td><%=account.getCurrentBalance() %></td>
@@ -70,11 +96,11 @@
           %>
     </table>
   </main>
-  <%@ include file="pagination.jsp"%>
+  <%@ include file="../addOns/pagination.jsp"%>
   
   <script>
   function redirect(){
-  	window.location.href='<%=request.getContextPath()%>/controller/manageAccount?accountNo='+document.getElementById('accountNo').value;
+  	window.location.href='<%=request.getContextPath()%>/controller/admin/manageAccount?accountNo='+document.getElementById('accountNo').value;
 		  }
   </script>
 </body>

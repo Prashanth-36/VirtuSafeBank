@@ -13,8 +13,8 @@
 </head>
 <body>
 <% request.setAttribute("selected","moneyTransfer"); %>
-  <%@ include file="customerHeader.jsp"%>
-  <%@ include file="customerSideNav.jsp"%>
+  <%@ include file="../addOns/customerHeader.jsp"%>
+  <%@ include file="../addOns/customerSideNav.jsp"%>
   <div class="main-container">
     <main class="main">
       <div class="transfer-options">
@@ -32,7 +32,7 @@
         </div>
       </div>
       <form id="form"
-        action="<%=request.getContextPath()%>/controller/moneyTransfer"
+        action="<%=request.getContextPath()%>/controller/user/moneyTransfer"
         method="post" class="form-container"
         style="display: none; height: fit-content">
         <label for="senderAccountNo">Select From Account Number

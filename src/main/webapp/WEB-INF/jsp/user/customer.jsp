@@ -16,7 +16,7 @@
 </head>
 <body>
 <% request.setAttribute("selected","myAccounts"); %>
-  <%@ include file="customerHeader.jsp"%>
+  <%@ include file="../addOns/customerHeader.jsp"%>
   <main class="main">
     <div class="totalBalance">
       Total Available Balance: ₹<span> <%=request.getAttribute("totalBalance") %></span>
@@ -43,7 +43,7 @@
       	Account account = e.getValue();
       %>
       <tr
-        onclick="window.location.href='<%=request.getContextPath()%>/controller/account?accountNo=<%=id%>'">
+        onclick="window.location.href='<%=request.getContextPath()%>/controller/user/account?accountNo=<%=id%>'">
         <td><%=id%></td>
         <td><%=account.getCurrentBalance()%></td>
         <td><%=account.isPrimaryAccout() ? "YES" : "NO"%></td>

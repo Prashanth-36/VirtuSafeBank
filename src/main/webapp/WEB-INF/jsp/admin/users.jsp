@@ -18,7 +18,7 @@
 </head>
 <body>
   <% request.setAttribute("activePath", "users"); %>
-  <%@include file="adminHeader.jsp" %>
+  <%@include file="../addOns/adminHeader.jsp" %>
   <main class="main">
     <form id="form" action="" method="get" class="search">
 
@@ -48,7 +48,7 @@
         <th colspan="12"
           style="text-align: center; background-color: var(--blue); color: white;position:reletive;height:3rem">
           Account Details
-            <button onclick="window.location.href='<%=request.getContextPath() %>/controller/addUser'"
+            <button onclick="window.location.href='<%=request.getContextPath() %>/controller/admin/addUser'"
               style="position: absolute; font-size: larger; right: 1rem;top:.7rem; height:2rem;width: 2rem;">
               +</button>
         </th>
@@ -85,7 +85,7 @@
                 int userId=e.getKey();
                 Customer customer=e.getValue();
       %>
-        <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/manageUser?userId=<%=userId%>&userType=<%=customer.getType().ordinal()%>'">
+        <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/admin/manageUser?userId=<%=userId%>&userType=<%=customer.getType().ordinal()%>'">
           <td><%=userId %></td>
           <td><%=customer.getName() %></td>
           <td><%=Utils.millisToLocalDate(customer.getDob(), ZoneId.systemDefault())  %></td>
@@ -107,7 +107,7 @@
               int userId=e.getKey();
               Employee employee=e.getValue();
       %>
-      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/manageUser?userId=<%=userId%>&userType=<%=employee.getType().ordinal()%>'">
+      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/admin/manageUser?userId=<%=userId%>&userType=<%=employee.getType().ordinal()%>'">
         <td><%=userId %></td>
           <td><%=employee.getName() %></td>
           <td><%=Utils.millisToLocalDate( employee.getDob(), ZoneId.systemDefault()) %></td>
@@ -127,11 +127,11 @@
       %>
     </table>
   </main>
-  <%@ include file="pagination.jsp"%>
+  <%@ include file="../addOns/pagination.jsp"%>
   
   <script>
   function redirect(){
-  	window.location.href='<%=request.getContextPath()%>/controller/user?userId='+document.getElementById('userId').value;
+  	window.location.href='<%=request.getContextPath()%>/controller/admin/user?userId='+document.getElementById('userId').value;
 		  }
   </script>
 </body>

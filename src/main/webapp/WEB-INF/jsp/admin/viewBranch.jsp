@@ -12,7 +12,7 @@
 </head>
 <body>
   <% request.setAttribute("activePath", "branches"); %>
-  <%@include file="adminHeader.jsp" %>
+  <%@include file="../addOns/adminHeader.jsp" %>
   <main class="main">
     <table class="table" style="margin-top:5rem;">
       <tr style="position: relative">
@@ -54,7 +54,7 @@
       </tr>
     </table>
        <% if(branch.getStatus()==ActiveStatus.ACTIVE){ %>
-      <form method="post" action="<%=request.getContextPath() %>/controller/branch">
+      <form method="post" action="<%=request.getContextPath() %>/controller/admin/branch">
       <input type="hidden" name="deactivate" value="1" />
       <input type="hidden" name="branchId" value="<%=branch.getId() %>" />
       <button

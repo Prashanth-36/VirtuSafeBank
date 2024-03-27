@@ -15,7 +15,7 @@
   </head>
   <body>
   <% request.setAttribute("selected","myAccounts"); %>
-	<%@ include file="customerHeader.jsp" %>
+	<%@ include file="../addOns/customerHeader.jsp" %>
       <main class="main">
         <div class="options" style="margin-top: 3rem">
           <div
@@ -74,14 +74,14 @@
           <% } %>
         </table>
 
-<%@ include file="pagination.jsp" %>
+<%@ include file="../addOns/pagination.jsp" %>
       </main>
 
     <div id="back-drop" class="back-drop" onclick="toggle()">
       <form
         method="post"
         onclick="event.stopPropagation()"
-        action="<%=request.getContextPath() %>/controller/changeMpin"
+        action="<%=request.getContextPath() %>/controller/user/changeMpin"
         id="form"
         style="width: 40%; height: fit-content"
         class="form-container"
@@ -114,7 +114,7 @@
         <button>Update</button>
       </form>
     </div>
-    <form action="<%=request.getContextPath() %>/controller/setPrimary" method="post"  id="setPrimary">
+    <form action="<%=request.getContextPath() %>/controller/user/setPrimary" method="post"  id="setPrimary">
       <input
             type="hidden"
             name="accountNo"

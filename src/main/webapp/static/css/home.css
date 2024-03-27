@@ -8,7 +8,15 @@
   --blue: #004b8e;
   --lightBlue: #e3eefa;
 }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
+input[type=number] {
+  -moz-appearance: textfield;
+}
 body {
   margin: 0;
 }
@@ -398,7 +406,7 @@ div.activePage {
   width: 100%;
 }
 
-tr:hover {
+.border-table tr:hover {
   background-color: rgba(128, 128, 128, 0.224);
 }
 
@@ -407,4 +415,7 @@ tr:hover {
 }
 .debit {
   color: red;
+}
+.info-table td,.info-table th{
+	padding:.5rem;
 }

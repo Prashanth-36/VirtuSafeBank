@@ -13,10 +13,10 @@
 </head>
 <body>
 <% request.setAttribute("selected","moneyTransfer"); %>
-  <%@ include file="customerHeader.jsp"%>
-  <%@include file="customerSideNav.jsp"%>
+  <%@ include file="../addOns/customerHeader.jsp"%>
+  <%@include file="../addOns/customerSideNav.jsp"%>
   <main class="main">
-    <form action="<%=request.getContextPath()%>/controller/<%=path%>"
+    <form action="<%=request.getContextPath()%>/controller/user/<%=path%>"
       method="post" class="form-container">
       <label for="accountNo">Select Account Number <select
         name="accountNo" id="accountNo" class="account-selection" required>
@@ -30,7 +30,7 @@
             }
           %>
       </select>
-      </label> <input type="text" name="amount" id="amount" placeholder="Amount" />
+      </label> <input type="number" name="amount" id="amount" placeholder="Amount" />
       <input type="password" name="mpin" id="mpin" placeholder="MPIN" />
       <input type="text" name="description" id="description" placeholder="Description" />
       <button><%=path.equals("withdrawl") ? "Withdraw" : "Deposit"%></button>

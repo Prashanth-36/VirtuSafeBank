@@ -22,7 +22,7 @@ charset=UTF-8"
   <%
   request.setAttribute("activePath", "users");
   %>
-  <%@include file="adminHeader.jsp"%>
+  <%@include file="../addOns/adminHeader.jsp"%>
   <main class="main">
       <%
         int type = (int) request.getAttribute("userType");
@@ -34,7 +34,7 @@ charset=UTF-8"
           style="text-align: center; background-color: var(--blue); color: white;">
           User Details <img
           src="<%=request.getContextPath()%>/static/images/edit-white.png"
-          onclick="window.location.href='<%=request.getContextPath()%>/controller/modifyUser?userId=<%=user.getUserId()%>&userType=<%=user.getType() %>'" alt="edit"
+          onclick="window.location.href='<%=request.getContextPath()%>/controller/admin/modifyUser?userId=<%=user.getUserId()%>&userType=<%=user.getType() %>'" alt="edit"
           style="position: absolute; font-size: larger; right: 1rem; width: 2rem;" />
         </th>
       </tr>
@@ -107,7 +107,7 @@ charset=UTF-8"
     </table>
     
        <% if(user.getStatus()==ActiveStatus.INACTIVE){ %>
-    <form method="post" action="<%=request.getContextPath() %>/controller/manageUser">
+    <form method="post" action="<%=request.getContextPath() %>/controller/admin/manageUser">
       <input type="hidden" name="activate" value="1" />
       <input type="hidden" name="userId" value="<%=user.getUserId() %>" />
       <input type="hidden" name="userType" value="<%=user.getType() %>" />
@@ -125,7 +125,7 @@ charset=UTF-8"
           </button> 
     </form>
         <%}else{ %>
-      <form method="post" action="<%=request.getContextPath() %>/controller/manageUser">
+      <form method="post" action="<%=request.getContextPath() %>/controller/admin/manageUser">
       <input type="hidden" name="deactivate" value="1" />
       <input type="hidden" name="userId" value="<%=user.getUserId() %>" />
       <input type="hidden" name="userType" value="<%=user.getType() %>" />

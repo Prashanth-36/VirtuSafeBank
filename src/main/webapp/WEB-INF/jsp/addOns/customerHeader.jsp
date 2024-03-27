@@ -4,10 +4,10 @@
     <li><img
       src="<%=request.getContextPath()%>/static/images/logo.png" alt=""
       id="logo" /></li>
-    <li><a href="<%=request.getContextPath()%>/controller/home"
+    <li><a href="<%=request.getContextPath()%>/controller/user/home"
       class=<%=selected.equals("myAccounts") ? "active" : ""%>>My Accounts</a></li>
     <li><a
-      href="<%=request.getContextPath()%>/controller/moneyTransfer"
+      href="<%=request.getContextPath()%>/controller/user/moneyTransfer"
       class=<%=selected.equals("moneyTransfer") ? "active" : ""%>>Money
         Transfer</a></li>
   </ul>

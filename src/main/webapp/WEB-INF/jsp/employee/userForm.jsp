@@ -20,13 +20,12 @@
   <body>
   <% 
     request.setAttribute("activePath", "users"); 
-    String type=(String)request.getAttribute("type");
-    User user=(User)request.getAttribute("user");
+    Customer user=(Customer)request.getAttribute("user");
   %>
-  <%@include file="adminHeader.jsp" %>
+  <%@include file="../addOns/employeeHeader.jsp" %>
     <main class="main">
-      <form action="<%=request.getContextPath() %>/controller/<%=user==null?"addUser":"modifyUser" %>" method="post" class="user-form-container">
-        <h3><%=user!=null? "Modify User":"Add User" %></h3>
+      <form action="<%=request.getContextPath() %>/controller/admin/<%=user==null?"addUser":"modifyUser" %>" method="post" class="user-form-container">
+        <h3><%=user!=null? "Modify User":"Add Customer" %></h3>
         <div class="user-form">
           <div class="form-column">
             <div class="form-row">
@@ -62,48 +61,17 @@
             <div class="form-row">
                 <label for="userType">User Type</label>
                 <select name="userType" id="userType" style="margin:1rem" class="selection" onchange="toggleInputs()" required >
-                  <option value="">Select</option>
-                  <option value="0" <%=user!=null&& user.getType()==UserType.USER?"selected":""%>>Customer</option>
-                  <option value="2" <%=user!=null&& user.getType()==UserType.EMPLOYEE?"selected":""%>>Employee</option>
-                  <option value="3" <%=user!=null&& user.getType()==UserType.ADMIN?"selected":""%>>Admin</option>
+                  <option value="0" readonly>Customer</option>
                 </select>
             </div>
-            <% 
-              Employee employee=null;
-              if(user!=null && user instanceof Employee){
-            	   employee=(Employee) user;
-              }
-            %>
-            <div class="form-row" style="display:<%=user!=null && (user.getType()==UserType.ADMIN||user.getType()==UserType.EMPLOYEE)?"flex":"none"%>" id="employee">
-              <label for="branchId">Branch ID *</label>
-                <select name="branchId" id="branchId" style="margin:1rem" class="selection">
-                  <option value="">Select</option>
-                  <% 
-                  Map<Integer,Branch> branches=(Map<Integer,Branch>)request.getAttribute("branches");
-                    if(branches!=null){
-                      for(int branchId:branches.keySet()){
-                  %>
-                        <option value="<%=branchId%>" <%=employee!=null&& employee.getBranchId()==branchId?"selected":""%>><%=branchId%></option>
-                  <%
-                      }
-                    }
-                  %>
-                </select>
-            </div>
-            <% 
-              Customer customer=null;
-              if(user!=null && user instanceof Customer){
-                 customer=(Customer) user;
-              }
-            %>
-            <div style="width:100%;display:<%=user!=null && user.getType()==UserType.USER?"block":"none"%>" id="customer">
+            <div style="width:100%;" id="customer">
               <div class="form-row">
                 <label for="aadhaarNo">Aadhaar No</label> 
-                <input type="text" name="aadhaarNo"  value="<%=customer!=null?customer.getAadhaarNo():""%>"  id="aadhaarNo" placeholder="Aadhaar No"%>
+                <input type="text" name="aadhaarNo"  value="<%=user!=null?user.getAadhaarNo():""%>"  id="aadhaarNo" placeholder="Aadhaar No">
               </div>
               <div class="form-row">
                 <label for="panNo">PAN</label> 
-                <input type="text" name="panNo" value="<%=customer!=null?customer.getPanNo():""%>" id="panNo" placeholder="PAN" %>
+                <input type="text" name="panNo" value="<%=user!=null?user.getPanNo():""%>" id="panNo" placeholder="PAN" >
               </div>
             </div>
             <div class="form-row">
@@ -124,22 +92,5 @@
       </form>
     </main>
 
-    <script>
-      const customer=document.getElementById("customer");
-      const employee=document.getElementById("employee");
-      function toggleInputs(){
-        const type=document.getElementById("userType").value;
-        if(type===""){
-          customer.style.display="none";
-          employee.style.display="none";
-        }else if(type==="0"){
-          customer.style.display="block";
-          employee.style.display="none";
-        }else{
-          customer.style.display="none";
-          employee.style.display="flex";
-        }
-      }
-    </script>
   </body>
 </html>

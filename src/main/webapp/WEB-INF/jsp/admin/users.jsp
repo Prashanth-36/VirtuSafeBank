@@ -131,7 +131,7 @@
   
   <script>
   function redirect(){
-  	window.location.href='<%=request.getContextPath()%>/controller/admin/user?userId='+document.getElementById('userId').value;
+  	window.location.href='<%=request.getContextPath()%>/controller/admin/manageUser?userId='+document.getElementById('userId').value+'&userType='+document.getElementById('userType').value;
 		  }
   </script>
 </body>

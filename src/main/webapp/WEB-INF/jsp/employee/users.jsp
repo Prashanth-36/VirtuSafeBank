@@ -92,7 +92,7 @@
   
   <script>
   function redirect(){
-  	window.location.href='<%=request.getContextPath()%>/controller/employee/user?userId='+document.getElementById('userId').value;
+  	window.location.href='<%=request.getContextPath()%>/controller/employee/manageUser?userId='+document.getElementById('userId').value;
 		  }
   </script>
 </body>

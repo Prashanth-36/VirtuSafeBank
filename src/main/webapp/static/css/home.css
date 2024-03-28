@@ -293,6 +293,7 @@ ul a {
 .pages {
   display: flex;
   margin: auto;
+  margin-bottom:1rem;
   width: 36rem;
   justify-content:center;
 }

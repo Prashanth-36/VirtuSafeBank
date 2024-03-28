@@ -21,11 +21,11 @@ public class AccountDao implements AccountManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(
 						"INSERT INTO account(customerId,openDate,branchId,status,isPrimaryAccount,mpin) values(?,?,?,?,?,?)")) {
-			statement.setInt(1, account.getCustomerId());
-			statement.setLong(2, System.currentTimeMillis());
-			statement.setInt(3, account.getBranchId());
-			statement.setInt(4, ActiveStatus.ACTIVE.ordinal());
-			statement.setBoolean(5, account.isPrimaryAccout());
+			statement.setObject(1, account.getCustomerId());
+			statement.setObject(2, System.currentTimeMillis());
+			statement.setObject(3, account.getBranchId());
+			statement.setObject(4, ActiveStatus.ACTIVE.ordinal());
+			statement.setObject(5, account.getIsPrimaryAccount());
 			String mpin = account.getMpin();
 			if (mpin == null || mpin.isEmpty()) {
 				mpin = "0000";
@@ -43,8 +43,8 @@ public class AccountDao implements AccountManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("UPDATE account SET status = ? WHERE accountNo = ?")) {
-			statement.setInt(1, status.ordinal());
-			statement.setInt(2, accountNo);
+			statement.setObject(1, status.ordinal());
+			statement.setObject(2, accountNo);
 			statement.executeUpdate();
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("Account Deletion failed!", e);
@@ -61,7 +61,7 @@ public class AccountDao implements AccountManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("SELECT currentBalance FROM account WHERE accountNo = ?")) {
-			statement.setInt(1, accountNo);
+			statement.setObject(1, accountNo);
 			try (ResultSet resultSet = statement.executeQuery();) {
 				if (resultSet.next()) {
 					return resultSet.getDouble(1);
@@ -78,7 +78,7 @@ public class AccountDao implements AccountManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("SELECT SUM(currentBalance) FROM account WHERE customerId = ?")) {
-			statement.setInt(1, customerId);
+			statement.setObject(1, customerId);
 			try (ResultSet resultSet = statement.executeQuery();) {
 				if (resultSet.next()) {
 					return resultSet.getDouble(1);
@@ -95,7 +95,7 @@ public class AccountDao implements AccountManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("SELECT COUNT(*) as count FROM account WHERE accountNo = ?")) {
-			statement.setInt(1, accountNo);
+			statement.setObject(1, accountNo);
 			try (ResultSet result = statement.executeQuery();) {
 				if (result.next()) {
 					if (result.getInt("count") == 1) {
@@ -114,7 +114,7 @@ public class AccountDao implements AccountManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("SELECT * FROM account WHERE accountNo = ?")) {
-			statement.setInt(1, accountNo);
+			statement.setObject(1, accountNo);
 			try (ResultSet result = statement.executeQuery();) {
 				if (result.next()) {
 					Account account = new Account();
@@ -123,7 +123,7 @@ public class AccountDao implements AccountManager {
 					account.setCurrentBalance(result.getDouble("currentBalance"));
 					account.setCustomerId(result.getInt("customerId"));
 					account.setOpenDate(result.getLong("openDate"));
-					account.setPrimaryAccout(result.getBoolean("isPrimaryAccount"));
+					account.setIsPrimaryAccount(result.getBoolean("isPrimaryAccount"));
 					account.setStatus(ActiveStatus.values()[result.getInt("status")]);
 					return account;
 				}
@@ -139,7 +139,7 @@ public class AccountDao implements AccountManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("SELECT * FROM account WHERE customerId = ?")) {
-			statement.setInt(1, customerId);
+			statement.setObject(1, customerId);
 			try (ResultSet result = statement.executeQuery();) {
 				Map<Integer, Account> accounts = new HashMap<>();
 				while (result.next()) {
@@ -157,7 +157,7 @@ public class AccountDao implements AccountManager {
 	public Map<Integer, Account> getBranchAccounts(int branchId) throws CustomException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement("SELECT * FROM account WHERE branchId = ?")) {
-			statement.setInt(1, branchId);
+			statement.setObject(1, branchId);
 			try (ResultSet result = statement.executeQuery();) {
 				Map<Integer, Account> accounts = new HashMap<>();
 				while (result.next()) {
@@ -176,7 +176,7 @@ public class AccountDao implements AccountManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("SELECT COUNT(*) FROM account WHERE branchId = ?")) {
-			statement.setInt(1, branchId);
+			statement.setObject(1, branchId);
 			try (ResultSet result = statement.executeQuery();) {
 				if (result.next()) {
 					return result.getInt(1);
@@ -195,7 +195,7 @@ public class AccountDao implements AccountManager {
 		account.setCurrentBalance(result.getDouble("currentBalance"));
 		account.setCustomerId(result.getInt("customerId"));
 		account.setOpenDate(result.getLong("openDate"));
-		account.setPrimaryAccout(result.getBoolean("isPrimaryAccount"));
+		account.setIsPrimaryAccount(result.getBoolean("isPrimaryAccount"));
 		account.setStatus(ActiveStatus.values()[result.getInt("status")]);
 		return account;
 	}
@@ -207,8 +207,8 @@ public class AccountDao implements AccountManager {
 						"UPDATE account SET isPrimaryAccount = 0 WHERE customerId = ? and isPrimaryAccount = 1");
 				PreparedStatement setStatement = connection
 						.prepareStatement("UPDATE account SET isPrimaryAccount = 1 WHERE accountNo = ?")) {
-			offStatement.setInt(1, customerId);
-			setStatement.setInt(1, accountNo);
+			offStatement.setObject(1, customerId);
+			setStatement.setObject(1, accountNo);
 			try {
 				connection.setAutoCommit(false);
 				offStatement.executeUpdate();
@@ -232,7 +232,7 @@ public class AccountDao implements AccountManager {
 						.prepareStatement("UPDATE account SET mPin = ? WHERE accountNo = ?")) {
 			String hashedMpin = Utils.hashPassword(newPin);
 			statement.setString(1, hashedMpin);
-			statement.setInt(2, accountNo);
+			statement.setObject(2, accountNo);
 			statement.executeUpdate();
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("MPIN Updation failed!", e);
@@ -245,7 +245,7 @@ public class AccountDao implements AccountManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("SELECT customerId,mpin FROM account WHERE accountNo = ?")) {
-			statement.setInt(1, accountNo);
+			statement.setObject(1, accountNo);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				if (resultSet.next()) {
 					if (customerId != resultSet.getInt(1)) {

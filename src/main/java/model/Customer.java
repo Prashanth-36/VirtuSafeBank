@@ -1,15 +1,15 @@
 package model;
 
 public class Customer extends User {
-	private static final long serialVersionUID = 1L;
-	private long aadhaarNo;
+	private static final Long serialVersionUID = 1L;
+	private Long aadhaarNo;
 	private String panNo;
 
-	public long getAadhaarNo() {
+	public Long getAadhaarNo() {
 		return aadhaarNo;
 	}
 
-	public void setAadhaarNo(long aadhaarNo) {
+	public void setAadhaarNo(Long aadhaarNo) {
 		this.aadhaarNo = aadhaarNo;
 	}
 

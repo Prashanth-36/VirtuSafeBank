@@ -27,7 +27,7 @@ public class BranchDao implements BranchManager {
 			statement.setString(1, branch.getLocation());
 			statement.setString(2, branch.getCity());
 			statement.setString(3, branch.getState());
-			statement.setInt(4, ActiveStatus.ACTIVE.ordinal());
+			statement.setObject(4, ActiveStatus.ACTIVE.ordinal());
 			try {
 				connection.setAutoCommit(false);
 				int rows = statement.executeUpdate();
@@ -38,7 +38,7 @@ public class BranchDao implements BranchManager {
 							String ifsc = "VSB" + String.format("%04d", id);
 							branch.setIfsc(ifsc);
 							updateStatement.setString(1, ifsc);
-							updateStatement.setInt(2, id);
+							updateStatement.setObject(2, id);
 							updateStatement.executeUpdate();
 							connection.commit();
 						}
@@ -59,7 +59,7 @@ public class BranchDao implements BranchManager {
 	public Branch getBranch(int branchId) throws CustomException, InvalidValueException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement("SELECT * FROM branch WHERE id = ?")) {
-			statement.setInt(1, branchId);
+			statement.setObject(1, branchId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				if (resultSet.next()) {
 					return resultSetToBranch(resultSet);
@@ -75,7 +75,7 @@ public class BranchDao implements BranchManager {
 	public Map<Integer, Branch> getBranches(ActiveStatus status) throws CustomException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement("SELECT * FROM branch WHERE status = ?")) {
-			statement.setInt(1, status.ordinal());
+			statement.setObject(1, status.ordinal());
 			try (ResultSet resultSet = statement.executeQuery()) {
 				Map<Integer, Branch> branches = new HashMap<>();
 				while (resultSet.next()) {
@@ -94,8 +94,8 @@ public class BranchDao implements BranchManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("UPDATE branch SET status = ? WHERE id = ?")) {
-			statement.setInt(1, ActiveStatus.INACTIVE.ordinal());
-			statement.setInt(2, branchId);
+			statement.setObject(1, ActiveStatus.INACTIVE.ordinal());
+			statement.setObject(2, branchId);
 			statement.executeUpdate();
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("Branch Deletion failed!", e);
@@ -117,7 +117,7 @@ public class BranchDao implements BranchManager {
 	public boolean isValidBranch(int branchId) throws InvalidValueException, CustomException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM branch WHERE id = ?")) {
-			statement.setInt(1, branchId);
+			statement.setObject(1, branchId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				if (resultSet.next()) {
 					if (resultSet.getInt(1) == 1) {

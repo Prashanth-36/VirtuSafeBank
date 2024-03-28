@@ -46,7 +46,7 @@
         onclick="window.location.href='<%=request.getContextPath()%>/controller/user/account?accountNo=<%=id%>'">
         <td><%=id%></td>
         <td><%=account.getCurrentBalance()%></td>
-        <td><%=account.isPrimaryAccout() ? "YES" : "NO"%></td>
+        <td><%=account.getIsPrimaryAccount() ? "YES" : "NO"%></td>
         <td><%=Utils.millisToLocalDate((account.getOpenDate()),ZoneId.systemDefault()) %></td>
         <td><%=account.getBranchId()%></td>
         <td><%=account.getStatus()%></td>

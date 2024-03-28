@@ -30,4 +30,6 @@ public interface CustomerManager {
 	Map<Integer, Customer> getAllCustomers(int offset, int limit) throws CustomException;
 
 	int getAllCustomerCount() throws CustomException;
+
+	void updateCustomer(Customer customer) throws CustomException, InvalidValueException;
 }

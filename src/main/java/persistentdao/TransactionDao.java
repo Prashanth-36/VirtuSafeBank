@@ -28,24 +28,24 @@ public class TransactionDao implements TransactionManager {
 				id = createdTransactionId(transaction.getPrimaryAccount(), transaction.getTransactionalAccount());
 			}
 			transactionStatement.setString(1, id);
-			transactionStatement.setInt(2, transaction.getType().ordinal());
-			transactionStatement.setLong(3, System.currentTimeMillis());
-			transactionStatement.setDouble(4, transaction.getAmount());
-			transactionStatement.setInt(5, transaction.getPrimaryAccount());
-			transactionStatement.setInt(6, transaction.getTransactionalAccount());
+			transactionStatement.setObject(2, transaction.getType().ordinal());
+			transactionStatement.setObject(3, System.currentTimeMillis());
+			transactionStatement.setObject(4, transaction.getAmount());
+			transactionStatement.setObject(5, transaction.getPrimaryAccount());
+			transactionStatement.setObject(6, transaction.getTransactionalAccount());
 			transactionStatement.setString(7, transaction.getDescription());
-			transactionStatement.setInt(8, transaction.getCustomerId());
-			transactionStatement.setDouble(9, transaction.getBalance());
+			transactionStatement.setObject(8, transaction.getCustomerId());
+			transactionStatement.setObject(9, transaction.getBalance());
 			transactionStatement.setString(10, transaction.getIfsc());
 
-			balanceStatement.setInt(1, transaction.getPrimaryAccount());
+			balanceStatement.setObject(1, transaction.getPrimaryAccount());
 
-			accountStatement.setInt(2, transaction.getPrimaryAccount());
+			accountStatement.setObject(2, transaction.getPrimaryAccount());
 
 			if (transaction.getType() == TransactionType.DEBIT) {
-				accountStatement.setDouble(1, -transaction.getAmount());
+				accountStatement.setObject(1, -transaction.getAmount());
 			} else {
-				accountStatement.setDouble(1, transaction.getAmount());
+				accountStatement.setObject(1, transaction.getAmount());
 			}
 
 			try {
@@ -54,7 +54,7 @@ public class TransactionDao implements TransactionManager {
 				try (ResultSet resultSet = balanceStatement.executeQuery()) {
 					if (resultSet.next()) {
 						double balance = resultSet.getDouble(1);
-						transactionStatement.setDouble(9, balance);
+						transactionStatement.setObject(9, balance);
 						transactionStatement.executeUpdate();
 						connection.commit();
 					}
@@ -108,8 +108,8 @@ public class TransactionDao implements TransactionManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("SELECT COUNT(*) as count FROM account WHERE accountNo IN (?,?)")) {
-			statement.setInt(1, sourceAccountNo);
-			statement.setInt(2, targetAccountNo);
+			statement.setObject(1, sourceAccountNo);
+			statement.setObject(2, targetAccountNo);
 			ResultSet result = statement.executeQuery();
 			if (result.next()) {
 				if (result.getInt("count") == 2) {
@@ -126,9 +126,9 @@ public class TransactionDao implements TransactionManager {
 	public int getTransactionCount(int accountNo, long startTime) throws CustomException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(
-						"SELECT Count(*) FROM transaction WHERE primaryAccount = ? and time > ? ORDER BY time DESC")) {
-			statement.setLong(1, accountNo);
-			statement.setLong(2, startTime);
+						"SELECT COUNT(*) FROM transaction WHERE primaryAccount = ? and time > ? ORDER BY time DESC")) {
+			statement.setObject(1, accountNo);
+			statement.setObject(2, startTime);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				if (resultSet.next()) {
 					return (resultSet.getInt(1));
@@ -146,10 +146,10 @@ public class TransactionDao implements TransactionManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(
 						"SELECT * FROM transaction WHERE primaryAccount = ? and time > ? ORDER BY time DESC LIMIT ?,?")) {
-			statement.setLong(1, accountNo);
-			statement.setLong(2, startTime);
-			statement.setInt(3, offset);
-			statement.setInt(4, limit);
+			statement.setObject(1, accountNo);
+			statement.setObject(2, startTime);
+			statement.setObject(3, offset);
+			statement.setObject(4, limit);
 			List<Transaction> transactions = new ArrayList<Transaction>();
 			try (ResultSet resultSet = statement.executeQuery()) {
 				while (resultSet.next()) {
@@ -177,9 +177,9 @@ public class TransactionDao implements TransactionManager {
 		return transaction;
 	}
 
-	String createdTransactionId(int primaryAccount, int transactionalAccount) {
-		return String.format("%04d", primaryAccount) + System.currentTimeMillis()
-				+ String.format("%04d", transactionalAccount);
+	String createdTransactionId(Integer primaryAccount, Integer transactionalAccount) {
+		return String.format("%04d", primaryAccount == null ? 0 : primaryAccount) + System.currentTimeMillis()
+				+ String.format("%04d", transactionalAccount == null ? 0 : transactionalAccount);
 	}
 
 }

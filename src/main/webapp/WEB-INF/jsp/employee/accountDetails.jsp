@@ -45,7 +45,7 @@
         <td><%=account.getAccountNo() %></td>
         <td><%=account.getCustomerId() %></td>
         <td><%=account.getCurrentBalance() %></td>
-        <td><%=account.isPrimaryAccout()?"YES":"NO"%></td>
+        <td><%=account.getIsPrimaryAccount()?"YES":"NO"%></td>
         <td><%=Utils.millisToLocalDate((account.getOpenDate()),ZoneId.systemDefault()) %></td>
         <td><%=account.getStatus() %></td>
       </tr>

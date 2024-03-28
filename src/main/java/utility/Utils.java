@@ -62,10 +62,6 @@ public class Utils {
 			logger.addHandler(handler);
 			ConsoleHandler handler2 = new ConsoleHandler();
 			handler2.setFormatter(new SimpleFormatter() {
-//				@Override
-//				public String format(LogRecord record) {
-//					return record.getMessage() + System.lineSeparator();
-//				}
 				@Override
 				public String format(LogRecord record) {
 					StringBuilder message = new StringBuilder();

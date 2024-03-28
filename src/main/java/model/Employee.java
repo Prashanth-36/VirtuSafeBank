@@ -2,14 +2,14 @@ package model;
 
 public class Employee extends User {
 
-	private static final long serialVersionUID = 1L;
-	private int branchId;
+	private static final Long serialVersionUID = 1L;
+	private Integer branchId;
 
-	public int getBranchId() {
+	public Integer getBranchId() {
 		return branchId;
 	}
 
-	public void setBranchId(int branchId) {
+	public void setBranchId(Integer branchId) {
 		this.branchId = branchId;
 	}
 

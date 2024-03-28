@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,19 +29,19 @@ public class EmployeeDao implements EmployeeManager {
 				PreparedStatement statement = connection
 						.prepareStatement("INSERT INTO employee(id,branchId) VALUES (?,?)");) {
 			userStatement.setString(1, employee.getName());
-			userStatement.setLong(2, employee.getDob());
-			userStatement.setLong(3, employee.getNumber());
+			userStatement.setObject(2, employee.getDob());
+			userStatement.setObject(3, employee.getNumber());
 			String hashedPassword = Utils.hashPassword(employee.getPassword());
 			userStatement.setString(4, hashedPassword);
-			userStatement.setInt(5, ActiveStatus.ACTIVE.ordinal());
-			userStatement.setInt(6, employee.getType().ordinal());
+			userStatement.setObject(5, ActiveStatus.ACTIVE.ordinal());
+			userStatement.setObject(6, employee.getType().ordinal());
 			userStatement.setString(7, employee.getLocation());
 			userStatement.setString(8, employee.getCity().toLowerCase());
 			userStatement.setString(9, employee.getState().toLowerCase());
 			userStatement.setString(10, employee.getEmail());
-			userStatement.setInt(11, employee.getGender().ordinal());
+			userStatement.setObject(11, employee.getGender().ordinal());
 
-			statement.setInt(2, employee.getBranchId());
+			statement.setObject(2, employee.getBranchId());
 
 			try {
 				connection.setAutoCommit(false);
@@ -48,7 +49,7 @@ public class EmployeeDao implements EmployeeManager {
 				if (rows > 0) {
 					try (ResultSet resultSet = userStatement.getGeneratedKeys()) {
 						if (resultSet.next()) {
-							statement.setInt(1, resultSet.getInt(1));
+							statement.setObject(1, resultSet.getInt(1));
 							statement.executeUpdate();
 							connection.commit();
 						}
@@ -70,7 +71,7 @@ public class EmployeeDao implements EmployeeManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(
 						"SELECT u.*,branchId FROM user u JOIN employee e on u.id=e.id WHERE u.id = ?")) {
-			statement.setInt(1, id);
+			statement.setObject(1, id);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				if (resultSet.next()) {
 					return resultSetToEmployee(resultSet);
@@ -88,10 +89,10 @@ public class EmployeeDao implements EmployeeManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(
 						"SELECT u.*,e.branchId from user u join employee e on e.id=u.id where branchId = ? AND status = ? limit ?,?");) {
-			statement.setInt(1, branchId);
-			statement.setInt(2, status.ordinal());
-			statement.setInt(3, offset);
-			statement.setInt(4, limit);
+			statement.setObject(1, branchId);
+			statement.setObject(2, status.ordinal());
+			statement.setObject(3, offset);
+			statement.setObject(4, limit);
 			try (ResultSet resultSet = statement.executeQuery();) {
 				Map<Integer, Employee> employees = new HashMap<>();
 				while (resultSet.next()) {
@@ -110,8 +111,8 @@ public class EmployeeDao implements EmployeeManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(
 						"SELECT u.*,e.branchId from user u join employee e on e.id=u.id ORDER BY e.branchId,u.id limit ?,? ");) {
-			statement.setInt(1, offset);
-			statement.setInt(2, limit);
+			statement.setObject(1, offset);
+			statement.setObject(2, limit);
 			try (ResultSet resultSet = statement.executeQuery();) {
 				Map<Integer, Employee> employees = new HashMap<>();
 				while (resultSet.next()) {
@@ -129,8 +130,8 @@ public class EmployeeDao implements EmployeeManager {
 	public void setEmployeeStatus(int employeeId, ActiveStatus status) throws CustomException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement("UPDATE user SET status = ? WHERE id = ?")) {
-			statement.setInt(1, status.ordinal());
-			statement.setInt(2, employeeId);
+			statement.setObject(1, status.ordinal());
+			statement.setObject(2, employeeId);
 			statement.executeUpdate();
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("Employee deletion failed!", e);
@@ -164,8 +165,8 @@ public class EmployeeDao implements EmployeeManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(
 						"SELECT COUNT(*) from user u join employee e on e.id=u.id where branchId = ? AND status = ?");) {
-			statement.setInt(1, branchId);
-			statement.setInt(2, status.ordinal());
+			statement.setObject(1, branchId);
+			statement.setObject(2, status.ordinal());
 			try (ResultSet resultSet = statement.executeQuery();) {
 				if (resultSet.next()) {
 					return resultSet.getInt(1);
@@ -190,6 +191,31 @@ public class EmployeeDao implements EmployeeManager {
 			}
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("Employee fetch failed!", e);
+		}
+	}
+
+	@Override
+	public void updateEmployee(Employee employee) throws CustomException, InvalidValueException {
+		Employee existingEmployee = getEmployee(employee.getUserId());
+		ArrayList<Object> queryData = HelperDao.buildQuery(existingEmployee, employee);
+		if (queryData.size() > 1) {
+			StringBuffer sb = new StringBuffer();
+			sb.append("UPDATE user u JOIN employee e on u.id=e.id SET");
+			sb.append(queryData.get(0));
+			sb.append(" where u.id = ?");
+			String query = sb.toString();
+			try (Connection connection = DBConnection.getConnection();
+					PreparedStatement statement = connection.prepareStatement(query)) {
+				int size = queryData.size();
+				for (int i = 1; i < size; i++) {
+					statement.setObject(i, queryData.get(i));
+				}
+				statement.setObject(size, employee.getUserId());
+				System.out.println(statement.toString());
+				statement.executeUpdate();
+			} catch (ClassNotFoundException | SQLException e) {
+				throw new CustomException("Customer Updation failed!", e);
+			}
 		}
 	}
 

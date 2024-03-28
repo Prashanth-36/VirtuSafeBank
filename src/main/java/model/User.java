@@ -12,11 +12,11 @@ import utility.Utils;
 
 public class User implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	private int userId;
+	private static final Long serialVersionUID = 1L;
+	private Integer userId;
 	private String name;
-	private long dob;
-	private long number;
+	private Long dob;
+	private Long number;
 	private ActiveStatus status;
 	private String password;
 	private UserType type;
@@ -50,11 +50,11 @@ public class User implements Serializable {
 		this.state = state;
 	}
 
-	public int getUserId() {
+	public Integer getUserId() {
 		return userId;
 	}
 
-	public void setUserId(int userId) {
+	public void setUserId(Integer userId) {
 		this.userId = userId;
 	}
 
@@ -66,19 +66,19 @@ public class User implements Serializable {
 		this.name = name;
 	}
 
-	public long getDob() {
+	public Long getDob() {
 		return dob;
 	}
 
-	public void setDob(long dob) {
+	public void setDob(Long dob) {
 		this.dob = dob;
 	}
 
-	public long getNumber() {
+	public Long getNumber() {
 		return number;
 	}
 
-	public void setNumber(long number) {
+	public void setNumber(Long number) {
 		this.number = number;
 	}
 

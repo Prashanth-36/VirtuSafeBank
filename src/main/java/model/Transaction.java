@@ -9,13 +9,13 @@ import utility.Utils;
 public class Transaction {
 	private String id;
 	private TransactionType type;
-	private double amount;
-	private int primaryAccount;
-	private int transactionalAccount;
-	private long timestamp;
+	private Double amount;
+	private Integer primaryAccount;
+	private Integer transactionalAccount;
+	private Long timestamp;
 	private String description;
-	private int customerId;
-	private double balance;
+	private Integer customerId;
+	private Double balance;
 	private String ifsc;
 
 	public String getId() {
@@ -34,35 +34,35 @@ public class Transaction {
 		this.type = type;
 	}
 
-	public double getAmount() {
+	public Double getAmount() {
 		return amount;
 	}
 
-	public void setAmount(double amount) {
+	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
 
-	public int getPrimaryAccount() {
+	public Integer getPrimaryAccount() {
 		return primaryAccount;
 	}
 
-	public void setPrimaryAccount(int primaryAccount) {
+	public void setPrimaryAccount(Integer primaryAccount) {
 		this.primaryAccount = primaryAccount;
 	}
 
-	public int getTransactionalAccount() {
+	public Integer getTransactionalAccount() {
 		return transactionalAccount;
 	}
 
-	public void setTransactionalAccount(int transactionalAccount) {
+	public void setTransactionalAccount(Integer transactionalAccount) {
 		this.transactionalAccount = transactionalAccount;
 	}
 
-	public long getTimestamp() {
+	public Long getTimestamp() {
 		return timestamp;
 	}
 
-	public void setTimestamp(long timestamp) {
+	public void setTimestamp(Long timestamp) {
 		this.timestamp = timestamp;
 	}
 
@@ -74,19 +74,19 @@ public class Transaction {
 		this.description = description;
 	}
 
-	public int getCustomerId() {
+	public Integer getCustomerId() {
 		return customerId;
 	}
 
-	public void setCustomerId(int customerId) {
+	public void setCustomerId(Integer customerId) {
 		this.customerId = customerId;
 	}
 
-	public double getBalance() {
+	public Double getBalance() {
 		return balance;
 	}
 
-	public void setBalance(double balance) {
+	public void setBalance(Double balance) {
 		this.balance = balance;
 	}
 

@@ -5,61 +5,61 @@ import java.io.Serializable;
 import utility.ActiveStatus;
 
 public class Account implements Serializable {
-	private static final long serialVersionUID = 1L;
-	private int accountNo;
-	private int customerId;
-	private double currentBalance;
-	private boolean isPrimaryAccout;
-	private long openDate;
-	private int branchId;
+	private static final Long serialVersionUID = 1L;
+	private Integer accountNo;
+	private Integer customerId;
+	private Double currentBalance;
+	private Boolean isPrimaryAccount;
+	private Long openDate;
+	private Integer branchId;
 	private ActiveStatus status;
 	private String mpin;
 
-	public int getAccountNo() {
+	public Integer getAccountNo() {
 		return accountNo;
 	}
 
-	public void setAccountNo(int accountNo) {
+	public void setAccountNo(Integer accountNo) {
 		this.accountNo = accountNo;
 	}
 
-	public int getCustomerId() {
+	public Integer getCustomerId() {
 		return customerId;
 	}
 
-	public void setCustomerId(int customerId) {
+	public void setCustomerId(Integer customerId) {
 		this.customerId = customerId;
 	}
 
-	public double getCurrentBalance() {
+	public Double getCurrentBalance() {
 		return currentBalance;
 	}
 
-	public void setCurrentBalance(double currentBalance) {
+	public void setCurrentBalance(Double currentBalance) {
 		this.currentBalance = currentBalance;
 	}
 
-	public boolean isPrimaryAccout() {
-		return isPrimaryAccout;
+	public boolean getIsPrimaryAccount() {
+		return isPrimaryAccount;
 	}
 
-	public void setPrimaryAccout(boolean isPrimaryAccout) {
-		this.isPrimaryAccout = isPrimaryAccout;
+	public void setIsPrimaryAccount(boolean isPrimaryAccout) {
+		this.isPrimaryAccount = isPrimaryAccout;
 	}
 
-	public long getOpenDate() {
+	public Long getOpenDate() {
 		return openDate;
 	}
 
-	public void setOpenDate(long openDate) {
+	public void setOpenDate(Long openDate) {
 		this.openDate = openDate;
 	}
 
-	public int getBranchId() {
+	public Integer getBranchId() {
 		return branchId;
 	}
 
-	public void setBranchId(int branchId) {
+	public void setBranchId(Integer branchId) {
 		this.branchId = branchId;
 	}
 
@@ -82,7 +82,7 @@ public class Account implements Serializable {
 	@Override
 	public String toString() {
 		return "Account [accountNo=" + accountNo + ", customerId=" + customerId + ", currentBalance=" + currentBalance
-				+ ", isPrimaryAccout=" + isPrimaryAccout + ", openDate=" + openDate + ", branchId=" + branchId
+				+ ", isPrimaryAccout=" + isPrimaryAccount + ", openDate=" + openDate + ", branchId=" + branchId
 				+ ", status=" + status + ", mpin=" + mpin + "]";
 	}
 }

@@ -26,4 +26,6 @@ public interface EmployeeManager {
 
 	Map<Integer, Employee> getAllEmployees(int offset, int limit) throws CustomException;
 
+	void updateEmployee(Employee employee) throws CustomException, InvalidValueException;
+
 }

@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,8 +26,10 @@ import model.Customer;
 import model.Employee;
 import model.User;
 import utility.ActiveStatus;
+import utility.Gender;
 import utility.UserType;
 import utility.Utils;
+import utility.Validate;
 
 @WebServlet("/controller/*")
 public class ControllerServlet extends HttpServlet {
@@ -40,7 +43,7 @@ public class ControllerServlet extends HttpServlet {
 			response.sendRedirect(request.getContextPath() + "/");
 			return;
 		}
-		System.out.println(path);
+		System.out.println(path + "  get");
 		switch (path) {
 
 		case "/login": {
@@ -368,6 +371,11 @@ public class ControllerServlet extends HttpServlet {
 			break;
 		}
 
+		case "/employee/addAccount": {
+			request.getRequestDispatcher("/WEB-INF/jsp/employee/accountForm.jsp").forward(request, response);
+			break;
+		}
+
 		case "/employee/manageAccount": {
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
@@ -477,8 +485,8 @@ public class ControllerServlet extends HttpServlet {
 			throws ServletException, IOException {
 		String path = request.getPathInfo();
 		System.out.println(path + " post");
-		HttpSession httpSession = request.getSession(false);
-		if (!path.equals("/login") && (httpSession == null || httpSession.getAttribute("user") == null)) {
+		HttpSession session = request.getSession(false);
+		if (!path.equals("/login") && (session == null || session.getAttribute("user") == null)) {
 			response.sendRedirect(request.getContextPath() + "/");
 			return;
 		}
@@ -494,8 +502,8 @@ public class ControllerServlet extends HttpServlet {
 					response.sendRedirect(request.getContextPath() + "/controller/login");
 					break;
 				}
-				HttpSession session = request.getSession();
-				session.setAttribute("user", user);
+				HttpSession httpSession = request.getSession();
+				httpSession.setAttribute("user", user);
 				switch (user.getType()) {
 				case ADMIN:
 					response.sendRedirect(request.getContextPath() + "/controller/admin/home");
@@ -757,19 +765,138 @@ public class ControllerServlet extends HttpServlet {
 			break;
 		}
 
-//		case "/addUser": {
-//			AdminHandler adminHandler = new AdminHandler();
-//			try {
-//				int userId = Utils.parseInt(request.getParameter("userId"));
-////				int branchId = Utils.parseInt(request.getParameter("branchId"));
-////				adminHandler.createAccount(customerId, branchId);
-//				response.sendRedirect(request.getContextPath() + "/controller/home");
-//			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
-//				e.printStackTrace();
-//				response.getWriter().println(e.getMessage());
-//			}
-//			break;
-//		}
+		case "/admin/addUser": {
+			AdminHandler adminHandler = new AdminHandler();
+			try {
+				int type = Integer.parseInt(request.getParameter("userType"));
+				if (type == 0) {
+					Customer customer = new Customer();
+					customer.setName(request.getParameter("name"));
+					customer.setDob(Utils.getMillis(LocalDate.parse(request.getParameter("dob"))));
+					customer.setGender(Gender.values()[Integer.parseInt(request.getParameter("gender"))]);
+					String number = request.getParameter("number");
+					Validate.mobile(number);
+					customer.setNumber(Long.parseLong(number));
+					String email = request.getParameter("email");
+					Validate.email(email);
+					customer.setEmail(email);
+					customer.setType(UserType.values()[Integer.parseInt(request.getParameter("userType"))]);
+					customer.setPassword(request.getParameter("password"));
+					String aadhaar = request.getParameter("aadhaarNo");
+					Validate.aadhaar(aadhaar);
+					customer.setAadhaarNo(Long.parseLong(aadhaar));
+					String pan = request.getParameter("panNo");
+					Validate.pan(pan);
+					customer.setPanNo(pan);
+					customer.setLocation(request.getParameter("location"));
+					customer.setCity(request.getParameter("city"));
+					customer.setState(request.getParameter("state"));
+					adminHandler.addCustomer(customer);
+				} else {
+					Employee employee = new Employee();
+					employee.setName(request.getParameter("name"));
+					employee.setDob(Utils.getMillis(LocalDate.parse(request.getParameter("dob"))));
+					employee.setGender(Gender.values()[Integer.parseInt(request.getParameter("gender"))]);
+					String number = request.getParameter("number");
+					Validate.mobile(number);
+					employee.setNumber(Long.parseLong(number));
+					String email = request.getParameter("email");
+					Validate.email(email);
+					employee.setEmail(email);
+					employee.setType(UserType.values()[Integer.parseInt(request.getParameter("userType"))]);
+					employee.setPassword(request.getParameter("password"));
+					employee.setLocation(request.getParameter("location"));
+					employee.setCity(request.getParameter("city"));
+					employee.setState(request.getParameter("state"));
+					employee.setBranchId(Integer.parseInt(request.getParameter("branchId")));
+					adminHandler.addEmployee(employee);
+				}
+				String message = "User Created Successfully!";
+				String redirectUrl = request.getContextPath() + "/controller/admin/users";
+				response.getWriter().println(
+						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
+		case "/admin/modifyUser": {
+			int userId = Integer.parseInt(request.getParameter("userId"));
+			AdminHandler adminHandler = new AdminHandler();
+			try {
+				int type = Integer.parseInt(request.getParameter("userType"));
+				if (type == 0) {
+					Customer customer = new Customer();
+					customer.setUserId(userId);
+					customer.setName(request.getParameter("name"));
+					customer.setDob(Utils.getMillis(LocalDate.parse(request.getParameter("dob"))));
+					customer.setGender(Gender.values()[Integer.parseInt(request.getParameter("gender"))]);
+					String number = request.getParameter("number");
+					Validate.mobile(number);
+					customer.setNumber(Long.parseLong(number));
+					String email = request.getParameter("email");
+					Validate.email(email);
+					customer.setEmail(email);
+					customer.setType(UserType.values()[Integer.parseInt(request.getParameter("userType"))]);
+					customer.setPassword(request.getParameter("password"));
+					String aadhaar = request.getParameter("aadhaarNo");
+					Validate.aadhaar(aadhaar);
+					customer.setAadhaarNo(Long.parseLong(aadhaar));
+					String pan = request.getParameter("panNo");
+					Validate.pan(pan);
+					customer.setPanNo(pan);
+					customer.setLocation(request.getParameter("location"));
+					customer.setCity(request.getParameter("city"));
+					customer.setState(request.getParameter("state"));
+					adminHandler.updateCustomer(customer);
+				} else {
+					Employee employee = new Employee();
+					employee.setUserId(userId);
+					employee.setName(request.getParameter("name"));
+					employee.setDob(Utils.getMillis(LocalDate.parse(request.getParameter("dob"))));
+					employee.setGender(Gender.values()[Integer.parseInt(request.getParameter("gender"))]);
+					String number = request.getParameter("number");
+					Validate.mobile(number);
+					employee.setNumber(Long.parseLong(number));
+					String email = request.getParameter("email");
+					Validate.email(email);
+					employee.setEmail(email);
+					employee.setType(UserType.values()[Integer.parseInt(request.getParameter("userType"))]);
+					employee.setPassword(request.getParameter("password"));
+					employee.setLocation(request.getParameter("location"));
+					employee.setCity(request.getParameter("city"));
+					employee.setState(request.getParameter("state"));
+					employee.setBranchId(Integer.parseInt(request.getParameter("branchId")));
+					adminHandler.updateEmployee(employee);
+				}
+				String message = "User Data Updated Successfully!";
+				response.getWriter()
+						.println("<script>alert('" + message + "'); window.location.href=document.referrer</script>");
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
+		case "/employee/addAccount": {
+			EmployeeHandler employeeHandler = new EmployeeHandler();
+			int customerId = Utils.parseInt(request.getParameter("customerId"));
+			Employee employee = (Employee) session.getAttribute("user");
+			try {
+				employeeHandler.createAccount(customerId, employee.getBranchId());
+				String message = "Account Created Updated!";
+				String redirectUrl = request.getContextPath() + "/controller/employee/home";
+				response.getWriter().println(
+						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
 
 		case "/employee/manageAccount": {
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
@@ -801,19 +928,41 @@ public class ControllerServlet extends HttpServlet {
 			break;
 		}
 
-//		case "/addUser": {
-//		AdminHandler adminHandler = new AdminHandler();
-//		try {
-//			int userId = Utils.parseInt(request.getParameter("userId"));
-////			int branchId = Utils.parseInt(request.getParameter("branchId"));
-////			adminHandler.createAccount(customerId, branchId);
-//			response.sendRedirect(request.getContextPath() + "/controller/home");
-//		} catch (CustomException | InvalidValueException | InvalidOperationException e) {
-//			e.printStackTrace();
-//			response.getWriter().println(e.getMessage());
-//		}
-//		break;
-//	}
+		case "/employee/addUser": {
+			EmployeeHandler employeeHandler = new EmployeeHandler();
+			try {
+				Customer customer = new Customer();
+				customer.setName(request.getParameter("name"));
+				customer.setDob(Utils.getMillis(LocalDate.parse(request.getParameter("dob"))));
+				customer.setGender(Gender.values()[Integer.parseInt(request.getParameter("gender"))]);
+				String number = request.getParameter("number");
+				Validate.mobile(number);
+				customer.setNumber(Long.parseLong(number));
+				String email = request.getParameter("email");
+				Validate.email(email);
+				customer.setEmail(email);
+				customer.setType(UserType.values()[Integer.parseInt(request.getParameter("userType"))]);
+				customer.setPassword(request.getParameter("password"));
+				String aadhaar = request.getParameter("aadhaarNo");
+				Validate.aadhaar(aadhaar);
+				customer.setAadhaarNo(Long.parseLong(aadhaar));
+				String pan = request.getParameter("panNo");
+				Validate.pan(pan);
+				customer.setPanNo(pan);
+				customer.setLocation(request.getParameter("location"));
+				customer.setCity(request.getParameter("city"));
+				customer.setState(request.getParameter("state"));
+				employeeHandler.addCustomer(customer);
+				String message = "User Created Successfully!";
+				String redirectUrl = request.getContextPath() + "/controller/employee/users";
+				response.getWriter().println(
+						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
 
 		case "/employee/manageUser": {
 			int userId = Utils.parseInt(request.getParameter("userId"));
@@ -829,6 +978,34 @@ public class ControllerServlet extends HttpServlet {
 			try {
 				employeeHandler.setCustomerStatus(userId, status);
 				String message = "User Status Updated!";
+				response.getWriter()
+						.println("<script>alert('" + message + "'); window.location.href=document.referrer</script>");
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
+		case "/employee/modifyUser": {
+			int userId = Integer.parseInt(request.getParameter("userId"));
+			EmployeeHandler employeeHandler = new EmployeeHandler();
+			try {
+				Customer customer = new Customer();
+				customer.setUserId(userId);
+				customer.setName(request.getParameter("name"));
+				customer.setDob(Utils.getMillis(LocalDate.parse(request.getParameter("dob"))));
+				customer.setGender(Gender.values()[Integer.parseInt(request.getParameter("gender"))]);
+				customer.setNumber(Long.parseLong(request.getParameter("number")));
+				customer.setEmail(request.getParameter("email"));
+				customer.setType(UserType.values()[Integer.parseInt(request.getParameter("userType"))]);
+				customer.setAadhaarNo(Long.parseLong(request.getParameter("aadhaarNo")));
+				customer.setPanNo(request.getParameter("panNo"));
+				customer.setLocation(request.getParameter("location"));
+				customer.setCity(request.getParameter("city"));
+				customer.setState(request.getParameter("state"));
+				employeeHandler.updateCustomer(customer);
+				String message = "User Data Updated!";
 				response.getWriter()
 						.println("<script>alert('" + message + "'); window.location.href=document.referrer</script>");
 			} catch (CustomException | InvalidValueException e) {

@@ -40,7 +40,7 @@
       </tr>
       <tr>
         <th>Is Primary Accout</th>
-        <td><%=account.isPrimaryAccout()?"YES":"NO" %></td>
+        <td><%=account.getIsPrimaryAccount()?"YES":"NO" %></td>
       </tr>
       <tr>
         <th>Account Open Date</th>

@@ -1,8 +1,8 @@
 * {
   box-sizing: border-box;
   font-family: Arial, Helvetica, sans-serif;
-   -ms-overflow-style: none;
-   scrollbar-width: none; 
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 :root {
   --blue: #004b8e;
@@ -14,7 +14,7 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-input[type=number] {
+input[type="number"] {
   -moz-appearance: textfield;
 }
 body {
@@ -175,7 +175,7 @@ ul a {
   height: 3rem;
   font-size: larger;
 }
-.form-container button:hover {
+.form-container button:not(:disabled):hover {
   background-color: #0967b9;
 }
 .table {
@@ -288,18 +288,18 @@ ul a {
 }
 .page-container {
   display: flex;
-  overflow:scroll;
+  overflow: scroll;
 }
 .pages {
   display: flex;
   margin: auto;
-  margin-bottom:1rem;
+  margin-bottom: 1rem;
   width: 36rem;
-  justify-content:center;
+  justify-content: center;
 }
 .page {
   padding: 1rem;
-  width:3rem;
+  width: 3rem;
 }
 .pages div {
   border: 1px solid white;
@@ -363,7 +363,7 @@ div.activePage {
   font-size: larger;
   margin: 1rem;
 }
-.user-form button:hover {
+.user-form button:not(:disabled):hover {
   background-color: #0967b9;
 }
 .form-column {
@@ -417,6 +417,10 @@ div.activePage {
 .debit {
   color: red;
 }
-.info-table td,.info-table th{
-	padding:.5rem;
+.info-table td,
+.info-table th {
+  padding: 0.5rem;
+}
+button:disabled {
+  background-color: rgba(128, 128, 128, 0.461);
 }

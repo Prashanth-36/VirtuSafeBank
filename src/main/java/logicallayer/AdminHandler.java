@@ -82,6 +82,10 @@ public class AdminHandler extends EmployeeHandler {
 		return employeeManager.getEmployee(id);
 	}
 
+	public void updateEmployee(Employee employee) throws CustomException, InvalidValueException {
+		employeeManager.updateEmployee(employee);
+	}
+
 	public void setEmployeeStatus(int employeeId, ActiveStatus status) throws CustomException, InvalidValueException {
 		employeeManager.getEmployee(employeeId); // validate existing employee
 		employeeManager.setEmployeeStatus(employeeId, status);

@@ -31,19 +31,19 @@ public class CustomerDao implements CustomerManager {
 						.prepareStatement("INSERT INTO customer(id,aadhaarNo,panNo) VALUES(?,?,?)");) {
 
 			userStatement.setString(1, customer.getName());
-			userStatement.setLong(2, customer.getDob());
-			userStatement.setLong(3, customer.getNumber());
+			userStatement.setObject(2, customer.getDob());
+			userStatement.setObject(3, customer.getNumber());
 			String hashedPassword = Utils.hashPassword(customer.getPassword());
 			userStatement.setString(4, hashedPassword);
-			userStatement.setInt(5, ActiveStatus.ACTIVE.ordinal());
-			userStatement.setInt(6, customer.getType().ordinal());
+			userStatement.setObject(5, ActiveStatus.ACTIVE.ordinal());
+			userStatement.setObject(6, customer.getType().ordinal());
 			userStatement.setString(7, customer.getLocation());
 			userStatement.setString(8, customer.getCity());
 			userStatement.setString(9, customer.getState());
 			userStatement.setString(10, customer.getEmail());
-			userStatement.setInt(11, customer.getGender().ordinal());
+			userStatement.setObject(11, customer.getGender().ordinal());
 
-			customerStatement.setLong(2, customer.getAadhaarNo());
+			customerStatement.setObject(2, customer.getAadhaarNo());
 			customerStatement.setString(3, customer.getPanNo());
 
 			try {
@@ -52,7 +52,7 @@ public class CustomerDao implements CustomerManager {
 				if (userAffectedRows > 0) {
 					try (ResultSet resultSet = userStatement.getGeneratedKeys();) {
 						if (resultSet.next()) {
-							customerStatement.setInt(1, resultSet.getInt(1));
+							customerStatement.setObject(1, resultSet.getInt(1));
 							customerStatement.execute();
 							connection.commit();
 						}
@@ -74,8 +74,8 @@ public class CustomerDao implements CustomerManager {
 	public void setCustomerStatus(int customerId, ActiveStatus status) throws CustomException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement("UPDATE user SET status = ? where id = ?");) {
-			statement.setInt(1, status.ordinal());
-			statement.setInt(2, customerId);
+			statement.setObject(1, status.ordinal());
+			statement.setObject(2, customerId);
 			statement.executeUpdate();
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("Customer Status Modification failed!", e);
@@ -92,7 +92,7 @@ public class CustomerDao implements CustomerManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(
 						"SELECT u.*,aadhaarNo,panNo FROM user u JOIN customer c on u.id=c.id WHERE u.id = ?")) {
-			statement.setInt(1, id);
+			statement.setObject(1, id);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				if (resultSet.next()) {
 					return resultSetToCustomer(resultSet);
@@ -110,10 +110,10 @@ public class CustomerDao implements CustomerManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(
 						"SELECT u.*,panNo,aadhaarNo FROM user u JOIN customer c on u.id=c.id JOIN account a on a.customerId=u.id WHERE branchId = ? AND u.status = ? LIMIT ?,?")) {
-			statement.setInt(1, branchId);
-			statement.setInt(2, status.ordinal());
-			statement.setInt(3, offset);
-			statement.setInt(4, limit);
+			statement.setObject(1, branchId);
+			statement.setObject(2, status.ordinal());
+			statement.setObject(3, offset);
+			statement.setObject(4, limit);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				Map<Integer, Customer> customers = new HashMap<>();
 				while (resultSet.next()) {
@@ -132,8 +132,8 @@ public class CustomerDao implements CustomerManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(
 						"SELECT u.*,c.aadhaarNo,c.panNo from user u join customer c on c.id=u.id limit ?,?");) {
-			statement.setInt(1, offset);
-			statement.setInt(2, limit);
+			statement.setObject(1, offset);
+			statement.setObject(2, limit);
 			try (ResultSet resultSet = statement.executeQuery();) {
 				Map<Integer, Customer> customers = new HashMap<>();
 				while (resultSet.next()) {
@@ -152,7 +152,7 @@ public class CustomerDao implements CustomerManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("SELECT id FROM customer where aadhaarNo = ?");) {
-			statement.setLong(1, aadhaarNo);
+			statement.setObject(1, aadhaarNo);
 			ResultSet resultSet = statement.executeQuery();
 			if (resultSet.next()) {
 				return resultSet.getInt("id");
@@ -186,8 +186,8 @@ public class CustomerDao implements CustomerManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(
 						"SELECT COUNT(*) FROM user u JOIN customer c on u.id=c.id JOIN account a on a.customerId=u.id WHERE branchId = ? AND u.status = ?")) {
-			statement.setInt(1, branchId);
-			statement.setInt(2, status.ordinal());
+			statement.setObject(1, branchId);
+			statement.setObject(2, status.ordinal());
 			try (ResultSet resultSet = statement.executeQuery()) {
 				if (resultSet.next()) {
 					return resultSet.getInt(1);
@@ -220,7 +220,7 @@ public class CustomerDao implements CustomerManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("SELECT branchId FROM account WHERE customerId = ?")) {
-			statement.setInt(1, customerId);
+			statement.setObject(1, customerId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				List<Integer> branches = new ArrayList<>();
 				while (resultSet.next()) {
@@ -230,6 +230,31 @@ public class CustomerDao implements CustomerManager {
 			}
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("Customer fetch failed!", e);
+		}
+	}
+
+	@Override
+	public void updateCustomer(Customer customer) throws CustomException, InvalidValueException {
+		Customer existingCustomer = getCustomer(customer.getUserId());
+		ArrayList<Object> queryData = HelperDao.buildQuery(existingCustomer, customer);
+		if (queryData.size() > 1) {
+			StringBuffer sb = new StringBuffer();
+			sb.append("UPDATE user u JOIN customer c on u.id=c.id SET");
+			sb.append(queryData.get(0));
+			sb.append(" where u.id = ?");
+			String query = sb.toString();
+			try (Connection connection = DBConnection.getConnection();
+					PreparedStatement statement = connection.prepareStatement(query)) {
+				int size = queryData.size();
+				for (int i = 1; i < size; i++) {
+					statement.setObject(i, queryData.get(i));
+				}
+				statement.setObject(size, customer.getUserId());
+				System.out.println(statement.toString());
+				statement.executeUpdate();
+			} catch (ClassNotFoundException | SQLException e) {
+				throw new CustomException("Customer Updation failed!", e);
+			}
 		}
 	}
 

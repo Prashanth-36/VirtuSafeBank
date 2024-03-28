@@ -3,18 +3,18 @@ package model;
 import utility.ActiveStatus;
 
 public class Branch {
-	private int id;
+	private Integer id;
 	private String ifsc;
 	private String location;
 	private String city;
 	private String state;
 	private ActiveStatus status;
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 

@@ -21,7 +21,7 @@ public class SessionDao implements SessionManager {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("SELECT type,status FROM user WHERE id = ? AND password = ?");) {
-			statement.setInt(1, userId);
+			statement.setObject(1, userId);
 			String hashedPassword = Utils.hashPassword(password);
 			statement.setString(2, hashedPassword);
 			try (ResultSet result = statement.executeQuery()) {
@@ -33,7 +33,7 @@ public class SessionDao implements SessionManager {
 					if (type == UserType.USER) {
 						try (PreparedStatement userStatement = connection.prepareStatement(
 								"SELECT u.*,aadhaarNo,panNo FROM user u JOIN customer c ON u.id=c.id WHERE u.id = ?");) {
-							userStatement.setInt(1, userId);
+							userStatement.setObject(1, userId);
 							try (ResultSet customerRecord = userStatement.executeQuery()) {
 								if (customerRecord.next()) {
 									User customer = CustomerDao.resultSetToCustomer(customerRecord);
@@ -44,7 +44,7 @@ public class SessionDao implements SessionManager {
 					} else {
 						try (PreparedStatement employeeStatement = connection.prepareStatement(
 								"SELECT u.*,branchId FROM user u JOIN employee e ON u.id=e.id WHERE u.id = ?");) {
-							employeeStatement.setInt(1, userId);
+							employeeStatement.setObject(1, userId);
 							try (ResultSet employeeRecord = employeeStatement.executeQuery()) {
 								if (employeeRecord.next()) {
 									User employee = EmployeeDao.resultSetToEmployee(employeeRecord);

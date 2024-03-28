@@ -27,6 +27,9 @@
     <main class="main">
       <form action="<%=request.getContextPath() %>/controller/admin/<%=user==null?"addUser":"modifyUser" %>" method="post" class="user-form-container">
         <h3><%=user!=null? "Modify User":"Add User" %></h3>
+         <%if(user!=null){%>
+          <input type="hidden" name="userId" value="<%=user.getUserId()%>"/>
+        <%} %>
         <div class="user-form">
           <div class="form-column">
             <div class="form-row">

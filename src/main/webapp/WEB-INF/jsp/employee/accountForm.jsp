@@ -12,9 +12,10 @@ pageEncoding="UTF-8"%>
   </head>
   <body>
   <% request.setAttribute("activePath", "accounts"); %>
-  <%@include file="../addOns/employeeHeader.jsp" %>
+  <% String viewer=(String) request.getAttribute("viewer");%>
+  <%@include file="../addOns/adminHeader.jsp" %>
     <main class="main">
-      <form action="<%=request.getContextPath() %>/controller/employee/addAccount" method="post" class="form-container">
+      <form action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/addAccount" method="post" class="form-container">
         <h3>Create Account</h3>
         <label for="customerId">Customer ID *</label>
         <input
@@ -23,6 +24,23 @@ pageEncoding="UTF-8"%>
           id="customerId"
           placeholder="Customer ID"
         />
+        <% if(viewer!=null && viewer.equals("admin")){ %>
+          <label for="branchId">Branch ID * 
+            <select name="branchId" id="branchId" style="margin:1rem" class="selection" required>
+                  <option value="">Select</option>
+            <% 
+              Map<Integer,Branch> branches=(Map<Integer,Branch>)request.getAttribute("branches");
+              if(branches!=null){
+                for(int branchId:branches.keySet()){
+            %>
+                  <option value="<%=branchId%>"><%=branchId%></option>
+            <%
+                }
+              }
+            %>
+            </select>
+          </label>
+        <%} %>
         <button>Create</button>
       </form>
     </main>

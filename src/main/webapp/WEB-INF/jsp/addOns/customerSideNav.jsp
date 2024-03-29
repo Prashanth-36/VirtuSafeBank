@@ -5,7 +5,7 @@ String path = (String) request.getAttribute("path");
   <ul class="side-nav">
     <li><a
       href="<%=request.getContextPath()%>/controller/user/moneyTransfer"
-      class=<%=request.getRequestURI().contains("moneyTransfer.jsp") ? "active" : ""%>>Money
+      class=<%=path != null && path.equals("moneyTransfer") ? "active" : ""%>>Money
         Transfer</a></li>
     <li><a
       href="<%=request.getContextPath()%>/controller/user/withdrawl"

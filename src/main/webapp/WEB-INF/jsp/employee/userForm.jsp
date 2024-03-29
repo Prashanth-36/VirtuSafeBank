@@ -1,3 +1,4 @@
+<%@page import="utility.ActiveStatus"%>
 <%@page import="model.Customer"%>
 <%@page import="model.Employee"%>
 <%@page import="java.time.ZoneId"%>
@@ -20,13 +21,20 @@
   <body>
   <% 
     request.setAttribute("activePath", "users"); 
-    Customer user=(Customer)request.getAttribute("user");
+    User user=(User)request.getAttribute("user");
+  %>
+  <% 
+    String viewer=(String) request.getAttribute("viewer");
+    if(viewer!=null && viewer.equals("employee")){ 
   %>
   <%@include file="../addOns/employeeHeader.jsp" %>
+  <%}else{ %>
+  <%@include file="../addOns/adminHeader.jsp" %>
+  <%} %>
     <main class="main">
-      <form id="form" action="<%=request.getContextPath() %>/controller/employee/<%=user==null?"addUser":"modifyUser" %>" method="post" class="user-form-container">
-        <h3><%=user!=null? "Modify User":"Add Customer" %></h3>
-        <%if(user!=null){%>
+      <form id="form" action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/<%=user==null?"addUser":"modifyUser" %>" method="post" class="user-form-container">
+        <h3 style="position:relative"><%=user!=null? "Modify User":"Add User" %> <img src="<%=request.getContextPath()%>/static/images/edit-white.png" style="width:2rem;position:absolute;right:1rem;top:.5rem;" onclick="enableEdit()" alt="edit"></h3>
+         <%if(user!=null){%>
           <input type="hidden" name="userId" value="<%=user.getUserId()%>"/>
         <%} %>
         <div class="user-form">
@@ -42,39 +50,74 @@
             <div class="form-row">
               <label for="gender">Gender</label>
                 <select name="gender" id="gender"  style="margin:1rem" class="selection" required>
-                  <option value="">Select</option>  
+                  <option value="">Select</option>
                   <option value="1" <%=user!=null&&user.getGender()==Gender.MALE?"selected":""%> >Male</option>
                   <option value="0" <%=user!=null&&user.getGender()==Gender.FEMALE?"selected":""%>>Female</option>
                 </select>
             </div>
             <div class="form-row">
               <label for="number">Number</label>
-              <input type="tel" name="number" pattern="[0-9]{10}" title="10-digit Mobile no" value="<%=user!=null?user.getNumber():""%>"  id="number" placeholder="Number" required>
+              <input type="tel" name="number" value="<%=user!=null?user.getNumber():""%>"  id="number" placeholder="Number" required>
             </div>
             <div class="form-row">
               <label for="email">Email</label>
               <input type="email" name="email" value="<%=user!=null?user.getEmail():""%>"  id="email" placeholder="Email" required>
             </div>
+            <% if(user==null){%> 
+              <div class="form-row">
+                <label for="password">Password</label>
+                <input type="password" name="password"  id="password" placeholder="password" <%=user==null?"required":"" %>>
+              </div>
+            <%} %>
+          </div>
+          <div class="form-column">
             <div class="form-row">
                 <label for="userType">User Type</label>
                 <select name="userType" id="userType" style="margin:1rem" class="selection" onchange="toggleInputs()" required >
-                  <option value="0" readonly>Customer</option>
+                  <% if(viewer!=null && viewer.equals("admin")){%>
+                    <option value="">Select</option>
+                    <option value="2" <%=user!=null&& user.getType()==UserType.EMPLOYEE?"selected":""%>>Employee</option>
+                    <option value="1" <%=user!=null&& user.getType()==UserType.ADMIN?"selected":""%>>Admin</option>
+                  <%} %>
+                  <option value="0" <%=user!=null&& user.getType()==UserType.USER?"selected":""%>>Customer</option>
                 </select>
             </div>
-          </div>
-          <div class="form-column">
-            <div class="form-row" style="display:<%=user==null?"flex":"none"%>">
-              <label for="password">Password</label>
-              <input type="password" name="password"  id="password" placeholder="password" <%=user==null?"required":"" %>>
+            <% 
+              Employee employee=null;
+              if(user!=null && user instanceof Employee){
+            	   employee=(Employee) user;
+              }
+            %>
+            <div class="form-row" style="display:<%=user!=null && (user.getType()==UserType.ADMIN||user.getType()==UserType.EMPLOYEE)?"flex":"none"%>" id="employee">
+              <label for="branchId">Branch ID *</label>
+                <select name="branchId" id="branchId" style="margin:1rem" class="selection">
+                  <option value="">Select</option>
+                  <% 
+                  Map<Integer,Branch> branches=(Map<Integer,Branch>)request.getAttribute("branches");
+                    if(branches!=null){
+                      for(int branchId:branches.keySet()){
+                  %>
+                        <option value="<%=branchId%>" <%=employee!=null&& employee.getBranchId()==branchId?"selected":""%>><%=branchId%></option>
+                  <%
+                      }
+                    }
+                  %>
+                </select>
             </div>
-            <div style="width:100%;" id="customer">
+            <% 
+              Customer customer=null;
+              if(user!=null && user instanceof Customer){
+                 customer=(Customer) user;
+              }
+            %>
+            <div style="width:100%;display:<%=user!=null && user.getType()==UserType.USER?"block":"none"%>" id="customer">
               <div class="form-row">
                 <label for="aadhaarNo">Aadhaar No</label> 
-                <input type="text" name="aadhaarNo" pattern="[0-9]{12}" title="12-digit Aadhaar no" value="<%=user!=null?user.getAadhaarNo():""%>"  id="aadhaarNo" placeholder="Aadhaar No">
+                <input type="text" name="aadhaarNo"  value="<%=customer!=null?customer.getAadhaarNo():""%>"  id="aadhaarNo" placeholder="Aadhaar No">
               </div>
               <div class="form-row">
                 <label for="panNo">PAN</label> 
-                <input type="text" name="panNo" pattern="^[A-Z]{5}[0-9]{4}[A-Z]$" title="ABCDE1234F - Pan no" value="<%=user!=null?user.getPanNo():""%>" id="panNo" placeholder="PAN" >
+                <input type="text" name="panNo" value="<%=customer!=null?customer.getPanNo():""%>" id="panNo" placeholder="PAN" >
               </div>
             </div>
             <div class="form-row">
@@ -90,20 +133,55 @@
               <input type="text" name="state" value="<%=user!=null?user.getState():""%>"  id="state" placeholder="State" required>
             </div>
           </div>
-          <button id="submit" <%=user!=null?"disabled":"" %>><%=user!=null? "Update":"Create" %></button>
+          <button id="submit" disabled><%=user!=null? "Update":"Create" %></button>
         </div>
       </form>
+      
+    <% if(user!=null && user.getStatus()==ActiveStatus.INACTIVE){ %>
+      <form method="post" action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/manageUser">
+        <input type="hidden" name="activate" value="1" />
+        <input type="hidden" name="userId" value="<%=user.getUserId() %>" />
+        <input type="hidden" name="userType" value="<%=user.getType() %>" />
+        <button style="font-size: large;padding: 0.5rem;margin: auto;display: block;background-color: #009e60;color: white;">Activate</button>
+      </form>
+    <%}else if(user!=null && user.getStatus()==ActiveStatus.ACTIVE){ %>
+      <form method="post" action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/manageUser">
+        <input type="hidden" name="deactivate" value="1" />
+        <input type="hidden" name="userId" value="<%=user.getUserId() %>" />
+        <input type="hidden" name="userType" value="<%=user.getType() %>" />
+        <button style="font-size: large; padding: 0.5rem; margin: auto; display: block; background-color: #e34234; color: white;">Deactivate</button>
+      </form>
+    <%} %>
     </main>
+
+    <script>
+      const customer=document.getElementById("customer");
+      const employee=document.getElementById("employee");
+      function toggleInputs(){
+        const type=document.getElementById("userType").value;
+        if(type===""){
+          customer.style.display="none";
+          employee.style.display="none";
+        }else if(type==="0"){
+          customer.style.display="block";
+          employee.style.display="none";
+        }else{
+          customer.style.display="none";
+          employee.style.display="flex";
+        }
+      }
+    </script>
     <%if(user!=null){ %>
     <script>
-    	const fields = document.querySelectorAll("#form input");
+      const fields = document.querySelectorAll("#form input");
+      const selections = document.querySelectorAll("#form select");
       const submit=document.getElementById("submit");
       let changedCount=0;
-    	for(field of fields){
-    		field.addEventListener("change",(e)=>{
-    			console.log(e.target.value);
-    			console.log(e.target.defaultValue);
-    			if(e.target.value===e.target.defaultValue){
+      for(field of fields){
+        field.addEventListener("change",(e)=>{
+          console.log(e.target.value);
+          console.log(e.target.defaultValue);
+          if(e.target.value===e.target.defaultValue){
             changedCount--;
           }else{
             changedCount++;
@@ -113,8 +191,41 @@
           }else{
             submit.removeAttribute("disabled");
           }
-    		});
-    	}
+        });
+      }
+      for(field of selections){
+        field.addEventListener("change",(e)=>{
+          console.log(e.target.value);
+          console.log(e.target.defaultValue);
+          if(e.target.value===e.target.defaultValue){
+            changedCount--;
+          }else{
+            changedCount++;
+          }
+          if(changedCount==0){
+            submit.setAttribute("disabled","disabled");
+          }else{
+            submit.removeAttribute("disabled");
+          }
+        });
+      }
+      
+      function enableEdit(){
+    	  for(e of selections){
+    		  e.removeAttribute("disabled");
+    	  }
+    	  for(e of fields){
+    		  e.removeAttribute("disabled");
+    	  }
+      }
+      window.onload=()=>{
+    	  for(e of selections){
+    		  e.setAttribute("disabled","disabled");
+    	  }
+    	  for(e of fields){
+    		  e.setAttribute("disabled","disabled");
+    	  }
+      };
     </script>
     <%} %>
   </body>

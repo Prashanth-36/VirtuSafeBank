@@ -17,11 +17,20 @@
 <link rel="stylesheet" href="<%=request.getContextPath() %>/static/css/home.css" />
 </head>
 <body>
-  <% request.setAttribute("activePath", "accounts"); %>
-  <%@include file="../addOns/employeeHeader.jsp" %>
+  <% 
+    request.setAttribute("activePath", "accounts"); 
+    String viewer=(String) request.getAttribute("viewer");
+  %>
+  
+  <% if(viewer!=null && viewer.equals("admin")){ %>
+    <%@include file="../addOns/adminHeader.jsp" %>
+  <%}else if(viewer!=null && viewer.equals("employee")){ %>
+    <%@include file="../addOns/employeeHeader.jsp" %>
+  <%} %>
+  
   <main class="main">
     
-    <table class="border-table">
+    <table class="border-table" style="margin-bottom:1rem">
       <tr style="position: relative">
         <th colspan="6"
           style="text-align: center; background-color: var(--blue); color: white;position:reletive;height:3rem">
@@ -41,7 +50,7 @@
       <% 
           Account account=(Account)request.getAttribute("account");
        %>
-      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/employee/manageAccount?accountNo=<%=account.getAccountNo()%>'">
+      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=viewer.equals("admin")?"admin":"employee"%>/manageAccount?accountNo=<%=account.getAccountNo()%>'">
         <td><%=account.getAccountNo() %></td>
         <td><%=account.getCustomerId() %></td>
         <td><%=account.getCurrentBalance() %></td>
@@ -50,9 +59,8 @@
         <td><%=account.getStatus() %></td>
       </tr>
     </table>
-    
     <% if(account.getStatus()==ActiveStatus.INACTIVE){ %>
-    <form method="post" action="<%=request.getContextPath() %>/controller/employee/manageAccount">
+    <form method="post" action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee"%>/manageAccount">
       <input type="hidden" name="activate" value="1" />
       <input type="hidden" name="accountNo" value="<%=account.getAccountNo() %>" />
       <button
@@ -69,7 +77,7 @@
           </button> 
     </form>
         <%}else{ %>
-      <form method="post" action="<%=request.getContextPath() %>/controller/employee/manageAccount">
+      <form method="post" action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee"%>/manageAccount">
       <input type="hidden" name="deactivate" value="1" />
       <input type="hidden" name="accountNo" value="<%=account.getAccountNo() %>" />
       <button
@@ -77,8 +85,22 @@
         Deactivate</button>
       </form>
      <%} %>
+     
+          <div style="display:flex;justify-content:flex-end;gap:1rem;align-items:center;width:90%;margin:auto">
+            <label for="months">Select days:</label>
+            <select name="months" id="months" class="selection" onchange="selectMonth()" required>
+            <% int months=(int) request.getAttribute("months"); %>
+              <option value="">Select</option>
+              <option value="1" <%=months==1?"selected":"" %>>30</option>
+              <option value="2" <%=months==2?"selected":"" %>>60</option>
+              <option value="3" <%=months==3?"selected":"" %>>90</option>
+              <option value="4" <%=months==4?"selected":"" %>>120</option>
+              <option value="5" <%=months==5?"selected":"" %>>150</option>
+              <option value="6" <%=months==6?"selected":"" %>>180</option>
+            </select>
+          </div>
 
-        <table class="border-table">
+        <table class="border-table" style="margin-top:1rem">
           <tr>
             <th
               colspan="8"
@@ -122,5 +144,13 @@
         
         <%@include file="../addOns/pagination.jsp" %>
   </main>
+  <script>
+  function selectMonth(){
+	  const params=new URLSearchParams(location.search);
+    const months=document.getElementById("months").value;
+    params.set("months",months);
+    window.location.search=params;
+  }
+  </script>
 </body>
 </html>

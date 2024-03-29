@@ -16,6 +16,7 @@
     <%@include file="../addOns/employeeHeader.jsp" %>
     <form action="<%=request.getContextPath()%>/controller/employee/fundTransfer"
       method="post" class="form-container">
+      <h3>Deposit Money</h3>
       <label for="accountNo">Account Number </label> 
       <input type="number" name="accountNo" placeholder="Account Number" list="accounts" required/>
       <datalist id="accounts">

@@ -22,4 +22,4 @@ function changePage(e){
 }
 
 const focused = document.querySelector('.activePage')
-focused.scrollIntoView({ behavior: 'smooth' })
+focused.scrollIntoView({ behavior: 'instant' })

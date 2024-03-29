@@ -4,7 +4,7 @@
 <%@page import="java.util.List"%>
 <%@page import="model.Transaction"%>
 <%@page import="logicallayer.CustomerHandler"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" errorPage="error.jsp"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" errorPage="../error.jsp"%>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -28,6 +28,19 @@
           <div class="card" onclick="toggle()">
             <img src="<%=request.getContextPath()%>/static/images/password.png" alt="" width="50rem" />Change MPIN
           </div>
+          <div class="card">
+            <label for="months">Select days:</label>
+            <select name="months" id="months" class="selection" onchange="selectMonth()" required>
+            <% int months=(int) request.getAttribute("months"); %>
+              <option value="">Select</option>
+              <option value="1" <%=months==1?"selected":"" %>>30</option>
+              <option value="2" <%=months==2?"selected":"" %>>60</option>
+              <option value="3" <%=months==3?"selected":"" %>>90</option>
+              <option value="4" <%=months==4?"selected":"" %>>120</option>
+              <option value="5" <%=months==5?"selected":"" %>>150</option>
+              <option value="6" <%=months==6?"selected":"" %>>180</option>
+            </select>
+          </div>
         </div>
 
         <table class="border-table">
@@ -38,9 +51,11 @@
                 text-align: center;
                 background-color: var(--blue);
                 color: white;
+                border:none;
               "
             >
-              Transaction Statements
+            <span style="text-align: center;background-color: var(--blue);color: white;border:none;">Account No: <%=request.getAttribute("accountNo") %> </span>
+              - Transaction Statements
             </th>
           </tr>
           <tr>
@@ -130,6 +145,13 @@
         } else {
           backDrop.style.display = "flex";
         }
+      }
+      
+      function selectMonth(){
+    	  const params=new URLSearchParams(location.search);
+        const months=document.getElementById("months").value;
+        params.set("months",months);
+        window.location.search=params;
       }
     </script>
   </body>

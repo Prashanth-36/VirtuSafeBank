@@ -18,18 +18,40 @@
 </head>
 <body>
   <% request.setAttribute("activePath", "users"); %>
-  <%@include file="../addOns/employeeHeader.jsp" %>
+  <% 
+    String viewer=(String) request.getAttribute("viewer"); 
+    int userType=(int) request.getAttribute("userType");
+  %>
+  
+  <% if(viewer.equals("admin")){ %>
+    <%@include file="../addOns/adminHeader.jsp" %>
+  <%}else{ %>
+    <%@include file="../addOns/employeeHeader.jsp" %>
+  <%}%>
+  
   <main class="main">
     <form id="form" action="" method="get" class="search">
-    <label for="status">User Status:</label>
-        <select name="status"
-          class="selection"
-          id="status"
+
+      <% if(viewer.equals("admin")){ %>
+        <label for="userType">User Type:</label>
+        <select name="userType"
+        class="selection"
+          id="userType"
           onchange="document.getElementById('form').submit()">
-          <option value="1" <%= (1==(int)request.getAttribute("status"))?"selected":"" %>>ACTIVE</option>
-          <option value="0" <%= (0==(int)request.getAttribute("status"))?"selected":"" %>>INACTIVE</option>
+          <option value="2" <%= (2==userType)?"selected":"" %>>Employee</option>
+          <option value="0" <%= (0==userType)?"selected":"" %>>Customer</option>
         </select> 
-         
+      <%}else{ %>
+          <label for="status">User Status:</label>
+          <select name="status"
+            class="selection"
+            id="status"
+            onchange="document.getElementById('form').submit()">
+            <option value="1" <%= (1==(int)request.getAttribute("status"))?"selected":"" %>>ACTIVE</option>
+            <option value="0" <%= (0==(int)request.getAttribute("status"))?"selected":"" %>>INACTIVE</option>
+          </select> 
+      <%}%>
+      
         <label for="userId">User ID:</label>
         <input
           type="search"
@@ -43,8 +65,8 @@
       <tr style="position: relative">
         <th colspan="12"
           style="text-align: center; background-color: var(--blue); color: white;position:reletive;height:3rem">
-          Customer Details
-            <button onclick="window.location.href='<%=request.getContextPath() %>/controller/employee/addUser'"
+          Account Details
+            <button onclick="window.location.href='<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/addUser'"
               style="position: absolute; font-size: larger; right: 1rem;top:.7rem; height:2rem;width: 2rem;">
               +</button>
         </th>
@@ -59,17 +81,29 @@
         <th>Location</th>
         <th>City</th>
         <th>State</th>
-        <th>Aadhaar No</th>
-        <th>PAN</th>
-        <th>Status</th>
+        <% 
+            if(userType==0){ 
+        %>
+            <th>Aadhaar No</th>
+            <th>PAN</th>
+        <%
+          }else{
+        %>
+            <th>User Type</th>
+            <th>Branch Id</th>
+        <%
+          }
+        %>
+            <th>Status</th>
       </tr>
       <%
-          Map<Integer,Customer> customers=(Map<Integer,Customer>) request.getAttribute("customers");
-          for(Map.Entry<Integer,Customer> e:customers.entrySet()){
-            int userId=e.getKey();
-            Customer customer=e.getValue();
+            if(userType==0){
+              Map<Integer,Customer> customers=(Map<Integer,Customer>) request.getAttribute("customers");
+              for(Map.Entry<Integer,Customer> e:customers.entrySet()){
+                int userId=e.getKey();
+                Customer customer=e.getValue();
       %>
-        <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/employee/manageUser?userId=<%=userId%>'">
+        <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/modifyUser?userId=<%=userId%>&userType=<%=customer.getType().ordinal()%>'">
           <td><%=userId %></td>
           <td><%=customer.getName() %></td>
           <td><%=Utils.millisToLocalDate(customer.getDob(), ZoneId.systemDefault())  %></td>
@@ -85,6 +119,29 @@
         </tr>
       <%
           }
+        }else{
+        	Map<Integer,Employee> employees=(Map<Integer,Employee>) request.getAttribute("employees");
+            for(Map.Entry<Integer,Employee> e:employees.entrySet()){
+              int userId=e.getKey();
+              Employee employee=e.getValue();
+      %>
+      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/modifyUser?userId=<%=userId%>&userType=<%=employee.getType().ordinal()%>'">
+        <td><%=userId %></td>
+          <td><%=employee.getName() %></td>
+          <td><%=Utils.millisToLocalDate( employee.getDob(), ZoneId.systemDefault()) %></td>
+          <td><%=employee.getNumber()%></td>
+          <td><%=employee.getEmail()%></td>
+          <td><%=employee.getGender()%></td>
+          <td><%=employee.getType()%></td>
+          <td><%=employee.getLocation()%></td>
+          <td><%=employee.getCity()%></td>
+          <td><%=employee.getState()%></td>
+          <td><%=employee.getBranchId()%></td>
+          <td><%=employee.getStatus()%></td>
+      </tr>
+      <%
+          }
+        }
       %>
     </table>
   </main>
@@ -92,8 +149,8 @@
   
   <script>
   function redirect(){
-  	window.location.href='<%=request.getContextPath()%>/controller/employee/manageUser?userId='+document.getElementById('userId').value;
-		  }
+  		window.location.href='<%=request.getContextPath()%>/controller/admin/manageUser?userId='+document.getElementById('userId').value+'&userType='+document.getElementById('userType').value;
+	}
   </script>
 </body>
 </html>

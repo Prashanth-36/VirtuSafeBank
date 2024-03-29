@@ -328,7 +328,7 @@ div.activePage {
 }
 
 .user-form-container {
-  margin: 5rem auto;
+  margin: 5rem auto 2rem;
   width: 50%;
   height: 80%;
   background-color: white;
@@ -423,4 +423,9 @@ div.activePage {
 }
 button:disabled {
   background-color: rgba(128, 128, 128, 0.461);
+}
+.statusButton{
+	margin:0;
+	padding:0;
+	
 }

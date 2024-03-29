@@ -18,10 +18,7 @@
       <tr style="position: relative">
         <th colspan="2"
           style="text-align: center; background-color: var(--blue); color: white;">
-          Branch Details <img src="<%=request.getContextPath() %>/static/images/edit-white.png"
-          onclick="window.location.href='<%=request.getContextPath() %>/controller/admin/modifyBranch?id=1'"
-          alt="edit"
-          style="position: absolute; font-size: larger; right: 1rem; width: 2rem;" />
+          Branch Details 
         </th>
       </tr>
       <% 

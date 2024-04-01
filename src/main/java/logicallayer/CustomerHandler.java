@@ -212,4 +212,9 @@ public class CustomerHandler {
 		accountManager.setMpin(accountNo, newPin);
 	}
 
+	public void changePassword(int customerId, String currentPassword, String newPassword)
+			throws InvalidValueException, CustomException {
+		customerManager.setPassword(customerId, currentPassword, newPassword);
+	}
+
 }

@@ -28,4 +28,7 @@ public interface EmployeeManager {
 
 	void updateEmployee(Employee employee) throws CustomException, InvalidValueException;
 
+	void setPassword(int customerId, String currentPassword, String newPassword)
+			throws InvalidValueException, CustomException;;
+
 }

@@ -3,12 +3,13 @@ package persistentdao;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
 
 import customexceptions.CustomException;
 
 public class HelperDao {
 
-	public static <T> ArrayList<Object> buildQuery(T existingPojo, T updatedPojo) throws CustomException {
+	public static <T> List<Object> buildQuery(T existingPojo, T updatedPojo) throws CustomException {
 		try {
 			StringBuilder sb = new StringBuilder();
 			Class<?> clazz = existingPojo.getClass();

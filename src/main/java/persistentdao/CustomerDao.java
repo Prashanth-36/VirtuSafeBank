@@ -238,7 +238,7 @@ public class CustomerDao implements CustomerManager {
 	@Override
 	public void updateCustomer(Customer customer) throws CustomException, InvalidValueException {
 		Customer existingCustomer = getCustomer(customer.getUserId());
-		ArrayList<Object> queryData = HelperDao.buildQuery(existingCustomer, customer);
+		List<Object> queryData = HelperDao.buildQuery(existingCustomer, customer);
 		if (queryData.size() > 1) {
 			StringBuffer sb = new StringBuffer();
 			sb.append("UPDATE user u JOIN customer c on u.id=c.id SET");
@@ -257,6 +257,26 @@ public class CustomerDao implements CustomerManager {
 			} catch (ClassNotFoundException | SQLException e) {
 				throw new CustomException("Customer Updation failed!", e);
 			}
+		}
+	}
+
+	@Override
+	public void setPassword(int customerId, String currentPassword, String newPassword)
+			throws InvalidValueException, CustomException {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection
+						.prepareStatement("UPDATE user SET password = ? WHERE id = ? && password = ?")) {
+			String hashedPassword = Utils.hashPassword(newPassword);
+			statement.setString(1, hashedPassword);
+			statement.setObject(2, customerId);
+			String currentHashedPassword = Utils.hashPassword(currentPassword);
+			statement.setString(3, currentHashedPassword);
+			int affected = statement.executeUpdate();
+			if (affected == 0) {
+				throw new InvalidValueException("Invalid Current Password!");
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			throw new CustomException("Password Updation failed!", e);
 		}
 	}
 

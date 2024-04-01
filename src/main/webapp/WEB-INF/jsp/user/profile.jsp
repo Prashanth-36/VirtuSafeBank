@@ -7,11 +7,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Profile</title>
 <link rel="stylesheet" href="<%=request.getContextPath()%>/static/css/home.css"/>
 </head>
 <body>
+<%    
+      response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      response.setHeader("Pragma", "no-cache"); 
+      response.setHeader("Expires", "0");
+%>
   <% request.setAttribute("selected", "myAccounts"); %>
   <%@include file="../addOns/customerHeader.jsp" %>
   <% Customer profile=(Customer) request.getAttribute("profile"); %>
@@ -68,7 +74,57 @@
               </div>
             </div>
           </div>
+          <div style="display:flex;align-items:center;gap:1rem;justify-content:center" onclick="toggle()"><img src="<%=request.getContextPath()%>/static/images/password.png" style="width:2rem"/> Change Password</div>
       </div>
+      
+       <div id="back-drop" class="back-drop" onclick="toggle()">
+      <form
+        method="post"
+        onclick="event.stopPropagation()"
+        action="<%=request.getContextPath() %>/controller/user/changePassword"
+        id="form"
+        style="width: 40%; height: fit-content"
+        class="form-container"
+      >
+        <h3>Change Password</h3>
+        <input
+          type="hidden"
+          name="customerId"
+          id="customerId"
+          value="<%=profile.getUserId() %>"
+        />
+        <input
+          type="password"
+          name="currentPassword"
+          id="currentPassword"
+          placeholder="Current Password"
+        />
+        <input
+          type="password"
+          name="newPassword"
+          id="newPassword"
+          placeholder="New Password"
+        />
+        <input
+          type="password"
+          name="confirmPassword"
+          id="comfirmPassword"
+          placeholder="Confirm Password"
+        />
+        <button>Update</button>
+      </form>
+    </div>
   </main>
+  
+  <script>
+  function toggle() {
+      const backDrop = document.getElementById("back-drop");
+      if (backDrop.style.display === "flex") {
+        backDrop.style.display = "none";
+      } else {
+        backDrop.style.display = "flex";
+      }
+    }
+  </script>
 </body>
 </html>

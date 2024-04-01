@@ -5,8 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import customexceptions.CustomException;
@@ -197,7 +197,7 @@ public class EmployeeDao implements EmployeeManager {
 	@Override
 	public void updateEmployee(Employee employee) throws CustomException, InvalidValueException {
 		Employee existingEmployee = getEmployee(employee.getUserId());
-		ArrayList<Object> queryData = HelperDao.buildQuery(existingEmployee, employee);
+		List<Object> queryData = HelperDao.buildQuery(existingEmployee, employee);
 		if (queryData.size() > 1) {
 			StringBuffer sb = new StringBuffer();
 			sb.append("UPDATE user u JOIN employee e on u.id=e.id SET");
@@ -216,6 +216,26 @@ public class EmployeeDao implements EmployeeManager {
 			} catch (ClassNotFoundException | SQLException e) {
 				throw new CustomException("Customer Updation failed!", e);
 			}
+		}
+	}
+
+	@Override
+	public void setPassword(int customerId, String currentPassword, String newPassword)
+			throws InvalidValueException, CustomException {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection
+						.prepareStatement("UPDATE user SET password = ? WHERE id = ? && password = ?")) {
+			String hashedPassword = Utils.hashPassword(newPassword);
+			statement.setString(1, hashedPassword);
+			statement.setObject(2, customerId);
+			String currentHashedPassword = Utils.hashPassword(currentPassword);
+			statement.setString(3, currentHashedPassword);
+			int affected = statement.executeUpdate();
+			if (affected == 0) {
+				throw new InvalidValueException("Invalid Current Password!");
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			throw new CustomException("Password Updation failed!", e);
 		}
 	}
 

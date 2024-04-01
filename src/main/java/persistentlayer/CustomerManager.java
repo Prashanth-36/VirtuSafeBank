@@ -32,4 +32,7 @@ public interface CustomerManager {
 	int getAllCustomerCount() throws CustomException;
 
 	void updateCustomer(Customer customer) throws CustomException, InvalidValueException;
+
+	void setPassword(int customerId, String currentPassword, String newPassword)
+			throws InvalidValueException, CustomException;
 }

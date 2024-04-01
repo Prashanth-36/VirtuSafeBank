@@ -495,6 +495,7 @@ public class ControllerServlet extends HttpServlet {
 			response.sendError(404);
 		}
 		}
+
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -552,6 +553,28 @@ public class ControllerServlet extends HttpServlet {
 				customerHandler.changeMpin(id, accountNo, currentMin, newMpin);
 				String message = "MPIN Updated Successful!";
 				String redirectUrl = request.getContextPath() + "/controller/user/home";
+				response.getWriter().println(
+						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
+		case "/user/changePassword": {
+			try {
+				CustomerHandler customerHandler = new CustomerHandler();
+				int id = (int) session.getAttribute("userId");
+				String currentPassword = request.getParameter("currentPassword");
+				String newPassword = request.getParameter("newPassword");
+				String confirmPassword = request.getParameter("confirmPassword");
+				if (!newPassword.equals(confirmPassword)) {
+					throw new InvalidValueException("Please re-enter new Password correctly!");
+				}
+				customerHandler.changePassword(id, currentPassword, newPassword);
+				String message = "Password Updated Successful!";
+				String redirectUrl = request.getContextPath() + "/controller/user/profile";
 				response.getWriter().println(
 						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
 			} catch (CustomException | InvalidValueException e) {
@@ -656,10 +679,8 @@ public class ControllerServlet extends HttpServlet {
 					AdminHandler adminHandler = new AdminHandler();
 					adminHandler.setAccountStatus(accountNo, status);
 					String message = "Account Status Updated!";
-					String redirectUrl = request.getContextPath() + "/controller/admin/manageAccount?accountNo="
-							+ accountNo;
 					response.getWriter().println(
-							"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+							"<script>alert('" + message + "'); window.location.href=document.referrer</script>");
 				} else {
 					response.sendRedirect(
 							request.getContextPath() + "/controller/admin/manageAccount?accountNo=" + accountNo);
@@ -710,9 +731,8 @@ public class ControllerServlet extends HttpServlet {
 				if (deactivate != null && deactivate.equals("1")) {
 					adminHandler.removeBranch(branchId);
 					String message = "Removed Branch!";
-					String redirectUrl = request.getContextPath() + "/controller/admin/branch?id=" + branchId;
-					response.getWriter().println(
-							"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+					response.getWriter().println("<script>alert('" + message
+							+ "'); window.location.href=window.location.href=document.referrer;</script>");
 				} else {
 					response.sendRedirect(request.getContextPath() + "/controller/admin/branch?id=" + branchId);
 				}
@@ -805,6 +825,28 @@ public class ControllerServlet extends HttpServlet {
 			break;
 		}
 
+		case "/admin/changePassword": {
+			try {
+				AdminHandler adminHandler = new AdminHandler();
+				int id = (int) session.getAttribute("userId");
+				String currentPassword = request.getParameter("currentPassword");
+				String newPassword = request.getParameter("newPassword");
+				String confirmPassword = request.getParameter("confirmPassword");
+				if (!newPassword.equals(confirmPassword)) {
+					throw new InvalidValueException("Please re-enter new Password correctly!");
+				}
+				adminHandler.changePassword(id, currentPassword, newPassword);
+				String message = "Password Updated Successful!";
+				String redirectUrl = request.getContextPath() + "/controller/admin/profile";
+				response.getWriter().println(
+						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
 		case "/employee/addAccount": {
 			try {
 				EmployeeHandler employeeHandler = new EmployeeHandler();
@@ -837,10 +879,8 @@ public class ControllerServlet extends HttpServlet {
 					EmployeeHandler employeeHandler = new EmployeeHandler();
 					employeeHandler.setAccountStatus(accountNo, status);
 					String message = "Account Status Updated!";
-					String redirectUrl = request.getContextPath() + "/controller/employee/manageAccount?accountNo="
-							+ accountNo;
 					response.getWriter().println(
-							"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+							"<script>alert('" + message + "'); window.location.href=document.referrer;</script>");
 				} else {
 					response.sendRedirect(
 							request.getContextPath() + "/controller/employee/manageAccount?accountNo=" + accountNo);
@@ -927,11 +967,32 @@ public class ControllerServlet extends HttpServlet {
 			break;
 		}
 
+		case "/employee/changePassword": {
+			try {
+				EmployeeHandler employeeHandler = new EmployeeHandler();
+				int id = (int) session.getAttribute("userId");
+				String currentPassword = request.getParameter("currentPassword");
+				String newPassword = request.getParameter("newPassword");
+				String confirmPassword = request.getParameter("confirmPassword");
+				if (!newPassword.equals(confirmPassword)) {
+					throw new InvalidValueException("Please re-enter new Password correctly!");
+				}
+				employeeHandler.changePassword(id, currentPassword, newPassword);
+				String message = "Password Updated Successful!";
+				String redirectUrl = request.getContextPath() + "/controller/employee/profile";
+				response.getWriter().println(
+						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.getWriter().println(e.getMessage());
+			}
+			break;
+		}
+
 		default:
 			response.getWriter().println("wrong url!");
 			break;
 		}
-
 	}
 
 	private Employee getEmployeeFormData(HttpServletRequest request, HttpServletResponse response)

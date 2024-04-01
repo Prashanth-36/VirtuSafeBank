@@ -6,11 +6,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Insert title here</title>
 <link rel="stylesheet" href="<%=request.getContextPath() %>/static/css/home.css" />
 </head>
 <body>
+<%    
+      response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      response.setHeader("Pragma", "no-cache"); 
+      response.setHeader("Expires", "0");
+%>
   <main class="main">
     <% request.setAttribute("activePath", "fundTransfer"); %>
     <%@include file="../addOns/employeeHeader.jsp" %>

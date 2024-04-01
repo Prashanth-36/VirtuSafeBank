@@ -11,6 +11,11 @@ pageEncoding="UTF-8"%>
     <link rel="stylesheet" href="<%=request.getContextPath() %>/static/css/home.css" />
   </head>
   <body>
+<%    
+      response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      response.setHeader("Pragma", "no-cache"); 
+      response.setHeader("Expires", "0");
+%>
   <% request.setAttribute("activePath", "accounts"); %>
   <% String viewer=(String) request.getAttribute("viewer");%>
   <%@include file="../addOns/adminHeader.jsp" %>

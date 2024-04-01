@@ -13,10 +13,12 @@ import model.Transaction;
 import persistentdao.AccountDao;
 import persistentdao.BranchDao;
 import persistentdao.CustomerDao;
+import persistentdao.EmployeeDao;
 import persistentdao.TransactionDao;
 import persistentlayer.AccountManager;
 import persistentlayer.BranchManager;
 import persistentlayer.CustomerManager;
+import persistentlayer.EmployeeManager;
 import persistentlayer.TransactionManager;
 import utility.ActiveStatus;
 import utility.TransactionType;
@@ -163,5 +165,11 @@ public class EmployeeHandler {
 		transaction.setDescription(description);
 		transaction.setCustomerId(account.getCustomerId());
 		transactionManager.initTransaction(transaction);
+	}
+
+	public void changePassword(int customerId, String currentPassword, String newPassword)
+			throws InvalidValueException, CustomException {
+		EmployeeManager employeeManager = new EmployeeDao();
+		employeeManager.setPassword(customerId, currentPassword, newPassword);
 	}
 }

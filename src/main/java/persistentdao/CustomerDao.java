@@ -22,7 +22,7 @@ import utility.Utils;
 public class CustomerDao implements CustomerManager {
 
 	@Override
-	public void addCustomer(Customer customer) throws CustomException, InvalidValueException {
+	public int addCustomer(Customer customer) throws CustomException, InvalidValueException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement userStatement = connection.prepareStatement(
 						"INSERT INTO user(name, dob, number,password,status,type,location,city,state,email,gender) values(?,?,?,?,?,?,?,?,?,?,?)",
@@ -45,19 +45,21 @@ public class CustomerDao implements CustomerManager {
 
 			customerStatement.setObject(2, customer.getAadhaarNo());
 			customerStatement.setString(3, customer.getPanNo());
-
+			int customerId = -1;
 			try {
 				connection.setAutoCommit(false);
 				int userAffectedRows = userStatement.executeUpdate();
 				if (userAffectedRows > 0) {
 					try (ResultSet resultSet = userStatement.getGeneratedKeys();) {
 						if (resultSet.next()) {
-							customerStatement.setObject(1, resultSet.getInt(1));
+							customerId = resultSet.getInt(1);
+							customerStatement.setObject(1, customerId);
 							customerStatement.execute();
 							connection.commit();
 						}
 					}
 				}
+				return customerId;
 			} catch (SQLException e) {
 				connection.rollback();
 				throw new CustomException("Customer Creation failed!", e);

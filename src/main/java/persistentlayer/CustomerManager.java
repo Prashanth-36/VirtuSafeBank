@@ -10,7 +10,7 @@ import utility.ActiveStatus;
 
 public interface CustomerManager {
 
-	void addCustomer(Customer customer) throws CustomException, InvalidValueException;
+	int addCustomer(Customer customer) throws CustomException, InvalidValueException;
 
 	void removeCustomer(int customerId) throws CustomException;
 

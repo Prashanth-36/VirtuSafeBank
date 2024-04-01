@@ -97,6 +97,12 @@ nav {
   border-bottom: 5px solid var(--blue);
 }
 
+nav #userName{
+	margin:1rem;
+	font-size:large;
+	color:var(--blue);
+}
+
 nav ul {
   list-style-type: none;
   width: 100%;
@@ -424,8 +430,42 @@ div.activePage {
 button:disabled {
   background-color: rgba(128, 128, 128, 0.461);
 }
-.statusButton{
-	margin:0;
-	padding:0;
-	
+.statusButton {
+  margin: 0;
+  padding: 0;
+}
+.profile-container {
+  width: 40%;
+  font-size: large;
+  margin: 5rem auto 0;
+}
+.profile {
+  text-align: left;
+  display: flex;
+}
+.profile h3 {
+  width: 100%;
+}
+.profile .row {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  align-items:center;
+}
+.profile .row div {
+  width: 50%;
+  height:100%;
+}
+.profile .row > div {
+ 	display:flex;
+ 	gap: 1rem;
+ 	align-items:center;
+}
+.profile .row img {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+.profile .column {
+  flex: 1;
+  width: 50%;
 }

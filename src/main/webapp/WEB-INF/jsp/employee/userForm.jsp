@@ -1,3 +1,4 @@
+<%@page import="model.Account"%>
 <%@page import="utility.ActiveStatus"%>
 <%@page import="model.Customer"%>
 <%@page import="model.Employee"%>
@@ -33,7 +34,14 @@
   <%} %>
     <main class="main">
       <form id="form" action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/<%=user==null?"addUser":"modifyUser" %>" method="post" class="user-form-container">
-        <h3 style="position:relative"><%=user!=null? "Modify User":"Add User" %> <img src="<%=request.getContextPath()%>/static/images/edit-white.png" style="width:2rem;position:absolute;right:1rem;top:.5rem;" onclick="enableEdit()" alt="edit"></h3>
+        <h3 style="position:relative"><%=user!=null? "Modify User":"Add User" %> 
+        <%if(user!=null){ %>
+          <%if(user.getType()==UserType.USER){%>
+            <img src="<%=request.getContextPath()%>/static/images/accounts.png" title="view all aaccounts" style="width:2rem;position:absolute;right:5rem;top:.5rem;" onclick="getAllAccounts()" alt="all Accounts">
+          <%} %>
+          <img src="<%=request.getContextPath()%>/static/images/edit-white.png" title="edit" style="width:2rem;position:absolute;right:1rem;top:.5rem;" onclick="enableEdit()" alt="edit">
+        <%} %>
+        </h3>
          <%if(user!=null){%>
           <input type="hidden" name="userId" value="<%=user.getUserId()%>"/>
         <%} %>
@@ -76,10 +84,10 @@
                 <select name="userType" id="userType" style="margin:1rem" class="selection" onchange="toggleInputs()" required >
                   <% if(viewer!=null && viewer.equals("admin")){%>
                     <option value="">Select</option>
-                    <option value="2" <%=user!=null&& user.getType()==UserType.EMPLOYEE?"selected":""%>>Employee</option>
-                    <option value="1" <%=user!=null&& user.getType()==UserType.ADMIN?"selected":""%>>Admin</option>
+                    <option value="2" <%=user!=null && user.getType()==UserType.EMPLOYEE?"selected":""%>>Employee</option>
+                    <option value="1" <%=user!=null && user.getType()==UserType.ADMIN?"selected":""%>>Admin</option>
                   <%} %>
-                  <option value="0" <%=user!=null&& user.getType()==UserType.USER?"selected":""%>>Customer</option>
+                  <option value="0" <%=user!=null && user.getType()==UserType.USER?"selected":""%>>Customer</option>
                 </select>
             </div>
             <% 
@@ -88,9 +96,10 @@
             	   employee=(Employee) user;
               }
             %>
-            <div class="form-row" style="display:<%=user!=null && (user.getType()==UserType.ADMIN||user.getType()==UserType.EMPLOYEE)?"flex":"none"%>" id="employee">
-              <label for="branchId">Branch ID *</label>
-                <select name="branchId" id="branchId" style="margin:1rem" class="selection">
+            <%if(viewer.equals("admin") && ( user==null || (user!=null && user.getType()!=UserType.USER))){ %>
+            <div class="form-row" id="branchField">
+              <label for="branchId" id="branchIdLabel">Branch ID *</label>
+                <select name="branchId" id="branchId" style="margin:1rem" class="selection" required>
                   <option value="">Select</option>
                   <% 
                   Map<Integer,Branch> branches=(Map<Integer,Branch>)request.getAttribute("branches");
@@ -104,6 +113,7 @@
                   %>
                 </select>
             </div>
+            <%} %>
             <% 
               Customer customer=null;
               if(user!=null && user instanceof Customer){
@@ -133,7 +143,7 @@
               <input type="text" name="state" value="<%=user!=null?user.getState():""%>"  id="state" placeholder="State" required>
             </div>
           </div>
-          <button id="submit" disabled><%=user!=null? "Update":"Create" %></button>
+          <button id="submit" <%=user!=null?"disabled":"" %>><%=user!=null? "Update":"Create" %></button>
         </div>
       </form>
       
@@ -152,25 +162,61 @@
         <button style="font-size: large; padding: 0.5rem; margin: auto; display: block; background-color: #e34234; color: white;">Deactivate</button>
       </form>
     <%} %>
+    
+   <% if(request.getAttribute("accounts")!=null){ %>
+      <table class="border-table">
+        <tr>
+          <th colspan="7"
+            style="text-align: center; background-color: var(--blue); color: white;">
+            Accounts</th>
+        </tr>
+        <tr>
+          <th>Account Number</th>
+          <th>Current Balance</th>
+          <th>Is Primary Account</th>
+          <th>Account Open Date</th>
+          <th>Branch ID</th>
+          <th>Account Status</th>
+        </tr>
+  
+        <%
+        Map<Integer, Account> accounts = (Map<Integer, Account>) request.getAttribute("accounts");
+        for (Map.Entry<Integer, Account> e : accounts.entrySet()) {
+          int id = e.getKey();
+          Account account = e.getValue();
+        %>
+        <tr
+          onclick="window.location.href='<%=request.getContextPath()%>/controller/user/account?accountNo=<%=id%>'">
+          <td><%=id%></td>
+          <td><%=account.getCurrentBalance()%></td>
+          <td><%=account.getIsPrimaryAccount() ? "YES" : "NO"%></td>
+          <td><%=Utils.millisToLocalDate((account.getOpenDate()),ZoneId.systemDefault()) %></td>
+          <td><%=account.getBranchId()%></td>
+          <td><%=account.getStatus()%></td>
+        </tr>
+        <%
+        }
+        %>
+      </table>
+     <%} %>
+  
     </main>
 
     <script>
       const customer=document.getElementById("customer");
-      const employee=document.getElementById("employee");
       function toggleInputs(){
         const type=document.getElementById("userType").value;
-        if(type===""){
-          customer.style.display="none";
-          employee.style.display="none";
-        }else if(type==="0"){
+        if(type==="0"){
           customer.style.display="block";
-          employee.style.display="none";
+          document.getElementById("branchIdLabel").innerText="Account's Branch ID";
         }else{
+          document.getElementById("branchIdLabel").innerText="Branch ID";
           customer.style.display="none";
-          employee.style.display="flex";
         }
       }
+      window.onload=toggleInputs();
     </script>
+    
     <%if(user!=null){ %>
     <script>
       const fields = document.querySelectorAll("#form input");
@@ -226,6 +272,13 @@
     		  e.setAttribute("disabled","disabled");
     	  }
       };
+      <%if(user.getType()==UserType.USER){%>
+     	function getAllAccounts(){
+     		const params=new URLSearchParams(window.location.search);
+     		params.set("getAllAccounts","1");
+     		window.location.search=params;
+     	}
+      <%}%>
     </script>
     <%} %>
   </body>

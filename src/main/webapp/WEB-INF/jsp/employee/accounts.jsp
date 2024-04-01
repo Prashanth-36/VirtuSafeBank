@@ -113,7 +113,7 @@
   
   <script>
   function redirect(){
-  	window.location.href='<%=request.getContextPath()%>/controller/admin/manageAccount?accountNo='+document.getElementById('accountNo').value;
+  	window.location.href='<%=request.getContextPath()%>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/manageAccount?accountNo='+document.getElementById('accountNo').value;
 		  }
   </script>
 </body>

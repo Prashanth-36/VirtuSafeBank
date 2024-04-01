@@ -132,10 +132,10 @@
           <td><%=employee.getNumber()%></td>
           <td><%=employee.getEmail()%></td>
           <td><%=employee.getGender()%></td>
-          <td><%=employee.getType()%></td>
           <td><%=employee.getLocation()%></td>
           <td><%=employee.getCity()%></td>
           <td><%=employee.getState()%></td>
+          <td><%=employee.getType()%></td>
           <td><%=employee.getBranchId()%></td>
           <td><%=employee.getStatus()%></td>
       </tr>
@@ -148,9 +148,15 @@
   <%@ include file="../addOns/pagination.jsp"%>
   
   <script>
+  <%if(viewer.equals("admin")){%>
   function redirect(){
-  		window.location.href='<%=request.getContextPath()%>/controller/admin/manageUser?userId='+document.getElementById('userId').value+'&userType='+document.getElementById('userType').value;
+  		window.location.href='<%=request.getContextPath()%>/controller/admin/modifyUser?userId='+document.getElementById('userId').value+'&userType='+document.getElementById('userType').value;
 	}
+  <%}else{%>
+  function redirect(){
+  		window.location.href='<%=request.getContextPath()%>/controller/admin/modifyUser?userId='+document.getElementById('userId').value+'&userType=0';
+	}
+  <%}%>
   </script>
 </body>
 </html>

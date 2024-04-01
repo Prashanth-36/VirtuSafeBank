@@ -32,14 +32,13 @@ public class EmployeeHandler {
 
 	static TransactionManager transactionManager = new TransactionDao();
 
-	public void addCustomer(Customer customer)
-			throws InvalidOperationException, CustomException, InvalidValueException {
+	public int addCustomer(Customer customer) throws InvalidOperationException, CustomException, InvalidValueException {
 		Utils.checkNull(customer);
 		int customerId = customerManager.getCustomerId(customer.getAadhaarNo());
 		if (customerId != -1) {
 			throw new InvalidOperationException("Customer already exists with id:" + customerId);
 		}
-		customerManager.addCustomer(customer);
+		return customerManager.addCustomer(customer);
 	}
 
 	public void removeCustomer(int customerId) throws CustomException {

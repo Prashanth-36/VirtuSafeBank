@@ -11,8 +11,9 @@
       class=<%=selected.equals("moneyTransfer") ? "active" : ""%>>Money
         Transfer</a></li>
   </ul>
+  <div id="userName"><%=session.getAttribute("userName") %></div>
   <img
-    src="<%=request.getContextPath()%>/static/images/profile-user.png"
-    alt="" style="width: 2.6rem" /> <a
-    href="<%=request.getContextPath()%>/controller/logout" class="top-nav" id="logout">Logout</a>
+    src="<%=request.getContextPath()%>/static/images/profile-user.png" onclick="window.location.href='<%=request.getContextPath()%>/controller/user/profile'"
+    alt="profile" style="width: 2.6rem" /> 
+    <a href="<%=request.getContextPath()%>/controller/logout" class="top-nav" id="logout">Logout</a>
 </nav>

@@ -948,9 +948,10 @@ public class ControllerServlet extends HttpServlet {
 			break;
 		}
 
-		default:
+		default: {
 			response.sendError(404, "Invalid URL!");
 			break;
+		}
 		}
 	}
 

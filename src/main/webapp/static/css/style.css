@@ -13,6 +13,7 @@ input[type=number] {
 body {
   margin: 0;
   display: flex;
+  flex-direction:column;
   overflow: hidden;
   justify-content: center;
   align-items: center;
@@ -63,4 +64,23 @@ label {
 }
 #form-container button:hover {
   background-color: #387aff;
+}
+.error {
+  width:20%;
+  margin: 2rem auto;
+  background-color: #dd000032;
+  color: red;
+  font-size: large;
+  padding: 2rem;
+}
+.card {
+  position: relative;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0.5px 0.5px 5px gray;
+  text-align: center;
+}
+
+.card:hover {
+  box-shadow: 0.5px 0.5px 15px gray;
 }

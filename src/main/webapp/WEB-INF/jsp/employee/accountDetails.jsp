@@ -13,7 +13,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Home</title>
+<title>Account Details</title>
 <link rel="stylesheet" href="<%=request.getContextPath() %>/static/css/home.css" />
 </head>
 <body>
@@ -83,7 +83,7 @@
     </form>
         <%}else{ %>
       <form method="post" action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee"%>/manageAccount">
-      <input type="hidden" name="deactivate" value="1" />
+      <input type="hidden" name="activate" value="0" />
       <input type="hidden" name="accountNo" value="<%=account.getAccountNo() %>" />
       <button
         style="font-size: large; padding: 0.5rem; margin: auto; display: block; background-color: #e34234; color: white;">

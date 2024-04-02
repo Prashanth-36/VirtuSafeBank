@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() %>/static/css/style.css" />
   </head>
   <body>
+      <%@include file="addOns/message.jsp" %>
     <form action="<%=request.getContextPath() %>/controller/login" id="form-container" method="post">
       <img src="<%=request.getContextPath() %>/static/images/logo.png" alt="VirtuSafe Bank" id="logo" />
       <input

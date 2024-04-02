@@ -7,7 +7,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Home</title>
+<title><%=request.getAttribute("path").equals("withdrawl") ? "Withdrawl" : "Deposit"%></title>
 <link rel="stylesheet"
   href="<%=request.getContextPath()%>/static/css/home.css" />
 </head>
@@ -35,8 +35,8 @@
             }
           %>
       </select>
-      </label> <input type="number" name="amount" id="amount" placeholder="Amount" />
-      <input type="password" name="mpin" id="mpin" placeholder="MPIN" />
+      </label> <input type="number" name="amount" id="amount" placeholder="Amount" required/>
+      <input type="password" name="mpin" id="mpin" placeholder="MPIN" required/>
       <input type="text" name="description" id="description" placeholder="Description" />
       <button><%=path.equals("withdrawl") ? "Withdraw" : "Deposit"%></button>
     </form>

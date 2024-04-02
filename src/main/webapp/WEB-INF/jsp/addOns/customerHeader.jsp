@@ -17,3 +17,5 @@
     alt="profile" style="width: 2.6rem" /> 
     <a href="<%=request.getContextPath()%>/controller/logout" class="top-nav" id="logout">Logout</a>
 </nav>
+
+<%@include file="message.jsp"%>

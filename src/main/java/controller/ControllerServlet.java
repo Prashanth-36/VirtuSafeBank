@@ -139,7 +139,7 @@ public class ControllerServlet extends HttpServlet {
 					request.getRequestDispatcher("/WEB-INF/jsp/user/customerAccount.jsp").forward(request, response);
 				} catch (InvalidValueException | CustomException e) {
 					e.printStackTrace();
-					response.sendError(401, e.getMessage());
+					response.sendRedirect(request.getContextPath() + "/controller/user/home?error=" + e.getMessage());
 				}
 			}
 			break;
@@ -155,7 +155,7 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/user/moneyTransfer.jsp").forward(request, response);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/user/home?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -170,7 +170,7 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/user/transactionForm.jsp").forward(request, response);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/user/home?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -185,7 +185,7 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/user/transactionForm.jsp").forward(request, response);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/user/home?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -199,7 +199,7 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/user/profile.jsp").forward(request, response);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/user/home?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -213,31 +213,28 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/accountForm.jsp").forward(request, response);
 			} catch (CustomException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/admin/home?error=" + e.getMessage());
 			}
 			break;
 		}
 
 		case "/admin/manageAccount": {
-			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
-			if (accountNo != -1) {
-				try {
-					int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
-					int months = Math.abs(Utils.parseInt(request.getParameter("months")));
-					request.setAttribute("months", months);
-					AdminHandler adminHandler = new AdminHandler();
-					request.setAttribute("viewer", "admin");
-					request.setAttribute("account", adminHandler.getAccount(accountNo));
-					request.setAttribute("totalPages", adminHandler.getTransactionPageCount(accountNo, 1, 10));
-					request.setAttribute("page", pageNo);
-					request.setAttribute("transactions", adminHandler.getTransactions(accountNo, months, pageNo, 10));
-					request.getRequestDispatcher("/WEB-INF/jsp/employee/accountDetails.jsp").forward(request, response);
-				} catch (InvalidValueException | CustomException e) {
-					e.printStackTrace();
-					response.sendError(401, e.getMessage());
-				}
-			} else {
-				response.sendRedirect(request.getContextPath() + "/controller/home");
+			try {
+				int accountNo = Utils.parseInt(request.getParameter("accountNo"));
+				int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
+				int months = Math.abs(Utils.parseInt(request.getParameter("months")));
+				request.setAttribute("months", months);
+				AdminHandler adminHandler = new AdminHandler();
+				request.setAttribute("viewer", "admin");
+				request.setAttribute("account", adminHandler.getAccount(accountNo));
+				request.setAttribute("totalPages", adminHandler.getTransactionPageCount(accountNo, 1, 10));
+				request.setAttribute("page", pageNo);
+				request.setAttribute("transactions", adminHandler.getTransactions(accountNo, months, pageNo, 10));
+				request.getRequestDispatcher("/WEB-INF/jsp/employee/accountDetails.jsp").forward(request, response);
+			} catch (InvalidValueException | CustomException e) {
+				e.printStackTrace();
+				request.setAttribute("error", e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/admin/home?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -253,7 +250,7 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/admin/branches.jsp").forward(request, response);
 			} catch (CustomException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/admin/home?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -273,7 +270,7 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/admin/viewBranch.jsp").forward(request, response);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/admin/branches?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -296,7 +293,7 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/users.jsp").forward(request, response);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect("/controller/admin/home?message=" + e.getMessage());
 			}
 			break;
 		}
@@ -310,7 +307,7 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/userForm.jsp").forward(request, response);
 			} catch (CustomException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/admin/users?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -336,7 +333,7 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/userForm.jsp").forward(request, response);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/admin/users?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -351,7 +348,7 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/profile.jsp").forward(request, response);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/admin/home?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -363,26 +360,22 @@ public class ControllerServlet extends HttpServlet {
 		}
 
 		case "/employee/manageAccount": {
-			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
-			if (accountNo != -1) {
-				try {
-					int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
-					int months = Math.abs(Utils.parseInt(request.getParameter("months")));
-					request.setAttribute("months", months);
-					EmployeeHandler employeeHandler = new EmployeeHandler();
-					request.setAttribute("account", employeeHandler.getAccount(accountNo));
-					request.setAttribute("totalPages", employeeHandler.getTransactionPageCount(accountNo, 1, 10));
-					request.setAttribute("page", pageNo);
-					request.setAttribute("viewer", "employee");
-					request.setAttribute("transactions",
-							employeeHandler.getTransactions(accountNo, months, pageNo, 10));
-					request.getRequestDispatcher("/WEB-INF/jsp/employee/accountDetails.jsp").forward(request, response);
-				} catch (InvalidValueException | CustomException e) {
-					e.printStackTrace();
-					response.sendError(401, e.getMessage());
-				}
-			} else {
-				response.sendRedirect(request.getContextPath() + "/controller/home");
+			try {
+				int accountNo = Utils.parseInt(request.getParameter("accountNo"));
+				int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
+				int months = Math.abs(Utils.parseInt(request.getParameter("months")));
+				request.setAttribute("months", months);
+				EmployeeHandler employeeHandler = new EmployeeHandler();
+				request.setAttribute("account", employeeHandler.getAccount(accountNo));
+				request.setAttribute("totalPages", employeeHandler.getTransactionPageCount(accountNo, 1, 10));
+				request.setAttribute("page", pageNo);
+				request.setAttribute("viewer", "employee");
+				request.setAttribute("transactions", employeeHandler.getTransactions(accountNo, months, pageNo, 10));
+				request.getRequestDispatcher("/WEB-INF/jsp/employee/accountDetails.jsp").forward(request, response);
+			} catch (InvalidValueException | CustomException e) {
+				e.printStackTrace();
+				request.setAttribute("error", e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/employee/home?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -403,7 +396,7 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/users.jsp").forward(request, response);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/employee/home?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -411,21 +404,6 @@ public class ControllerServlet extends HttpServlet {
 		case "/employee/addUser": {
 			request.setAttribute("viewer", "employee");
 			request.getRequestDispatcher("/WEB-INF/jsp/employee/userForm.jsp").forward(request, response);
-			break;
-		}
-
-		case "/employee/manageUser": {
-			try {
-				EmployeeHandler handler = new EmployeeHandler();
-				int userId = Utils.parseInt(request.getParameter("userId"));
-				request.setAttribute("userId", userId);
-				Customer customer = handler.getCustomer(userId);
-				request.setAttribute("user", customer);
-				request.getRequestDispatcher("/WEB-INF/jsp/employee/userDetails.jsp").forward(request, response);
-			} catch (CustomException | InvalidValueException e) {
-				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
-			}
 			break;
 		}
 
@@ -443,7 +421,7 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/userForm.jsp").forward(request, response);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/employee/users?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -457,7 +435,7 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/transactionForm.jsp").forward(request, response);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/employee/home?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -472,7 +450,7 @@ public class ControllerServlet extends HttpServlet {
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/profile.jsp").forward(request, response);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/employee/home?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -492,7 +470,7 @@ public class ControllerServlet extends HttpServlet {
 		}
 
 		default: {
-			response.sendError(404);
+			response.sendError(404, "Invalid URL!");
 		}
 		}
 
@@ -534,16 +512,17 @@ public class ControllerServlet extends HttpServlet {
 				}
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				request.setAttribute("error", e.getMessage());
+				request.getRequestDispatcher("/WEB-INF/jsp/index.jsp").forward(request, response);
 			}
 			break;
 		}
 
 		case "/user/changeMpin": {
+			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
 				CustomerHandler customerHandler = new CustomerHandler();
 				int id = (int) session.getAttribute("userId");
-				int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 				String currentMin = request.getParameter("currentMpin");
 				String newMpin = request.getParameter("newMpin");
 				String confirmMpin = request.getParameter("confirmMpin");
@@ -552,12 +531,12 @@ public class ControllerServlet extends HttpServlet {
 				}
 				customerHandler.changeMpin(id, accountNo, currentMin, newMpin);
 				String message = "MPIN Updated Successful!";
-				String redirectUrl = request.getContextPath() + "/controller/user/home";
-				response.getWriter().println(
-						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+				String redirectUrl = request.getContextPath() + "/controller/user/account?accountNo=" + accountNo;
+				response.sendRedirect(redirectUrl + "&message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				String redirectUrl = request.getContextPath() + "/controller/user/account?accountNo=" + accountNo;
+				response.sendRedirect(redirectUrl + "&error=" + e.getMessage());
 			}
 			break;
 		}
@@ -575,28 +554,28 @@ public class ControllerServlet extends HttpServlet {
 				customerHandler.changePassword(id, currentPassword, newPassword);
 				String message = "Password Updated Successful!";
 				String redirectUrl = request.getContextPath() + "/controller/user/profile";
-				response.getWriter().println(
-						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+				response.sendRedirect(redirectUrl + "?message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				String redirectUrl = request.getContextPath() + "/controller/user/profile";
+				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
 			}
 			break;
 		}
 
 		case "/user/setPrimary": {
+			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
 				CustomerHandler customerHandler = new CustomerHandler();
 				int id = (int) session.getAttribute("userId");
-				int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 				customerHandler.setPrimaryAccount(id, accountNo);
 				String message = "Primary Account Updated Successful!";
-				String redirectUrl = request.getContextPath() + "/controller/user/home";
-				response.getWriter().println(
-						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+				String redirectUrl = request.getContextPath() + "/controller/user/account?accountNo=" + accountNo;
+				response.sendRedirect(redirectUrl + "&message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				String redirectUrl = request.getContextPath() + "/controller/user/account?accountNo=" + accountNo;
+				response.sendRedirect(redirectUrl + "&error=" + e.getMessage());
 			}
 			break;
 		}
@@ -613,13 +592,13 @@ public class ControllerServlet extends HttpServlet {
 				String description = request.getParameter("description");
 				customerHandler.moneyTransfer(userId, mpin, accountNo, benificiaryAccountNo, amount, ifsc, description);
 				String message = "Transaction Successful!";
-				String redirectUrl = request.getContextPath() + "/controller/user/home";
-				response.getWriter().println(
-						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+				String redirectUrl = request.getContextPath() + "/controller/user/moneyTransfer";
+				response.sendRedirect(redirectUrl + "?message=" + message);
 			} catch (CustomException | InvalidValueException | InsufficientFundException
 					| InvalidOperationException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				String redirectUrl = request.getContextPath() + "/controller/user/moneyTransfer";
+				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -634,12 +613,12 @@ public class ControllerServlet extends HttpServlet {
 				String description = request.getParameter("description");
 				customerHandler.withdrawl(userId, mpin, accountNo, amount, description);
 				String message = "Withdraw Successful!";
-				String redirectUrl = request.getContextPath() + "/controller/user/home";
-				response.getWriter().println(
-						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+				String redirectUrl = request.getContextPath() + "/controller/user/withdrawl";
+				response.sendRedirect(redirectUrl + "?message=" + message);
 			} catch (CustomException | InvalidValueException | InsufficientFundException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				String redirectUrl = request.getContextPath() + "/controller/user/withdrawl";
+				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -654,40 +633,33 @@ public class ControllerServlet extends HttpServlet {
 				String description = request.getParameter("description");
 				customerHandler.deposit(userId, mpin, accountNo, amount, description);
 				String message = "Deposit Successful!";
-				String redirectUrl = request.getContextPath() + "/controller/user/home";
-				response.getWriter().println(
-						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+				String redirectUrl = request.getContextPath() + "/controller/user/deposit";
+				response.sendRedirect(redirectUrl + "?message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				String redirectUrl = request.getContextPath() + "/controller/user/deposit";
+				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
 			}
 			break;
 		}
 
 		case "/admin/manageAccount": {
+			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
-				int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 				String activate = request.getParameter("activate");
-				String deactivate = request.getParameter("deactivate");
-				ActiveStatus status = null;
-				if (activate != null && activate.equals("1")) {
-					status = ActiveStatus.values()[1];
-				} else if (deactivate != null && deactivate.equals("1")) {
-					status = ActiveStatus.values()[0];
-				}
-				if (status != null) {
-					AdminHandler adminHandler = new AdminHandler();
-					adminHandler.setAccountStatus(accountNo, status);
-					String message = "Account Status Updated!";
-					response.getWriter().println(
-							"<script>alert('" + message + "'); window.location.href=document.referrer</script>");
-				} else {
-					response.sendRedirect(
-							request.getContextPath() + "/controller/admin/manageAccount?accountNo=" + accountNo);
-				}
+				ActiveStatus status = ActiveStatus.values()[Integer.parseInt(activate)];
+				AdminHandler adminHandler = new AdminHandler();
+				adminHandler.setAccountStatus(accountNo, status);
+				String message = "Account Status Updated!";
+				String redirectUrl = request.getContextPath() + "/controller/admin/manageAccount?accountNo="
+						+ accountNo;
+				response.sendRedirect(redirectUrl + "&message=" + message);
+
 			} catch (CustomException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				String redirectUrl = request.getContextPath() + "/controller/admin/manageAccount?accountNo="
+						+ accountNo;
+				response.sendRedirect(redirectUrl + "&error=" + e.getMessage());
 			}
 			break;
 		}
@@ -698,10 +670,12 @@ public class ControllerServlet extends HttpServlet {
 				int customerId = Utils.parseInt(request.getParameter("customerId"));
 				int branchId = Utils.parseInt(request.getParameter("branchId"));
 				adminHandler.createAccount(customerId, branchId);
-				response.sendRedirect(request.getContextPath() + "/controller/admin/home");
+				String message = "Account Created Successfully!";
+				response.sendRedirect(request.getContextPath() + "/controller/admin/addAccount?message=" + message);
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(
+						request.getContextPath() + "/controller/admin/addAccount?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -718,94 +692,87 @@ public class ControllerServlet extends HttpServlet {
 				response.sendRedirect(request.getContextPath() + "/controller/admin/branches");
 			} catch (CustomException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/admin/addBranch?error=" + e.getMessage());
 			}
 			break;
 		}
 
 		case "/admin/branch": {
+			int branchId = Utils.parseInt(request.getParameter("branchId"));
 			try {
-				int branchId = Utils.parseInt(request.getParameter("branchId"));
-				String deactivate = request.getParameter("deactivate");
+				String activate = request.getParameter("activate");
 				AdminHandler adminHandler = new AdminHandler();
-				if (deactivate != null && deactivate.equals("1")) {
+				if (activate.equals("0")) {
 					adminHandler.removeBranch(branchId);
 					String message = "Removed Branch!";
-					response.getWriter().println("<script>alert('" + message
-							+ "'); window.location.href=window.location.href=document.referrer;</script>");
+					response.sendRedirect(request.getContextPath() + "/controller/admin/branch?id=" + branchId
+							+ "&message=" + message);
 				} else {
 					response.sendRedirect(request.getContextPath() + "/controller/admin/branch?id=" + branchId);
 				}
 			} catch (CustomException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/admin/branch?id=" + branchId + "&error="
+						+ e.getMessage());
 			}
 			break;
 		}
 
 		case "/admin/manageUser": {
+			int userId = Utils.parseInt(request.getParameter("userId"));
+			String type = request.getParameter("userType");
 			try {
-				int userId = Utils.parseInt(request.getParameter("userId"));
 				String activate = request.getParameter("activate");
-				String deactivate = request.getParameter("deactivate");
-				String type = request.getParameter("userType");
-				ActiveStatus status = null;
-				if (activate != null && activate.equals("1")) {
-					status = ActiveStatus.values()[1];
-				} else if (deactivate != null && deactivate.equals("1")) {
-					status = ActiveStatus.values()[0];
-				}
-				if (status != null) {
-					AdminHandler adminHandler = new AdminHandler();
-					if (type != null && UserType.valueOf(type) == UserType.USER) {
-						adminHandler.setCustomerStatus(userId, status);
-					} else {
-						adminHandler.setEmployeeStatus(userId, status);
-					}
-					String message = "User Status Updated!";
-					response.getWriter().println(
-							"<script>alert('" + message + "'); window.location.href=document.referrer</script>");
+				ActiveStatus status = ActiveStatus.values()[Integer.parseInt(activate)];
+				AdminHandler adminHandler = new AdminHandler();
+				if (type != null && UserType.valueOf(type) == UserType.USER) {
+					adminHandler.setCustomerStatus(userId, status);
 				} else {
-					response.getWriter().println(
-							"<script>alert('Invalid request url!'); window.location.href=document.referrer</script>");
+					adminHandler.setEmployeeStatus(userId, status);
 				}
-			} catch (CustomException | InvalidValueException e) {
+				String message = "User Status Updated!";
+				response.sendRedirect(request.getContextPath() + "/controller/admin/modifyUser?userId=" + userId
+						+ "&userType=" + UserType.valueOf(type).ordinal() + "&message=" + message);
+			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/admin/modifyUser?userId=" + userId
+						+ "&userType=" + UserType.valueOf(type).ordinal() + "&error=" + e.getMessage());
 			}
 			break;
 		}
 
 		case "/admin/addUser": {
+			int userId = 0;
+			int type = Integer.parseInt(request.getParameter("userType"));
 			try {
 				AdminHandler adminHandler = new AdminHandler();
 				request.setAttribute("viewer", "admin");
-				int type = Integer.parseInt(request.getParameter("userType"));
 				if (type == 0) {
 					int branchId = Integer.parseInt(request.getParameter("branchId"));
 					Customer customer = getCustomerFormData(request, response);
-					int id = adminHandler.addCustomer(customer);
-					adminHandler.createAccount(id, branchId);
+					userId = adminHandler.addCustomer(customer);
+					adminHandler.createAccount(userId, branchId);
 				} else {
 					Employee employee = getEmployeeFormData(request, response);
 					adminHandler.addEmployee(employee);
 				}
 				String message = "User Created Successfully!";
-				String redirectUrl = request.getContextPath() + "/controller/admin/users";
-				response.getWriter().println(
-						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+				String redirectUrl = request.getContextPath() + "/controller/admin/modifyUser";
+				response.sendRedirect(redirectUrl + "?userId=" + userId + "&userType=" + type + "&message=" + message);
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				String redirectUrl = request.getContextPath() + "/controller/admin/modifyUser";
+				response.sendRedirect(
+						redirectUrl + "?userId=" + userId + "&userType=" + type + "&error=" + e.getMessage());
 			}
 			break;
 		}
 
 		case "/admin/modifyUser": {
+			int userId = Integer.parseInt(request.getParameter("userId"));
+			int type = Integer.parseInt(request.getParameter("userType"));
 			try {
-				int userId = Integer.parseInt(request.getParameter("userId"));
 				AdminHandler adminHandler = new AdminHandler();
-				int type = Integer.parseInt(request.getParameter("userType"));
 				if (type == 0) {
 					Customer customer = getCustomerFormData(request, response);
 					customer.setUserId(userId);
@@ -816,11 +783,12 @@ public class ControllerServlet extends HttpServlet {
 					adminHandler.updateEmployee(employee);
 				}
 				String message = "User Data Updated Successfully!";
-				response.getWriter()
-						.println("<script>alert('" + message + "'); window.location.href=document.referrer</script>");
+				response.sendRedirect(request.getContextPath() + "/controller/admin/modifyUser?userId=" + userId
+						+ "&userType=" + type + "&message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/admin/modifyUser?userId=" + userId
+						+ "&userType=" + type + "&message=" + e.getMessage());
 			}
 			break;
 		}
@@ -838,11 +806,11 @@ public class ControllerServlet extends HttpServlet {
 				adminHandler.changePassword(id, currentPassword, newPassword);
 				String message = "Password Updated Successful!";
 				String redirectUrl = request.getContextPath() + "/controller/admin/profile";
-				response.getWriter().println(
-						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+				response.sendRedirect(redirectUrl + "?message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				String redirectUrl = request.getContextPath() + "/controller/admin/profile";
+				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -853,99 +821,88 @@ public class ControllerServlet extends HttpServlet {
 				int customerId = Utils.parseInt(request.getParameter("customerId"));
 				int branchId = (int) session.getAttribute("branchId");
 				employeeHandler.createAccount(customerId, branchId);
-				String message = "Account Created Updated!";
-				String redirectUrl = request.getContextPath() + "/controller/employee/home";
-				response.getWriter().println(
-						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+				String message = "Account Created Successfully!";
+				response.sendRedirect(request.getContextPath() + "/controller/employee/addAccount?message=" + message);
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(
+						request.getContextPath() + "/controller/employee/addAccount?error=" + e.getMessage());
 			}
 			break;
 		}
 
 		case "/employee/manageAccount": {
+			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
-				int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 				String activate = request.getParameter("activate");
-				String deactivate = request.getParameter("deactivate");
-				ActiveStatus status = null;
-				if (activate != null && activate.equals("1")) {
-					status = ActiveStatus.values()[1];
-				} else if (deactivate != null && deactivate.equals("1")) {
-					status = ActiveStatus.values()[0];
-				}
-				if (status != null) {
-					EmployeeHandler employeeHandler = new EmployeeHandler();
-					employeeHandler.setAccountStatus(accountNo, status);
-					String message = "Account Status Updated!";
-					response.getWriter().println(
-							"<script>alert('" + message + "'); window.location.href=document.referrer;</script>");
-				} else {
-					response.sendRedirect(
-							request.getContextPath() + "/controller/employee/manageAccount?accountNo=" + accountNo);
-				}
+				ActiveStatus status = ActiveStatus.values()[Integer.parseInt(activate)];
+				EmployeeHandler employeeHandler = new EmployeeHandler();
+				employeeHandler.setAccountStatus(accountNo, status);
+				String message = "Account Status Updated!";
+				String redirectUrl = request.getContextPath() + "/controller/employee/manageAccount?accountNo="
+						+ accountNo;
+				response.sendRedirect(redirectUrl + "&message=" + message);
 			} catch (CustomException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				String redirectUrl = request.getContextPath() + "/controller/employee/manageAccount?accountNo="
+						+ accountNo;
+				response.sendRedirect(redirectUrl + "&message=" + e.getMessage());
 			}
 			break;
 		}
 
 		case "/employee/addUser": {
+			int userId = 0;
 			try {
 				EmployeeHandler employeeHandler = new EmployeeHandler();
 				Customer customer = getCustomerFormData(request, response);
-				int id = employeeHandler.addCustomer(customer);
+				userId = employeeHandler.addCustomer(customer);
 				int branchId = (int) session.getAttribute("branchId");
-				employeeHandler.createAccount(id, branchId);
+				employeeHandler.createAccount(userId, branchId);
 				String message = "User Created Successfully!";
-				String redirectUrl = request.getContextPath() + "/controller/employee/users";
-				response.getWriter().println(
-						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+				String redirectUrl = request.getContextPath() + "/controller/employee/modifyUser";
+				response.sendRedirect(redirectUrl + "?message=" + message);
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				String redirectUrl = request.getContextPath() + "/controller/employee/modifyUser";
+				response.sendRedirect(redirectUrl + "?userId=" + userId + "&error=" + e.getMessage());
 			}
 			break;
 		}
 
 		case "/employee/manageUser": {
+			int userId = Utils.parseInt(request.getParameter("userId"));
 			try {
-				int userId = Utils.parseInt(request.getParameter("userId"));
 				String activate = request.getParameter("activate");
-				String deactivate = request.getParameter("deactivate");
-				ActiveStatus status = null;
-				if (activate != null && activate.equals("1")) {
-					status = ActiveStatus.values()[1];
-				} else if (deactivate != null && deactivate.equals("1")) {
-					status = ActiveStatus.values()[0];
-				}
+				ActiveStatus status = ActiveStatus.values()[Integer.parseInt(activate)];
 				EmployeeHandler employeeHandler = new EmployeeHandler();
 				employeeHandler.setCustomerStatus(userId, status);
 				String message = "User Status Updated!";
-				response.getWriter()
-						.println("<script>alert('" + message + "'); window.location.href=document.referrer</script>");
+				response.sendRedirect(request.getContextPath() + "/controller/employee/modifyUser?userId=" + userId
+						+ "&message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/employee/modifyUser?userId=" + userId
+						+ "&error=" + e.getMessage());
 			}
 			break;
 		}
 
 		case "/employee/modifyUser": {
+			int userId = Integer.parseInt(request.getParameter("userId"));
 			try {
-				int userId = Integer.parseInt(request.getParameter("userId"));
 				EmployeeHandler employeeHandler = new EmployeeHandler();
 				Customer customer = getCustomerFormData(request, response);
 				customer.setUserId(userId);
 				employeeHandler.updateCustomer(customer);
 				String message = "User Data Updated!";
-				response.getWriter()
-						.println("<script>alert('" + message + "'); window.location.href=document.referrer</script>");
+				request.setAttribute("message", message);
+				response.sendRedirect(request.getContextPath() + "/controller/employee/modifyUser?userId=" + userId
+						+ "&message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(request.getContextPath() + "/controller/employee/modifyUser?userId=" + userId
+						+ "&error=" + e.getMessage());
 			}
 			break;
 		}
@@ -958,11 +915,13 @@ public class ControllerServlet extends HttpServlet {
 				String description = request.getParameter("description");
 				employeeHandler.deposit(accountNo, amount, description);
 				String message = "Amount Deposited!";
-				response.getWriter()
-						.println("<script>alert('" + message + "'); window.location.href=document.referrer</script>");
+				request.setAttribute("message", message);
+				response.sendRedirect(
+						request.getContextPath() + "/controller/employee/fundTransfer?message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				response.sendRedirect(
+						request.getContextPath() + "/controller/employee/fundTransfer?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -980,17 +939,17 @@ public class ControllerServlet extends HttpServlet {
 				employeeHandler.changePassword(id, currentPassword, newPassword);
 				String message = "Password Updated Successful!";
 				String redirectUrl = request.getContextPath() + "/controller/employee/profile";
-				response.getWriter().println(
-						"<script>alert('" + message + "'); window.location.href='" + redirectUrl + "'</script>");
+				response.sendRedirect(redirectUrl + "?message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.getWriter().println(e.getMessage());
+				String redirectUrl = request.getContextPath() + "/controller/employee/profile";
+				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
 			}
 			break;
 		}
 
 		default:
-			response.getWriter().println("wrong url!");
+			response.sendError(404, "Invalid URL!");
 			break;
 		}
 	}

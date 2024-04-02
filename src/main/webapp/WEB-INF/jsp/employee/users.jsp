@@ -12,7 +12,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Home</title>
+<title>Users</title>
 <link rel="stylesheet"
   href="<%=request.getContextPath() %>/static/css/home.css" />
 </head>
@@ -159,7 +159,7 @@
 	}
   <%}else{%>
   function redirect(){
-  		window.location.href='<%=request.getContextPath()%>/controller/admin/modifyUser?userId='+document.getElementById('userId').value+'&userType=0';
+  		window.location.href='<%=request.getContextPath()%>/controller/employee/modifyUser?userId='+document.getElementById('userId').value;
 	}
   <%}%>
   </script>

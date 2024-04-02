@@ -7,7 +7,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Home</title>
+<title>Branch Details</title>
 <link rel="stylesheet" href="<%=request.getContextPath() %>/static/css/home.css" />
 </head>
 <body>
@@ -57,7 +57,7 @@
     </table>
        <% if(branch.getStatus()==ActiveStatus.ACTIVE){ %>
       <form method="post" action="<%=request.getContextPath() %>/controller/admin/branch">
-      <input type="hidden" name="deactivate" value="1" />
+      <input type="hidden" name="activate" value="0" />
       <input type="hidden" name="branchId" value="<%=branch.getId() %>" />
       <button
         style="font-size: large; padding: 0.5rem; margin: auto; display: block; background-color: #e34234; color: white;">

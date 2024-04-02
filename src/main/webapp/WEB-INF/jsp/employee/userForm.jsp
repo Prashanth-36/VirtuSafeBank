@@ -11,19 +11,24 @@
     pageEncoding="UTF-8"%>
 <%@page import="model.Branch"%>
 <%@page import="java.util.Map"%>
+  <% 
+    request.setAttribute("activePath", "users"); 
+    User user=(User)request.getAttribute("user");
+  %>
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home</title>
+    <title><%=user==null?"Create User":"User Details" %></title>
     <link rel="stylesheet" href="<%=request.getContextPath() %>/static/css/home.css" />
   </head>
   <body>
-  <% 
-    request.setAttribute("activePath", "users"); 
-    User user=(User)request.getAttribute("user");
-  %>
+<%    
+      response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      response.setHeader("Pragma", "no-cache"); 
+      response.setHeader("Expires", "0");
+%>
   <% 
     String viewer=(String) request.getAttribute("viewer");
     if(viewer!=null && viewer.equals("employee")){ 
@@ -37,7 +42,7 @@
         <h3 style="position:relative"><%=user!=null? "Modify User":"Add User" %> 
         <%if(user!=null){ %>
           <%if(user.getType()==UserType.USER){%>
-            <img src="<%=request.getContextPath()%>/static/images/accounts.png" title="view all aaccounts" style="width:2rem;position:absolute;right:5rem;top:.5rem;" onclick="getAllAccounts()" alt="all Accounts">
+            <img src="<%=request.getContextPath()%>/static/images/accounts.png" title="view all accounts" style="width:2rem;position:absolute;right:5rem;top:.5rem;" onclick="getAllAccounts()" alt="all Accounts">
           <%} %>
           <img src="<%=request.getContextPath()%>/static/images/edit-white.png" title="edit" style="width:2rem;position:absolute;right:1rem;top:.5rem;" onclick="enableEdit()" alt="edit">
         <%} %>
@@ -65,7 +70,7 @@
             </div>
             <div class="form-row">
               <label for="number">Number</label>
-              <input type="tel" name="number" value="<%=user!=null?user.getNumber():""%>"  id="number" placeholder="Number" required>
+              <input type="tel" name="number" pattern="^[1-9][0-9]{9}$" title="10-digit mobile no" value="<%=user!=null?user.getNumber():""%>"  id="number" placeholder="Number" required>
             </div>
             <div class="form-row">
               <label for="email">Email</label>
@@ -96,7 +101,7 @@
             	   employee=(Employee) user;
               }
             %>
-            <%if(viewer.equals("admin") && ( user==null || (user!=null && user.getType()!=UserType.USER))){ %>
+            <%if(user==null || (user!=null && user.getType()!=UserType.USER)){ %>
             <div class="form-row" id="branchField">
               <label for="branchId" id="branchIdLabel">Branch ID *</label>
                 <select name="branchId" id="branchId" style="margin:1rem" class="selection" required>
@@ -123,11 +128,11 @@
             <div style="width:100%;display:<%=user!=null && user.getType()==UserType.USER?"block":"none"%>" id="customer">
               <div class="form-row">
                 <label for="aadhaarNo">Aadhaar No</label> 
-                <input type="text" name="aadhaarNo"  value="<%=customer!=null?customer.getAadhaarNo():""%>"  id="aadhaarNo" placeholder="Aadhaar No">
+                <input type="text" name="aadhaarNo"  pattern="^[1-9][0-9]{11}$" title="12-digit Aadhaar no"  value="<%=customer!=null?customer.getAadhaarNo():""%>"  id="aadhaarNo" placeholder="Aadhaar No">
               </div>
               <div class="form-row">
                 <label for="panNo">PAN</label> 
-                <input type="text" name="panNo" value="<%=customer!=null?customer.getPanNo():""%>" id="panNo" placeholder="PAN" >
+                <input type="text" name="panNo" pattern="^[A-Z]{5}[0-9]{4}[A-Z]$" title="ABCDE1234F-PAN no" value="<%=customer!=null?customer.getPanNo():""%>" id="panNo" placeholder="PAN" >
               </div>
             </div>
             <div class="form-row">
@@ -156,7 +161,7 @@
       </form>
     <%}else if(user!=null && user.getStatus()==ActiveStatus.ACTIVE){ %>
       <form method="post" action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/manageUser">
-        <input type="hidden" name="deactivate" value="1" />
+        <input type="hidden" name="activate" value="0" />
         <input type="hidden" name="userId" value="<%=user.getUserId() %>" />
         <input type="hidden" name="userType" value="<%=user.getType() %>" />
         <button style="font-size: large; padding: 0.5rem; margin: auto; display: block; background-color: #e34234; color: white;">Deactivate</button>
@@ -186,7 +191,7 @@
           Account account = e.getValue();
         %>
         <tr
-          onclick="window.location.href='<%=request.getContextPath()%>/controller/user/account?accountNo=<%=id%>'">
+          onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/manageAccount?accountNo=<%=id%>'">
           <td><%=id%></td>
           <td><%=account.getCurrentBalance()%></td>
           <td><%=account.getIsPrimaryAccount() ? "YES" : "NO"%></td>
@@ -202,21 +207,28 @@
   
     </main>
 
+ <%if(user==null || viewer.equals("admin")){ %>
     <script>
       const customer=document.getElementById("customer");
+      const aadhaarNo=document.getElementById("aadhaarNo");
+      const panNo=document.getElementById("panNo");
       function toggleInputs(){
         const type=document.getElementById("userType").value;
         if(type==="0"){
           customer.style.display="block";
           document.getElementById("branchIdLabel").innerText="Account's Branch ID";
+          aadhaarNo.setAttribute("required","required");
+          panNo.setAttribute("required","required");
         }else{
           document.getElementById("branchIdLabel").innerText="Branch ID";
           customer.style.display="none";
+          aadhaarNo.removeAttribute("required");
+          panNo.removeAttribute("required");
         }
       }
       window.onload=toggleInputs();
     </script>
-    
+<%} %>
     <%if(user!=null){ %>
     <script>
       const fields = document.querySelectorAll("#form input");
@@ -276,6 +288,7 @@
      	function getAllAccounts(){
      		const params=new URLSearchParams(window.location.search);
      		params.set("getAllAccounts","1");
+     		params.delete("message");
      		window.location.search=params;
      	}
       <%}%>

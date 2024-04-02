@@ -7,7 +7,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Home</title>
+<title>Money Transfer</title>
 <link rel="stylesheet"
   href="<%=request.getContextPath()%>/static/css/home.css" />
 </head>
@@ -54,15 +54,15 @@
           %>
         </select>
         </label> <input type="text" name="beneficiaryAccNo"
-          id="beneficiaryAccNo" placeholder="Beneficiary Account No" />
+          id="beneficiaryAccNo" placeholder="Beneficiary Account No" required/>
         <input type="text" name="beneficiaryIfsc" id="beneficiaryIfsc"
           placeholder="Beneficiary IFSC code" /> 
           <input type="text"
-          name="amount" id="amount" placeholder="Amount" /> 
+          name="amount" id="amount" placeholder="Amount" required/> 
           <input type="text"
           name="description" id="description" placeholder="Description" /> 
           <input
-          type="password" name="mpin" id="mpin" placeholder="MPIN" />
+          type="password" name="mpin" id="mpin" placeholder="MPIN" required/>
         <button>Send</button>
       </form>
     </main>
@@ -77,7 +77,9 @@
           withinBank.classList.add("selected");
           otherBank.classList.remove("selected");
           form.style.display = "flex";
-          document.getElementById("beneficiaryIfsc").style.display = "none";
+          beneficiaryIfsc=document.getElementById("beneficiaryIfsc")
+          beneficiaryIfsc.style.display = "none";
+          beneficiaryIfsc.removeAttribute("required");
         }
       });
       otherBank.addEventListener("click", () => {
@@ -86,7 +88,9 @@
           otherBank.classList.add("selected");
           withinBank.classList.remove("selected");
           form.style.display = "flex";
-          document.getElementById("beneficiaryIfsc").style.display = "block";
+          const beneficiaryIfsc=document.getElementById("beneficiaryIfsc")
+          beneficiaryIfsc.style.display = "block";
+          beneficiaryIfsc.setAttribute("required","required");
         }
       });
     </script>

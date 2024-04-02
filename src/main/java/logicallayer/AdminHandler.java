@@ -86,7 +86,11 @@ public class AdminHandler extends EmployeeHandler {
 		employeeManager.updateEmployee(employee);
 	}
 
-	public void setEmployeeStatus(int employeeId, ActiveStatus status) throws CustomException, InvalidValueException {
+	public void setEmployeeStatus(int employeeId, ActiveStatus status)
+			throws CustomException, InvalidValueException, InvalidOperationException {
+		if (employeeId == 1) {
+			throw new InvalidOperationException("Can't remove admin!");
+		}
 		employeeManager.getEmployee(employeeId); // validate existing employee
 		employeeManager.setEmployeeStatus(employeeId, status);
 	}

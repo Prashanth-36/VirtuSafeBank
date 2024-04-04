@@ -7,6 +7,8 @@
 :root {
   --blue: #004b8e;
   --lightBlue: #e3eefa;
+  --bgRed: #ffcece;
+  --bgGreen: #cbeacb;
 }
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -17,8 +19,10 @@ input::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
-body {
+body,
+html {
   margin: 0;
+  height: 100%;
 }
 
 .card {
@@ -46,6 +50,11 @@ body {
   flex-direction: column;
   margin: 0;
   padding: 0;
+  width: 20vw;
+  height: 90vh;
+  overflow: hidden;
+  border-right: 1px solid var(--blue);
+  background-color: var(--lightBlue);
 }
 
 .side-nav li {
@@ -63,18 +72,14 @@ body {
 .main-container {
   display: flex;
   width: 100%;
-  justify-content: left;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 100%;
 }
 
 .main {
-  width: 100vw;
-  margin: auto;
-}
-
-aside {
-  width: 20vw;
-  /* display: none; */
-  /* height: 100vh; */
+  display: flex;
 }
 
 .totalBalance {
@@ -123,12 +128,31 @@ ul a {
   color: white;
   background-color: var(--blue);
 }
-
-#hidden-eye {
-  width: 1.5rem;
-  position: relative;
-  top: 4px;
+.btn-danger {
+  font-size: large;
+  margin: 1rem auto;
+  padding: 0.5rem;
+  height: 3rem;
+  display: block;
+  background-color: #f01d20 !important;
+  color: white !important;
 }
+.btn-danger:hover {
+  background-color: red !important;
+}
+.btn-success {
+  font-size: large;
+  padding: 0.5rem;
+  height: 3rem;
+  margin: 1rem auto 1rem;
+  display: block;
+  background-color: #1ca51c !important;
+  color: white !important;
+}
+.btn-success:hover {
+  background-color: #1abd38 !important;
+}
+
 #logo {
   width: 7rem;
   mix-blend-mode: multiply;
@@ -147,9 +171,9 @@ ul a {
 .form-container {
   margin: 5rem auto;
   width: 40%;
-  height: 80%;
   display: flex;
   flex-direction: column;
+  gap: 1rem;
   justify-content: space-evenly;
   align-items: center;
   font-size: larger;
@@ -163,7 +187,13 @@ ul a {
 }
 .form-container input {
   padding: 1rem;
-  margin: 1rem;
+  font-size: large;
+  display: block;
+  border-radius: 0.5rem;
+  height: 3rem;
+  width: 90%;
+}
+.form-container select {
   font-size: large;
   display: block;
   border-radius: 0.5rem;
@@ -206,7 +236,7 @@ ul a {
 
 .border-table {
   width: 90%;
-  margin: 3rem auto;
+  margin: 1rem auto 3rem;
   /* margin: 3rem 2rem; */
 }
 .border-table,
@@ -227,10 +257,15 @@ ul a {
   gap: 1rem;
   align-items: center;
   justify-content: flex-end;
-  width: 80%;
-  margin: 3rem auto;
+  width: 90%;
+  margin: 3rem auto 0;
   text-align: end;
   font-size: large;
+}
+.search form {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 .search input {
   padding: 0.5rem;
@@ -263,8 +298,9 @@ ul a {
   box-shadow: 0.5px 0.5px 15px var(--blue);
 }
 .transfer-options {
-  /*margin-top: 1rem;*/
+  margin-top: 3rem;
   display: flex;
+  width: 100%;
   flex-wrap: wrap;
   justify-content: space-evenly;
   align-items: center;
@@ -308,6 +344,9 @@ ul a {
   padding: 1rem;
   width: 3rem;
 }
+.pages div:hover{
+	cursor:pointer;
+}
 .pages div {
   border: 1px solid white;
   text-decoration: none;
@@ -337,9 +376,9 @@ div.activePage {
 .user-form-container {
   margin: 5rem auto 2rem;
   width: 50%;
-  height: 80%;
   background-color: white;
   box-shadow: 0.5px 0.5px 5px gray;
+  padding-bottom: 0.5rem;
 }
 
 .user-form-container:hover {
@@ -414,8 +453,9 @@ div.activePage {
   width: 100%;
 }
 
-.border-table tr:hover {
+.border-table tr:hover:not(:has(th)) {
   background-color: rgba(128, 128, 128, 0.224);
+  cursor: pointer;
 }
 
 .credit {
@@ -451,14 +491,15 @@ button:disabled {
   flex: 1;
   padding: 1.5rem;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 .profile .row div {
   width: 50%;
   height: 100%;
 }
-.profile .row > div {
+.profile .row div:first-child {
   display: flex;
+  font-weight: 700;
   gap: 1rem;
   align-items: center;
 }
@@ -467,13 +508,24 @@ button:disabled {
   height: 1.5rem;
 }
 .profile .column {
-  flex: 1;
   width: 50%;
+}
+.profile-container button {
+  background-color: var(--blue);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem auto;
+  color: white;
+  height: 3rem;
+  justify-content: center;
+  font-size: larger;
 }
 .error {
   width: 40%;
   margin: 2rem auto;
-  background-color: #ffcece;;
+  background-color: var(--bgRed);
   color: red;
   font-size: large;
   padding: 2rem;
@@ -481,15 +533,42 @@ button:disabled {
 .success {
   width: 30%;
   margin: 2rem auto;
-  background-color: #cbeacb;
+  background-color: var(--bgGreen);
   color: green;
   font-size: large;
   padding: 2rem;
 }
-#message{
-	position:absolute;
-	top:2rem;
-	left: 50%;
-    transform: translate(-50%,100%);
-	z-index:10;
+#message {
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translate(-50%, 100%);
+  z-index: 10;
+}
+.btn-search {
+  background-image: url("../images/search.png");
+  background-size: contain;
+  border: none;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+.btn-option {
+  cursor: pointer;
+  width: 10rem;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  gap: 1rem;
+}
+.add-button {
+  position: absolute;
+  padding:1rem;
+  font-size: large;
+  right: 0.2rem;
+  top: 0.2rem;
+  background-color: var(--lightBlue);
+  height: 3rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
 }

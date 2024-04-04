@@ -20,12 +20,14 @@ public class SessionDao implements SessionManager {
 			throws CustomException, InvalidValueException, InvalidOperationException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
-						.prepareStatement("SELECT type,status FROM user WHERE id = ? AND password = ?");) {
+						.prepareStatement("SELECT password,type,status FROM user WHERE id = ?");) {
 			statement.setObject(1, userId);
-			String hashedPassword = Utils.hashPassword(password);
-			statement.setString(2, hashedPassword);
 			try (ResultSet result = statement.executeQuery()) {
 				if (result.next()) {
+					String hashedPassword = Utils.hashPassword(password);
+					if (!result.getString("password").equals(hashedPassword)) {
+						throw new InvalidValueException("Invalid user id and password!");
+					}
 					if (result.getInt("status") == 0) {
 						throw new InvalidOperationException("User is currently INACTIVE!");
 					}
@@ -54,7 +56,7 @@ public class SessionDao implements SessionManager {
 						}
 					}
 				}
-				throw new InvalidValueException("Invalid user id and password!");
+				throw new InvalidValueException("Invalid user id!");
 			}
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("Authentication failed!", e);

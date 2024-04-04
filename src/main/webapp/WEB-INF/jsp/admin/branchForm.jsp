@@ -18,17 +18,15 @@
 %>
   <%request.setAttribute("activePath", "branches");%>
   <%@include file="../addOns/adminHeader.jsp"%>
-  <main class="main">
     <form action="<%=request.getContextPath()%>/controller/admin/addBranch" method="post" class="form-container">
       <h3>Create Branch</h3>
       <label for="location">Location *</label> 
-      <input type="text" name="location" id="location" placeholder="Location" required />
+      <input type="text" name="location" id="location" placeholder="Location" maxlength=50 required />
       <label for="city">City *</label> 
-      <input type="text" name="city" id="city" placeholder="City" required /> 
+      <input type="text" name="city" id="city" placeholder="City" maxlength=30 required /> 
       <label for="city">State*</label> 
-      <input type="text" name="state" id="state" placeholder="State" required />
+      <input type="text" name="state" id="state" placeholder="State" maxlength=30 required />
       <button>Create</button>
     </form>
-  </main>
 </body>
 </html>

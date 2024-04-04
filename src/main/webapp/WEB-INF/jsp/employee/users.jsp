@@ -1,3 +1,4 @@
+<%@page import="utility.UserType"%>
 <%@page import="model.Employee"%>
 <%@page import="model.Customer"%>
 <%@page import="java.util.Map"%>
@@ -24,56 +25,57 @@
 %>
   <% request.setAttribute("activePath", "users"); %>
   <% 
-    String viewer=(String) request.getAttribute("viewer"); 
-    int userType=(int) request.getAttribute("userType");
+    UserType userType=(UserType) session.getAttribute("userType");
+    int selectedUserType=(int) request.getAttribute("userType");
   %>
   
-  <% if(viewer.equals("admin")){ %>
+  <% if(userType==UserType.ADMIN){ %>
     <%@include file="../addOns/adminHeader.jsp" %>
   <%}else{ %>
     <%@include file="../addOns/employeeHeader.jsp" %>
   <%}%>
-  
-  <main class="main">
-    <form id="form" action="" method="get" class="search">
-
-      <% if(viewer.equals("admin")){ %>
-        <label for="userType">User Type:</label>
-        <select name="userType"
-        class="selection"
-          id="userType"
-          onchange="document.getElementById('form').submit()">
-          <option value="2" <%= (2==userType)?"selected":"" %>>Employee</option>
-          <option value="0" <%= (0==userType)?"selected":"" %>>Customer</option>
-        </select> 
-      <%}else{ %>
-          <label for="status">User Status:</label>
-          <select name="status"
-            class="selection"
-            id="status"
+    
+    <div class="search">
+      <form id="form" action="" method="get">
+        <% if(userType==UserType.ADMIN){ %>
+          <label for="userType">User Type:</label>
+          <select name="userType"
+          class="selection"
+            id="userType"
             onchange="document.getElementById('form').submit()">
-            <option value="1" <%= (1==(int)request.getAttribute("status"))?"selected":"" %>>ACTIVE</option>
-            <option value="0" <%= (0==(int)request.getAttribute("status"))?"selected":"" %>>INACTIVE</option>
+            <option value="2" <%= (2==selectedUserType)?"selected":"" %>>Employee</option>
+            <option value="0" <%= (0==selectedUserType)?"selected":"" %>>Customer</option>
           </select> 
-      <%}%>
-      
-        <label for="userId">User ID:</label>
+        <%}else{ %>
+            <label for="status">Customer Status:</label>
+            <select name="status"
+              class="selection"
+              id="status"
+              onchange="document.getElementById('form').submit()">
+              <option value="1" <%= (1==(int)request.getAttribute("status"))?"selected":"" %>>ACTIVE</option>
+              <option value="0" <%= (0==(int)request.getAttribute("status"))?"selected":"" %>>INACTIVE</option>
+            </select> 
+        <%}%>
+      </form>
+      <form action="<%=request.getContextPath()%>/controller/<%=userType.name().toLowerCase() %>/modifyUser" method="get">
+        <label for="userId"><%=userType==UserType.ADMIN?"User ID:":"Customer ID:" %></label>
+        <input type="hidden" name="userType" value="<%=selectedUserType%>"/>
         <input
-          type="search"
+          type="number"
           id="userId"
+          name="userId"
           placeholder="User ID"
         />
-        <img src="<%=request.getContextPath() %>/static/images/search.png" alt="" width="50rem" onclick="redirect()"/>
+        <button class="btn-search"></button>
       </form>
-      
+    </div>
     <table class="border-table">
       <tr style="position: relative">
         <th colspan="12"
           style="text-align: center; background-color: var(--blue); color: white;position:reletive;height:3rem">
-          Account Details
-            <button onclick="window.location.href='<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/addUser'"
-              style="position: absolute; font-size: larger; right: 1rem;top:.7rem; height:2rem;width: 2rem;">
-              +</button>
+         <%=userType==UserType.ADMIN && selectedUserType!=0?"Employees":"Customers" %>
+            <button onclick="window.location.href='<%=request.getContextPath() %>/controller/<%=userType.name().toLowerCase()%>/addUser'"
+              class="add-button"><img src="<%=request.getContextPath() %>/static/images/add-contact.png" style="width:2rem"> Add <%=userType==UserType.ADMIN?"User":"Customer" %></button>
         </th>
       </tr>
       <tr>
@@ -87,7 +89,7 @@
         <th>City</th>
         <th>State</th>
         <% 
-            if(userType==0){ 
+            if(selectedUserType==0){ 
         %>
             <th>Aadhaar No</th>
             <th>PAN</th>
@@ -102,13 +104,13 @@
             <th>Status</th>
       </tr>
       <%
-            if(userType==0){
+            if(selectedUserType==0){
               Map<Integer,Customer> customers=(Map<Integer,Customer>) request.getAttribute("customers");
               for(Map.Entry<Integer,Customer> e:customers.entrySet()){
                 int userId=e.getKey();
                 Customer customer=e.getValue();
       %>
-        <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/modifyUser?userId=<%=userId%>&userType=<%=customer.getType().ordinal()%>'">
+        <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=userType.name().toLowerCase() %>/modifyUser?userId=<%=userId%>&userType=<%=customer.getType().ordinal()%>'">
           <td><%=userId %></td>
           <td><%=customer.getName() %></td>
           <td><%=Utils.millisToLocalDate(customer.getDob(), ZoneId.systemDefault())  %></td>
@@ -130,7 +132,7 @@
               int userId=e.getKey();
               Employee employee=e.getValue();
       %>
-      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/modifyUser?userId=<%=userId%>&userType=<%=employee.getType().ordinal()%>'">
+      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=userType.name().toLowerCase() %>/modifyUser?userId=<%=userId%>&userType=<%=employee.getType().ordinal()%>'">
         <td><%=userId %></td>
           <td><%=employee.getName() %></td>
           <td><%=Utils.millisToLocalDate( employee.getDob(), ZoneId.systemDefault()) %></td>
@@ -149,19 +151,7 @@
         }
       %>
     </table>
-  </main>
   <%@ include file="../addOns/pagination.jsp"%>
   
-  <script>
-  <%if(viewer.equals("admin")){%>
-  function redirect(){
-  		window.location.href='<%=request.getContextPath()%>/controller/admin/modifyUser?userId='+document.getElementById('userId').value+'&userType='+document.getElementById('userType').value;
-	}
-  <%}else{%>
-  function redirect(){
-  		window.location.href='<%=request.getContextPath()%>/controller/employee/modifyUser?userId='+document.getElementById('userId').value;
-	}
-  <%}%>
-  </script>
 </body>
 </html>

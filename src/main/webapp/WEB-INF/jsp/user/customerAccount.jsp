@@ -4,7 +4,7 @@
 <%@page import="java.util.List"%>
 <%@page import="model.Transaction"%>
 <%@page import="logicallayer.CustomerHandler"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" errorPage="../error.jsp"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -19,21 +19,14 @@
       response.setHeader("Pragma", "no-cache"); 
       response.setHeader("Expires", "0");
 %>
-  <% request.setAttribute("selected","myAccounts"); %>
+  <% request.setAttribute("activePath","myAccounts"); %>
 	<%@ include file="../addOns/customerHeader.jsp" %>
-      <main class="main">
-        <div class="options" style="margin-top: 3rem">
-          <div
-            class="card"
-            onclick="document.getElementById('setPrimary').submit()"
-          >
-            <img src="<%=request.getContextPath()%>/static/images/financial.png" alt="" width="50rem" />
-            <p>Set as Primary Account</p>
-          </div>
-          <div class="card" onclick="toggle()">
-            <img src="<%=request.getContextPath()%>/static/images/password.png" alt="" width="50rem" />Change MPIN
-          </div>
-          <div class="card">
+          <div class="search">
+            <% boolean isPrimary=(boolean) request.getAttribute("isPrimary");
+            if(!isPrimary){ %>
+            <button class="btn-option" onclick="document.getElementById('setPrimary').submit()"><img src="<%=request.getContextPath()%>/static/images/financial.png" style="width:2rem">Set as Primary Account</button>
+            <%} %>
+            <button class="btn-option"  onclick="toggle()"><img src="<%=request.getContextPath()%>/static/images/password.png" style="width:2rem">Change MPIN</button>
             <label for="months">Select days:</label>
             <select name="months" id="months" class="selection" onchange="selectMonth()" required>
             <% int months=(int) request.getAttribute("months"); %>
@@ -46,8 +39,6 @@
               <option value="6" <%=months==6?"selected":"" %>>180</option>
             </select>
           </div>
-        </div>
-
         <table class="border-table">
           <tr>
             <th
@@ -68,7 +59,6 @@
             <th>Time</th>
             <th>Transaction type</th>
             <th>Amount</th>
-            <th>Primary Account</th>
             <th>Transactional Account</th>
             <th>Description</th>
             <th>Balance</th>
@@ -78,6 +68,7 @@
           for(Transaction transaction:transactions){
         	  String description=transaction.getDescription();
         	  TransactionType type= transaction.getType();
+        	  int transactionalAccount=transaction.getTransactionalAccount();
           %>
           
           <tr>
@@ -85,8 +76,7 @@
             <td><%=Utils.formatLocalDateTime(Utils.millisToLocalDateTime(transaction.getTimestamp(), ZoneId.systemDefault()))%></td>
             <td><%=type%></td>
             <td class="<%=type.name().toLowerCase()%>"><%=(type==TransactionType.DEBIT?"-":"+")+transaction.getAmount()%></td>
-            <td><%=transaction.getPrimaryAccount()%></td>
-            <td><%=transaction.getTransactionalAccount()%></td>
+            <td><%=transactionalAccount==0?"Self" :transactionalAccount%></td>
             <td><%=(description==null || description.isEmpty())? "-" : description%></td>
             <td><%=transaction.getBalance()%></td>
           </tr>
@@ -95,11 +85,11 @@
         </table>
 
 <%@ include file="../addOns/pagination.jsp" %>
-      </main>
-
-    <div id="back-drop" class="back-drop" onclick="toggle()">
+     <%String errorMessage=request.getParameter("error"); %>
+    <div id="back-drop" class="back-drop" style="<%=errorMessage!=null?"display:flex":"" %>" onclick="toggle()">
       <form
         method="post"
+        onsubmit="return validate()"
         onclick="event.stopPropagation()"
         action="<%=request.getContextPath() %>/controller/user/changeMpin"
         id="form"
@@ -113,24 +103,31 @@
           id="accountNo"
           value="<%=request.getParameter("accountNo") %>"
         />
+        <label for="currentMpin">Current MPIN</label>
         <input
           type="password"
           name="currentMpin"
           id="currentMpin"
-          placeholder="Current MPIN"
+          placeholder="Current Mpin"
+          required
         />
+        <label for="newMpin">New MPIN</label>
         <input
           type="password"
           name="newMpin"
           id="newMpin"
-          placeholder="New MPIN"
+          placeholder="New Mpin"
+          required
         />
+        <label for="confirmMpin">Confirm MPIN</label>
         <input
           type="password"
           name="confirmMpin"
-          id="comfirmMpin"
-          placeholder="Confirm MPIN"
+          id="confirmMpin"
+          placeholder="Confirm Mpin"
+          required
         />
+        <p id="error" style="color:red"><%=errorMessage!=null?errorMessage:"" %></p>
         <button>Update</button>
       </form>
     </div>
@@ -157,6 +154,16 @@
         const months=document.getElementById("months").value;
         params.set("months",months);
         window.location.search=params;
+      }
+      
+      function validate(){
+    	  if(document.getElementById("confirmMpin").value===document.getElementById("newMpin").value){
+    	  console.log("true");
+    		  return true;
+    	  }
+    	  console.log("false");
+    	  document.getElementById("error").innerText="Please re-enter new passwords correctly!";
+    	  return false;
       }
     </script>
   </body>

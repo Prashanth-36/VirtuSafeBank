@@ -17,14 +17,14 @@
       response.setHeader("Pragma", "no-cache"); 
       response.setHeader("Expires", "0");
 %>
-<% request.setAttribute("selected","moneyTransfer"); %>
+<% request.setAttribute("activePath","moneyTransfer"); %>
   <%@ include file="../addOns/customerHeader.jsp"%>
-  <%@include file="../addOns/customerSideNav.jsp"%>
   <main class="main">
+  <%@include file="../addOns/customerSideNav.jsp"%>
     <form action="<%=request.getContextPath()%>/controller/user/<%=path%>"
-      method="post" class="form-container">
-      <label for="accountNo">Select Account Number <select
-        name="accountNo" id="accountNo" class="account-selection" required>
+      method="post" class="form-container" style="height:fit-content;">
+      <label for="accountNo">Select Account Number</label> 
+      <select name="accountNo" id="accountNo" required>
            <option value="">Select</option>
           <% 
           Map<Integer,Account> accounts=(Map<Integer,Account>)request.getAttribute("accounts");
@@ -35,9 +35,12 @@
             }
           %>
       </select>
-      </label> <input type="number" name="amount" id="amount" placeholder="Amount" required/>
+      <label for="amount">Amount</label>
+      <input type="number" name="amount" min="0.01" id="amount" step="0.01" placeholder="Amount" required/>
+      <label for="mpin">MPIN</label>
       <input type="password" name="mpin" id="mpin" placeholder="MPIN" required/>
-      <input type="text" name="description" id="description" placeholder="Description" />
+      <label for="description">Description</label>
+      <input type="text" name="description" maxlength="50" id="description" placeholder="Description" />
       <button><%=path.equals("withdrawl") ? "Withdraw" : "Deposit"%></button>
     </form>
   </main>

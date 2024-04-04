@@ -1,4 +1,4 @@
-<% String selected=(String)request.getAttribute("selected"); %>
+<% String selected=(String)request.getAttribute("activePath"); %>
 <nav>
   <ul class="top-nav">
     <li><img
@@ -8,8 +8,7 @@
       class=<%=selected.equals("myAccounts") ? "active" : ""%>>My Accounts</a></li>
     <li><a
       href="<%=request.getContextPath()%>/controller/user/moneyTransfer"
-      class=<%=selected.equals("moneyTransfer") ? "active" : ""%>>Money
-        Transfer</a></li>
+      class=<%=selected.equals("moneyTransfer") ? "active" : ""%>>Pay</a></li>
   </ul>
   <div id="userName"><%=session.getAttribute("userName") %></div>
   <img

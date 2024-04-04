@@ -28,15 +28,14 @@
         <option value="0" <%= (0==(int)request.getAttribute("status"))?"selected":"" %>>INACTIVE</option>
       </select> 
       </form>
-	<main class="main">
 		<table id="table" class="border-table">
 			<tr>
 				<th colspan="6"
 					style="text-align: center; position: relative; background-color: var(--blue); color: white;">
 					Branch Details
-					<button onclick="window.location.href='<%=request.getContextPath() %>/controller/admin/addBranch'"
-						style="position: absolute; font-size: larger; right: 1rem; width: 2rem;">
-						+</button>
+                    <button onclick="window.location.href='<%=request.getContextPath() %>/controller/admin/addBranch'" class="add-button">
+                      <img src="<%=request.getContextPath() %>/static/images/branches.png" style="width:2rem"> Add Branch
+                    </button>
 				</th>
 			</tr>
 			<tr>
@@ -67,6 +66,5 @@
               }
             %>
 		</table>
-	</main>
 </body>
 </html>

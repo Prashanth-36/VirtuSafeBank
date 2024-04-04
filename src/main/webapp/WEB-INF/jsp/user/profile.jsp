@@ -1,3 +1,6 @@
+<%@page import="model.Branch"%>
+<%@page import="utility.UserType"%>
+<%@page import="model.Employee"%>
 <%@page import="java.time.ZoneId"%>
 <%@page import="utility.Utils"%>
 <%@page import="model.Customer"%>
@@ -18,10 +21,18 @@
       response.setHeader("Pragma", "no-cache"); 
       response.setHeader("Expires", "0");
 %>
-  <% request.setAttribute("selected", "myAccounts"); %>
-  <%@include file="../addOns/customerHeader.jsp" %>
-  <% Customer profile=(Customer) request.getAttribute("profile"); %>
-  <main class="main">
+  <% request.setAttribute("activePath", ""); %>
+  <% UserType userType=(UserType) session.getAttribute("userType"); %>
+  <%if(userType==UserType.ADMIN){ %>
+  <%@include file="../addOns/adminHeader.jsp" %>
+  <%}else if(userType==UserType.EMPLOYEE){ %>
+  <%@include file="../addOns/employeeHeader.jsp" %>
+  <%}else{ %>
+    <%@include file="../addOns/customerHeader.jsp" %>
+  <%} %>
+  <% 
+    User profile=(User) request.getAttribute("profile"); 
+  %>
       <div class="card profile-container">
           <h3 style="text-align:center;background-color:var(--blue);color:white;padding:1rem">My Profile</h3>
           <div class="profile">
@@ -46,43 +57,51 @@
                   <div><img src="<%=request.getContextPath() %>/static/images/email.png" alt=""> Email:</div>
                   <div><%=profile.getEmail() %></div>
               </div>
+           </div>
+           <div class="column">
               <div class="row">
                   <div><img src="<%=request.getContextPath() %>/static/images/gender.png" alt=""> Gender:</div>
                   <div><%=profile.getGender() %></div>
               </div>
-           </div>
-           <div class="column">
+           <% if(userType==UserType.USER){ 
+              Customer customer=(Customer)profile;
+           %>
               <div class="row">
                   <div><img src="<%=request.getContextPath() %>/static/images/digital.png" alt=""> Aadhaar No:</div>
-                  <div><%=profile.getAadhaarNo() %></div>
+                  <div><%=customer.getAadhaarNo() %></div>
               </div>
               <div class="row">
                   <div><img src="<%=request.getContextPath() %>/static/images/business-card.png" alt=""> PAN:</div>
-                  <div><%=profile.getPanNo() %></div>
+                  <div><%=customer.getPanNo() %></div>
               </div>
+            <%}else{ 
+              Branch branch=(Branch) request.getAttribute("branch");
+            %>
+              <div class="row">
+                  <div><img src="<%=request.getContextPath() %>/static/images/user-type.png" alt=""> User Type:</div>
+                  <div><%=profile.getType() %></div>
+              </div>
+              <div class="row">
+                  <div><img src="<%=request.getContextPath() %>/static/images/branches.png" alt=""> Branch:</div>
+                  <div><%=branch.getLocation()+", "+branch.getCity() %></div>
+              </div>
+            <%} %>
               <div class="row">
                   <div><img src="<%=request.getContextPath() %>/static/images/location.png" alt=""> Location:</div>
-                  <div><%=profile.getLocation() %></div>
-              </div>
-              <div class="row">
-                  <div style="margin-left:2.5rem;">City:</div>
-                  <div><%=profile.getCity() %></div>
-              </div>
-              <div class="row">
-                  <div style="margin-left:2.5rem;">State:</div>
-                  <div><%=profile.getState() %></div>
+                  <div><%=profile.getLocation() %>, <%=profile.getCity() %>, <%=profile.getState() %></div>
               </div>
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:1rem;justify-content:center" onclick="toggle()"><img src="<%=request.getContextPath()%>/static/images/password.png" style="width:2rem"/> Change Password</div>
+          <button style="cursor:pointer" onclick="toggle()"><img src="<%=request.getContextPath()%>/static/images/password-white.png" style="width:1.8rem;"/> Change Password</button>
       </div>
-      
-       <div id="back-drop" class="back-drop" onclick="toggle()">
+      <%String errorMessage=request.getParameter("error"); %>
+       <div id="back-drop" class="back-drop" style="<%=errorMessage!=null?"display:flex":"" %>" onclick="toggle()">
       <form
         method="post"
         onclick="event.stopPropagation()"
-        action="<%=request.getContextPath() %>/controller/user/changePassword"
+        action="<%=request.getContextPath() %>/controller/<%=userType.name().toLowerCase() %>/changePassword"
         id="form"
+        onsubmit="return validate()"
         style="width: 40%; height: fit-content"
         class="form-container"
       >
@@ -93,28 +112,34 @@
           id="customerId"
           value="<%=profile.getUserId() %>"
         />
+        <label for="currentPassword">Current Password</label>
         <input
           type="password"
           name="currentPassword"
           id="currentPassword"
           placeholder="Current Password"
+          required
         />
+        <label for="newPassword">New Password</label>
         <input
           type="password"
           name="newPassword"
           id="newPassword"
           placeholder="New Password"
+          required
         />
+        <label for="confirmPassword">Confirm Password</label>
         <input
           type="password"
           name="confirmPassword"
-          id="comfirmPassword"
+          id="confirmPassword"
           placeholder="Confirm Password"
+          required
         />
+        <p id="error" style="color:red"><%=errorMessage!=null?errorMessage:"" %></p>
         <button>Update</button>
       </form>
     </div>
-  </main>
   
   <script>
   function toggle() {
@@ -125,6 +150,17 @@
         backDrop.style.display = "flex";
       }
     }
+  function validate(){
+	  console.log(document.getElementById("confirmPassword").value);
+	  console.log(document.getElementById("newPassword").value);
+	  if(document.getElementById("confirmPassword").value===document.getElementById("newPassword").value){
+	  console.log("true");
+		  return true;
+	  }
+	  console.log("false");
+	  document.getElementById("error").innerText="Please re-enter new passwords correctly!";
+	  return false;
+  }
   </script>
 </body>
 </html>

@@ -18,7 +18,6 @@
 %>
   <% request.setAttribute("activePath", "branches"); %>
   <%@include file="../addOns/adminHeader.jsp" %>
-  <main class="main">
     <table class="table" style="margin-top:5rem;">
       <tr style="position: relative">
         <th colspan="2"
@@ -67,6 +66,5 @@
           }
         }
       %>
-  </main>
 </body>
 </html>

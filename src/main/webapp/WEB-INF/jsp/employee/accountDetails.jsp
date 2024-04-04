@@ -1,3 +1,4 @@
+<%@page import="utility.UserType"%>
 <%@page import="utility.TransactionType"%>
 <%@page import="model.Transaction"%>
 <%@page import="model.Customer"%>
@@ -24,16 +25,15 @@
 %>
   <% 
     request.setAttribute("activePath", "accounts"); 
-    String viewer=(String) request.getAttribute("viewer");
+    UserType userType=(UserType) session.getAttribute("userType");
   %>
   
-  <% if(viewer!=null && viewer.equals("admin")){ %>
+  <% if(userType==UserType.ADMIN){ %>
     <%@include file="../addOns/adminHeader.jsp" %>
-  <%}else if(viewer!=null && viewer.equals("employee")){ %>
+  <%}else{ %>
     <%@include file="../addOns/employeeHeader.jsp" %>
   <%} %>
   
-  <main class="main">
     
     <table class="border-table" style="margin-bottom:1rem">
       <tr style="position: relative">
@@ -55,7 +55,7 @@
       <% 
           Account account=(Account)request.getAttribute("account");
        %>
-      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=viewer.equals("admin")?"admin":"employee"%>/manageAccount?accountNo=<%=account.getAccountNo()%>'">
+      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=userType==UserType.ADMIN?"admin":"employee"%>/manageAccount?accountNo=<%=account.getAccountNo()%>'">
         <td><%=account.getAccountNo() %></td>
         <td><%=account.getCustomerId() %></td>
         <td><%=account.getCurrentBalance() %></td>
@@ -65,29 +65,16 @@
       </tr>
     </table>
     <% if(account.getStatus()==ActiveStatus.INACTIVE){ %>
-    <form method="post" action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee"%>/manageAccount">
+    <form method="post" action="<%=request.getContextPath() %>/controller/<%=userType==UserType.ADMIN?"admin":"employee"%>/manageAccount">
       <input type="hidden" name="activate" value="1" />
       <input type="hidden" name="accountNo" value="<%=account.getAccountNo() %>" />
-      <button
-            style="
-              font-size: large;
-              padding: 0.5rem;
-              margin: auto;
-              display: block;
-              background-color: #009e60;
-              color: white;
-            "
-          >
-            Activate
-          </button> 
+      <button class="btn-success">Activate</button> 
     </form>
         <%}else{ %>
-      <form method="post" action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee"%>/manageAccount">
+      <form method="post" action="<%=request.getContextPath() %>/controller/<%=userType==UserType.ADMIN?"admin":"employee"%>/manageAccount">
       <input type="hidden" name="activate" value="0" />
       <input type="hidden" name="accountNo" value="<%=account.getAccountNo() %>" />
-      <button
-        style="font-size: large; padding: 0.5rem; margin: auto; display: block; background-color: #e34234; color: white;">
-        Deactivate</button>
+      <button class="btn-danger">Deactivate</button>
       </form>
      <%} %>
      
@@ -121,9 +108,8 @@
           <tr>
             <th>Transaction ID</th>
             <th>Time</th>
-            <th>Transaction type</th>
+            <th>Transaction Type</th>
             <th>Amount</th>
-            <th>Primary Account</th>
             <th>Transactional Account</th>
             <th>Description</th>
             <th>Balance</th>
@@ -139,8 +125,8 @@
             <td><%=Utils.formatLocalDateTime(Utils.millisToLocalDateTime(transaction.getTimestamp(), ZoneId.systemDefault()))%></td>
             <td><%=type%></td>
             <td class="<%=type.name().toLowerCase()%>"><%=(type==TransactionType.DEBIT?"-":"+")+transaction.getAmount()%></td>
-            <td><%=transaction.getPrimaryAccount()%></td>
-            <td><%=transaction.getTransactionalAccount()%></td>
+            <% int transactionalAccount=transaction.getTransactionalAccount(); %>
+            <td><%=(transactionalAccount==0)?"Self":transactionalAccount%></td>
             <td><%=(description==null || description.isEmpty())? "-" : description%></td>
             <td><%=transaction.getBalance()%></td>
           </tr>
@@ -148,7 +134,6 @@
         </table>        
         
         <%@include file="../addOns/pagination.jsp" %>
-  </main>
   <script>
   function selectMonth(){
 	  const params=new URLSearchParams(location.search);

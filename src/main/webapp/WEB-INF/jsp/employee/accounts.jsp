@@ -1,3 +1,4 @@
+<%@page import="utility.UserType"%>
 <%@page import="java.time.ZoneId"%>
 <%@page import="utility.Utils"%>
 <%@page import="model.Branch"%>
@@ -20,17 +21,17 @@
       response.setHeader("Expires", "0");
 %>
   <% request.setAttribute("activePath", "accounts"); %>
-  <% String viewer=(String) request.getAttribute("viewer"); %>
+  <% UserType userType=(UserType) session.getAttribute("userType"); %>
   
-  <% if(viewer!=null && viewer.equals("admin")){ %>
+  <% if(userType==UserType.ADMIN){ %>
     <%@include file="../addOns/adminHeader.jsp" %>
   <% }else{ %>
     <%@include file="../addOns/employeeHeader.jsp" %>
   <% } %>
   
-  <main class="main">
-    <form id="form" action="" method="get" class="search">
-      <% if(viewer!=null && viewer.equals("admin")){ %>
+  <div class="search">
+    <form id="form" action="" method="get">
+      <% if(userType==UserType.ADMIN){ %>
         <label for="branchId">Branch ID:</label> 
         <select name="branchId"
         class="selection"
@@ -58,22 +59,25 @@
           <option value="0" <%= (0==(int)request.getAttribute("status"))?"selected":"" %>>INACTIVE</option>
         </select> 
       <%} %>
+      </form>
+      <form method="get" action="<%=request.getContextPath()%>/controller/<%=userType==UserType.ADMIN?"admin":"employee" %>/manageAccount">
         <label for="accountNo">Account No:</label>
         <input
-          type="search"
+          name="accountNo"
+          type="number"
           id="accountNo"
           placeholder="Account No"
         />
-        <img src="<%=request.getContextPath() %>/static/images/search.png" alt="" width="50rem" onclick="redirect()"/>
+        <button class="btn-search"></button>
       </form>
+    </div>
     <table class="border-table">
       <tr style="position: relative">
         <th colspan="7"
           style="text-align: center; background-color: var(--blue); color: white;position:reletive;height:3rem">
           Accounts
-            <button onclick="window.location.href='<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/addAccount'"
-              style="position: absolute; font-size: larger; right: 1rem;top:.7rem; height:2rem;width: 2rem;">
-              +</button>
+           <button onclick="window.location.href='<%=request.getContextPath() %>/controller/<%=userType.name().toLowerCase() %>/addAccount'"
+              class="add-button"><img src="<%=request.getContextPath() %>/static/images/credit-card.png" style="width:2rem"> Add Account</button>
         </th>
       </tr>
       <tr>
@@ -82,7 +86,7 @@
         <th>Current Balance</th>
         <th>Is Primary Account</th>
         <th>Account Open Date</th>
-        <% if(viewer!=null && viewer.equals("admin")){ %>
+        <% if(userType==UserType.ADMIN){ %>
           <th>Branch ID</th>
         <%} %>
         <th>Account Status</th>
@@ -97,13 +101,13 @@
           		int id=e.getKey();
           		Account account=e.getValue();
           %>
-      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/manageAccount?accountNo=<%=id%>'">
+      <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=userType==UserType.ADMIN?"admin":"employee" %>/manageAccount?accountNo=<%=id%>'">
         <td><%=id %></td>
         <td><%=account.getCustomerId() %></td>
         <td><%=account.getCurrentBalance() %></td>
         <td><%=account.getIsPrimaryAccount()?"YES":"NO"%></td>
         <td><%=Utils.millisToLocalDate((account.getOpenDate()),ZoneId.systemDefault()) %></td>
-        <% if(viewer!=null && viewer.equals("admin")){ %>
+        <% if(userType==UserType.ADMIN){ %>
           <td><%=account.getBranchId() %></td>
         <%} %>
         <td><%=account.getStatus() %></td>
@@ -113,13 +117,7 @@
           }
           %>
     </table>
-  </main>
   <%@ include file="../addOns/pagination.jsp"%>
   
-  <script>
-  function redirect(){
-  	window.location.href='<%=request.getContextPath()%>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/manageAccount?accountNo='+document.getElementById('accountNo').value;
-		  }
-  </script>
 </body>
 </html>

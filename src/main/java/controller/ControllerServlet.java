@@ -84,7 +84,6 @@ public class ControllerServlet extends HttpServlet {
 				ActiveStatus branchStatus = ActiveStatus.values()[status];
 				request.setAttribute("status", status);
 				request.setAttribute("branches", handler.getBranches(branchStatus));
-				request.setAttribute("viewer", "admin");
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/accounts.jsp").forward(request, response);
 
 			} catch (InvalidValueException | CustomException e) {
@@ -109,7 +108,6 @@ public class ControllerServlet extends HttpServlet {
 				pages = handler.getBranchAccountsPageCount(branchId, 10);
 				request.setAttribute("accounts", accounts);
 				request.setAttribute("totalPages", pages);
-				request.setAttribute("viewer", "employee");
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/accounts.jsp").forward(request, response);
 			} catch (InvalidValueException | CustomException e) {
 				e.printStackTrace();
@@ -132,6 +130,8 @@ public class ControllerServlet extends HttpServlet {
 					request.setAttribute("page", pageNo);
 					CustomerHandler customerHandler = new CustomerHandler();
 					int userId = (int) session.getAttribute("userId");
+					Account account = customerHandler.getAccount(accountNo);
+					request.setAttribute("isPrimary", account.getIsPrimaryAccount());
 					request.setAttribute("totalPages",
 							customerHandler.getTransactionPageCount(userId, accountNo, months, 10));
 					request.setAttribute("transactions",
@@ -209,7 +209,6 @@ public class ControllerServlet extends HttpServlet {
 				AdminHandler adminHandler = new AdminHandler();
 				Map<Integer, Branch> branches = adminHandler.getBranches(ActiveStatus.ACTIVE);
 				request.setAttribute("branches", branches);
-				request.setAttribute("viewer", "admin");
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/accountForm.jsp").forward(request, response);
 			} catch (CustomException e) {
 				e.printStackTrace();
@@ -225,7 +224,6 @@ public class ControllerServlet extends HttpServlet {
 				int months = Math.abs(Utils.parseInt(request.getParameter("months")));
 				request.setAttribute("months", months);
 				AdminHandler adminHandler = new AdminHandler();
-				request.setAttribute("viewer", "admin");
 				request.setAttribute("account", adminHandler.getAccount(accountNo));
 				request.setAttribute("totalPages", adminHandler.getTransactionPageCount(accountNo, 1, 10));
 				request.setAttribute("page", pageNo);
@@ -280,7 +278,6 @@ public class ControllerServlet extends HttpServlet {
 				AdminHandler handler = new AdminHandler();
 				int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
 				request.setAttribute("page", pageNo);
-				request.setAttribute("viewer", "admin");
 				int uType = Math.abs(Utils.parseInt(request.getParameter("userType")));
 				if (uType == 0) {
 					request.setAttribute("totalPages", handler.getAllCustomerPageCount(10));
@@ -298,16 +295,19 @@ public class ControllerServlet extends HttpServlet {
 			break;
 		}
 
+		case "/employee/addUser":
 		case "/admin/addUser": {
 			try {
 				AdminHandler adminHandler = new AdminHandler();
-				request.setAttribute("viewer", "admin");
 				Map<Integer, Branch> branches = adminHandler.getBranches(ActiveStatus.ACTIVE);
 				request.setAttribute("branches", branches);
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/userForm.jsp").forward(request, response);
 			} catch (CustomException e) {
 				e.printStackTrace();
-				response.sendRedirect(request.getContextPath() + "/controller/admin/users?error=" + e.getMessage());
+				UserType userType = (UserType) session.getAttribute("userType");
+				String role = userType.name().toLowerCase();
+				response.sendRedirect(
+						request.getContextPath() + "/controller/" + role + "/users?error=" + e.getMessage());
 			}
 			break;
 		}
@@ -317,7 +317,6 @@ public class ControllerServlet extends HttpServlet {
 				int userId = Utils.parseInt(request.getParameter("userId"));
 				int type = Integer.parseInt(request.getParameter("userType"));
 				AdminHandler adminHandler = new AdminHandler();
-				request.setAttribute("viewer", "admin");
 				if (UserType.values()[type] == UserType.USER) {
 					String getAccounts = request.getParameter("getAllAccounts");
 					if (getAccounts != null && getAccounts.equals("1")) {
@@ -338,23 +337,26 @@ public class ControllerServlet extends HttpServlet {
 			break;
 		}
 
+		case "/employee/profile":
 		case "/admin/profile": {
 			try {
 				AdminHandler adminHandler = new AdminHandler();
 				int userId = (int) session.getAttribute("userId");
 				Employee profile = (Employee) adminHandler.getEmployee(userId);
-				request.setAttribute("viewer", "admin");
 				request.setAttribute("profile", profile);
-				request.getRequestDispatcher("/WEB-INF/jsp/employee/profile.jsp").forward(request, response);
+				Branch branch = adminHandler.getBranch(profile.getBranchId());
+				request.setAttribute("branch", branch);
+				request.getRequestDispatcher("/WEB-INF/jsp/user/profile.jsp").forward(request, response);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
-				response.sendRedirect(request.getContextPath() + "/controller/admin/home?error=" + e.getMessage());
+				UserType userType = (UserType) session.getAttribute("userType");
+				response.sendRedirect(request.getContextPath() + "/controller/" + userType.name().toLowerCase()
+						+ "/home?error=" + e.getMessage());
 			}
 			break;
 		}
 
 		case "/employee/addAccount": {
-			request.setAttribute("viewer", "employee");
 			request.getRequestDispatcher("/WEB-INF/jsp/employee/accountForm.jsp").forward(request, response);
 			break;
 		}
@@ -369,7 +371,6 @@ public class ControllerServlet extends HttpServlet {
 				request.setAttribute("account", employeeHandler.getAccount(accountNo));
 				request.setAttribute("totalPages", employeeHandler.getTransactionPageCount(accountNo, 1, 10));
 				request.setAttribute("page", pageNo);
-				request.setAttribute("viewer", "employee");
 				request.setAttribute("transactions", employeeHandler.getTransactions(accountNo, months, pageNo, 10));
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/accountDetails.jsp").forward(request, response);
 			} catch (InvalidValueException | CustomException e) {
@@ -390,7 +391,6 @@ public class ControllerServlet extends HttpServlet {
 				request.setAttribute("status", customerStatus);
 				ActiveStatus status = ActiveStatus.values()[customerStatus];
 				int branchId = (int) session.getAttribute("branchId");
-				request.setAttribute("viewer", "employee");
 				request.setAttribute("totalPages", employeeHandler.getCustomerPageCount(branchId, 10, status));
 				request.setAttribute("customers", employeeHandler.getCustomers(branchId, pageNo, 10, status));
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/users.jsp").forward(request, response);
@@ -398,12 +398,6 @@ public class ControllerServlet extends HttpServlet {
 				e.printStackTrace();
 				response.sendRedirect(request.getContextPath() + "/controller/employee/home?error=" + e.getMessage());
 			}
-			break;
-		}
-
-		case "/employee/addUser": {
-			request.setAttribute("viewer", "employee");
-			request.getRequestDispatcher("/WEB-INF/jsp/employee/userForm.jsp").forward(request, response);
 			break;
 		}
 
@@ -417,7 +411,6 @@ public class ControllerServlet extends HttpServlet {
 					request.setAttribute("accounts", customerHandler.getAccounts(userId));
 				}
 				request.setAttribute("user", employeeHandler.getCustomer(userId));
-				request.setAttribute("viewer", "employee");
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/userForm.jsp").forward(request, response);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
@@ -440,31 +433,18 @@ public class ControllerServlet extends HttpServlet {
 			break;
 		}
 
-		case "/employee/profile": {
-			try {
-				AdminHandler adminHandler = new AdminHandler();
-				int userId = (int) session.getAttribute("userId");
-				Employee profile = (Employee) adminHandler.getEmployee(userId);
-				request.setAttribute("viewer", "employee");
-				request.setAttribute("profile", profile);
-				request.getRequestDispatcher("/WEB-INF/jsp/employee/profile.jsp").forward(request, response);
-			} catch (CustomException | InvalidValueException e) {
-				e.printStackTrace();
-				response.sendRedirect(request.getContextPath() + "/controller/employee/home?error=" + e.getMessage());
-			}
-			break;
-		}
-
 		case "/error": {
 			request.getRequestDispatcher("/WEB-INF/jsp/error.jsp").forward(request, response);
 			break;
 		}
 
 		case "/logout": {
-			session.removeAttribute("userId");
-			session.removeAttribute("branchId");
-			session.removeAttribute("userName");
-			session.invalidate();
+			if (session != null) {
+				session.removeAttribute("userId");
+				session.removeAttribute("branchId");
+				session.removeAttribute("userName");
+				session.invalidate();
+			}
 			response.sendRedirect(request.getContextPath() + "/controller/login");
 			break;
 		}
@@ -723,6 +703,7 @@ public class ControllerServlet extends HttpServlet {
 			String type = request.getParameter("userType");
 			try {
 				String activate = request.getParameter("activate");
+				Utils.checkNull(activate);
 				ActiveStatus status = ActiveStatus.values()[Integer.parseInt(activate)];
 				AdminHandler adminHandler = new AdminHandler();
 				if (type != null && UserType.valueOf(type) == UserType.USER) {
@@ -746,7 +727,6 @@ public class ControllerServlet extends HttpServlet {
 			int type = Integer.parseInt(request.getParameter("userType"));
 			try {
 				AdminHandler adminHandler = new AdminHandler();
-				request.setAttribute("viewer", "admin");
 				if (type == 0) {
 					int branchId = Integer.parseInt(request.getParameter("branchId"));
 					Customer customer = getCustomerFormData(request, response);
@@ -788,7 +768,7 @@ public class ControllerServlet extends HttpServlet {
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
 				response.sendRedirect(request.getContextPath() + "/controller/admin/modifyUser?userId=" + userId
-						+ "&userType=" + type + "&message=" + e.getMessage());
+						+ "&userType=" + type + "&error=" + e.getMessage());
 			}
 			break;
 		}
@@ -846,7 +826,7 @@ public class ControllerServlet extends HttpServlet {
 				e.printStackTrace();
 				String redirectUrl = request.getContextPath() + "/controller/employee/manageAccount?accountNo="
 						+ accountNo;
-				response.sendRedirect(redirectUrl + "&message=" + e.getMessage());
+				response.sendRedirect(redirectUrl + "&error=" + e.getMessage());
 			}
 			break;
 		}

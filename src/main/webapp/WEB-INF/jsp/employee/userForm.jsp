@@ -30,21 +30,21 @@
       response.setHeader("Expires", "0");
 %>
   <% 
-    String viewer=(String) request.getAttribute("viewer");
-    if(viewer!=null && viewer.equals("employee")){ 
+    UserType userType=(UserType) session.getAttribute("userType");
+    if(userType==UserType.ADMIN){ 
   %>
-  <%@include file="../addOns/employeeHeader.jsp" %>
-  <%}else{ %>
   <%@include file="../addOns/adminHeader.jsp" %>
+  <%}else{ %>
+  <%@include file="../addOns/employeeHeader.jsp" %>
   <%} %>
-    <main class="main">
-      <form id="form" action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/<%=user==null?"addUser":"modifyUser" %>" method="post" class="user-form-container">
-        <h3 style="position:relative"><%=user!=null? "Modify User":"Add User" %> 
+    <div class="user-form-container">
+      <form id="form" action="<%=request.getContextPath() %>/controller/<%=userType==UserType.ADMIN?"admin":"employee" %>/<%=user==null?"addUser":"modifyUser" %>" method="post" style="position:relative;">
+        <h3 style="position:relative"><%=user!=null? userType==UserType.ADMIN? "User Details":"Customer Details": userType==UserType.ADMIN? "Add User":"Add Customer" %> 
         <%if(user!=null){ %>
           <%if(user.getType()==UserType.USER){%>
-            <img src="<%=request.getContextPath()%>/static/images/accounts.png" title="view all accounts" style="width:2rem;position:absolute;right:5rem;top:.5rem;" onclick="getAllAccounts()" alt="all Accounts">
+            <img src="<%=request.getContextPath()%>/static/images/accounts.png" title="view all accounts" style="width:2rem;position:absolute;right:5rem;top:.6rem;" onclick="getAllAccounts()" alt="all Accounts">
           <%} %>
-          <img src="<%=request.getContextPath()%>/static/images/edit-white.png" title="edit" style="width:2rem;position:absolute;right:1rem;top:.5rem;" onclick="enableEdit()" alt="edit">
+          <img src="<%=request.getContextPath()%>/static/images/edit-white.png" id="edit" title="edit" style="width:1.8rem;position:absolute;right:1rem;top:.7rem;" onclick="enableEdit()" alt="edit">
         <%} %>
         </h3>
          <%if(user!=null){%>
@@ -54,7 +54,7 @@
           <div class="form-column">
             <div class="form-row">
               <label for="name">Name</label>
-              <input type="text" name="name" value="<%=user!=null?user.getName():""%>" id="name" placeholder="Name" required>
+              <input type="text" name="name" maxlength=30 value="<%=user!=null?user.getName():""%>" id="name" placeholder="Name" required>
             </div>
             <div class="form-row">
               <label for="dob">D.O.B</label>
@@ -87,7 +87,7 @@
             <div class="form-row">
                 <label for="userType">User Type</label>
                 <select name="userType" id="userType" style="margin:1rem" class="selection" onchange="toggleInputs()" required >
-                  <% if(viewer!=null && viewer.equals("admin")){%>
+                  <% if(userType==UserType.ADMIN){%>
                     <option value="">Select</option>
                     <option value="2" <%=user!=null && user.getType()==UserType.EMPLOYEE?"selected":""%>>Employee</option>
                     <option value="1" <%=user!=null && user.getType()==UserType.ADMIN?"selected":""%>>Admin</option>
@@ -137,36 +137,33 @@
             </div>
             <div class="form-row">
               <label for="location">Location</label> 
-              <input type="text" name="location" value="<%=user!=null?user.getLocation():""%>"  id="location" placeholder="Location" required>
+              <input type="text" name="location" maxlength=50 value="<%=user!=null?user.getLocation():""%>"  id="location" placeholder="Location" required>
             </div>
             <div class="form-row">
               <label for="city">City</label>
-              <input type="text" name="city" value="<%=user!=null?user.getCity():""%>"  id="city" placeholder="City" required>
+              <input type="text" name="city" maxlength=30 value="<%=user!=null?user.getCity():""%>"  id="city" placeholder="City" required>
             </div>
             <div class="form-row">
               <label for="state">State</label>
-              <input type="text" name="state" value="<%=user!=null?user.getState():""%>"  id="state" placeholder="State" required>
+              <input type="text" name="state" maxlength=30 value="<%=user!=null?user.getState():""%>"  id="state" placeholder="State" required>
             </div>
           </div>
-          <button id="submit" <%=user!=null?"disabled":"" %>><%=user!=null? "Update":"Create" %></button>
+          <button id="submit" <%=user!=null?"disabled":"" %> style='<%=user!=null?"display:none":""%>'><%=user!=null? "Update":"Create" %></button>
+          <button type="reset" id="reset" onclick="cancelEdit()" class="btn-danger" style="display:none;position:absolute;bottom:1rem;right:1rem">Discard</button>
         </div>
       </form>
-      
-    <% if(user!=null && user.getStatus()==ActiveStatus.INACTIVE){ %>
-      <form method="post" action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/manageUser">
-        <input type="hidden" name="activate" value="1" />
-        <input type="hidden" name="userId" value="<%=user.getUserId() %>" />
-        <input type="hidden" name="userType" value="<%=user.getType() %>" />
-        <button style="font-size: large;padding: 0.5rem;margin: auto;display: block;background-color: #009e60;color: white;">Activate</button>
-      </form>
-    <%}else if(user!=null && user.getStatus()==ActiveStatus.ACTIVE){ %>
-      <form method="post" action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/manageUser">
-        <input type="hidden" name="activate" value="0" />
-        <input type="hidden" name="userId" value="<%=user.getUserId() %>" />
-        <input type="hidden" name="userType" value="<%=user.getType() %>" />
-        <button style="font-size: large; padding: 0.5rem; margin: auto; display: block; background-color: #e34234; color: white;">Deactivate</button>
-      </form>
-    <%} %>
+          <%if(user!=null){ %>
+            <form method="post" id="activateForm" action="<%=request.getContextPath() %>/controller/<%=userType==UserType.ADMIN?"admin":"employee" %>/manageUser">
+              <input type="hidden" name="userId" value="<%=user.getUserId() %>" />
+              <input type="hidden" name="userType" value="<%=user.getType() %>" />
+              <% if(user.getStatus()==ActiveStatus.INACTIVE){ %>
+                <button id="activate" name="activate" class="btn-success" value="1">Activate</button>
+              <%}else{ %>
+                <button id="activate" name="activate" class="btn-danger" value="0">Deactivate</button>
+              <%} %>
+            </form>
+          <%} %>
+      </div>
     
    <% if(request.getAttribute("accounts")!=null){ %>
       <table class="border-table">
@@ -191,7 +188,7 @@
           Account account = e.getValue();
         %>
         <tr
-          onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/manageAccount?accountNo=<%=id%>'">
+          onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=userType==UserType.ADMIN?"admin":"employee" %>/manageAccount?accountNo=<%=id%>'">
           <td><%=id%></td>
           <td><%=account.getCurrentBalance()%></td>
           <td><%=account.getIsPrimaryAccount() ? "YES" : "NO"%></td>
@@ -205,9 +202,8 @@
       </table>
      <%} %>
   
-    </main>
 
- <%if(user==null || viewer.equals("admin")){ %>
+ <%if(user==null || userType==UserType.ADMIN){ %>
     <script>
       const customer=document.getElementById("customer");
       const aadhaarNo=document.getElementById("aadhaarNo");
@@ -234,6 +230,7 @@
       const fields = document.querySelectorAll("#form input");
       const selections = document.querySelectorAll("#form select");
       const submit=document.getElementById("submit");
+      const reset=document.getElementById("reset");
       let changedCount=0;
       for(field of fields){
         field.addEventListener("change",(e)=>{
@@ -246,8 +243,10 @@
           }
           if(changedCount==0){
             submit.setAttribute("disabled","disabled");
+            reset.style.display="none";
           }else{
             submit.removeAttribute("disabled");
+            reset.style.display="block";
           }
         });
       }
@@ -267,14 +266,26 @@
           }
         });
       }
-      
       function enableEdit(){
-    	  for(e of selections){
+		  for(e of selections){
     		  e.removeAttribute("disabled");
     	  }
     	  for(e of fields){
     		  e.removeAttribute("disabled");
     	  }
+    	  document.getElementById("activate").style.display="none";
+    	  submit.style.display="block";
+      }
+      function cancelEdit(){
+		  for(e of selections){
+    		  e.setAttribute("disabled","disabled");
+    	  }
+    	  for(e of fields){
+    		  e.setAttribute("disabled","disabled");
+    	  }
+    	  submit.style.display="none";
+    	  reset.style.display="none";
+    	  document.getElementById("activate").style.display="block";
       }
       window.onload=()=>{
     	  for(e of selections){

@@ -20,13 +20,12 @@
       response.setHeader("Pragma", "no-cache"); 
       response.setHeader("Expires", "0");
 %>
-<% request.setAttribute("selected","myAccounts"); %>
+<% request.setAttribute("activePath","myAccounts"); %>
   <%@ include file="../addOns/customerHeader.jsp"%>
-  <main class="main">
     <div class="totalBalance">
       Total Available Balance: ₹<span> <%=request.getAttribute("totalBalance") %></span>
     </div>
-    <table class="border-table">
+    <table class="border-table" style="margin-top:3rem">
       <tr>
         <th colspan="7"
           style="text-align: center; background-color: var(--blue); color: white;">
@@ -60,6 +59,5 @@
       }
       %>
     </table>
-  </main>
 </body>
 </html>

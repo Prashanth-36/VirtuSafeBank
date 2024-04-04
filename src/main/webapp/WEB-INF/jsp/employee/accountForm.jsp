@@ -1,6 +1,7 @@
+<%@page import="utility.UserType"%>
 <%@page import="model.Branch"%>
 <%@page import="java.util.Map"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
+<%@page language="java" contentType="text/html; charset=UTF-8"
 pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,10 +18,13 @@ pageEncoding="UTF-8"%>
       response.setHeader("Expires", "0");
 %>
   <% request.setAttribute("activePath", "accounts"); %>
-  <% String viewer=(String) request.getAttribute("viewer");%>
+  <% UserType userType=(UserType) session.getAttribute("userType");%>
+  <%if(userType==UserType.ADMIN){ %>
   <%@include file="../addOns/adminHeader.jsp" %>
-    <main class="main">
-      <form action="<%=request.getContextPath() %>/controller/<%=viewer.equals("admin")?"admin":"employee" %>/addAccount" method="post" class="form-container">
+  <%}else{ %>
+  <%@include file="../addOns/employeeHeader.jsp" %>
+  <%} %>
+      <form action="<%=request.getContextPath() %>/controller/<%=userType==UserType.ADMIN?"admin":"employee" %>/addAccount" method="post" class="form-container">
         <h3>Create Account</h3>
         <label for="customerId">Customer ID *</label>
         <input
@@ -30,25 +34,23 @@ pageEncoding="UTF-8"%>
           placeholder="Customer ID"
           required
         />
-        <% if(viewer!=null && viewer.equals("admin")){ %>
-          <label for="branchId">Branch ID * 
-            <select name="branchId" id="branchId" style="margin:1rem" class="selection" required>
-                  <option value="">Select</option>
-            <% 
-              Map<Integer,Branch> branches=(Map<Integer,Branch>)request.getAttribute("branches");
-              if(branches!=null){
-                for(int branchId:branches.keySet()){
-            %>
-                  <option value="<%=branchId%>"><%=branchId%></option>
-            <%
-                }
+        <% if(userType==UserType.ADMIN){ %>
+          <label for="branchId">Branch ID *</label>
+          <select name="branchId" id="branchId" class="selection" required>
+                <option value="">Select</option>
+          <% 
+            Map<Integer,Branch> branches=(Map<Integer,Branch>)request.getAttribute("branches");
+            if(branches!=null){
+              for(int branchId:branches.keySet()){
+          %>
+                <option value="<%=branchId%>"><%=branchId%></option>
+          <%
               }
-            %>
-            </select>
-          </label>
+            }
+          %>
+          </select>
         <%} %>
         <button>Create</button>
       </form>
-    </main>
   </body>
 </html>

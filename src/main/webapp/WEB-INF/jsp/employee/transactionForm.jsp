@@ -17,7 +17,6 @@
       response.setHeader("Pragma", "no-cache"); 
       response.setHeader("Expires", "0");
 %>
-  <main class="main">
     <% request.setAttribute("activePath", "fundTransfer"); %>
     <%@include file="../addOns/employeeHeader.jsp" %>
     <form action="<%=request.getContextPath()%>/controller/employee/fundTransfer"
@@ -36,11 +35,10 @@
           %>
       </datalist>
       <label for="amount">Amount</label> 
-      <input type="number" name="amount" id="amount" placeholder="Amount" required/>
+      <input type="number" name="amount" min="0.01" step="0.01" id="amount" placeholder="Amount" required/>
       <label for="description">Description</label> 
-      <input type="text" name="description" id="description" placeholder="Description" />
+      <input type="text" name="description" maxlength="50" id="description" placeholder="Description" />
       <button>Deposit</button>
     </form>
-  </main>
 </body>
 </html>

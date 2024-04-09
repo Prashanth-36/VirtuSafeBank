@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,34 +18,49 @@ import utility.Utils;
 public class AccountDao implements AccountManager {
 
 	@Override
-	public void createAccount(Account account) throws CustomException, InvalidValueException {
+	public int createAccount(Account account) throws CustomException, InvalidValueException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(
-						"INSERT INTO account(customerId,openDate,branchId,status,isPrimaryAccount,mpin) values(?,?,?,?,?,?)")) {
+						"INSERT INTO account(customerId,openDate,branchId,status,isPrimaryAccount,mpin,modifiedBy,modifiedOn) values(?,?,?,?,?,?,?,?)",
+						Statement.RETURN_GENERATED_KEYS)) {
 			statement.setObject(1, account.getCustomerId());
 			statement.setObject(2, System.currentTimeMillis());
 			statement.setObject(3, account.getBranchId());
 			statement.setObject(4, ActiveStatus.ACTIVE.ordinal());
 			statement.setObject(5, account.getIsPrimaryAccount());
+			statement.setObject(6, account.getModifiedBy());
+			statement.setObject(7, account.getModifiedOn());
 			String mpin = account.getMpin();
 			if (mpin == null || mpin.isEmpty()) {
 				mpin = "0000";
 			}
 			String hashedMpin = Utils.hashPassword(mpin);
 			statement.setString(6, hashedMpin);
-			statement.executeUpdate();
+			int rows = statement.executeUpdate();
+			if (rows > 0) {
+				try (ResultSet resultSet = statement.getGeneratedKeys()) {
+					if (resultSet.next()) {
+						int id = resultSet.getInt(1);
+						return id;
+					}
+				}
+			}
+			throw new CustomException("Account Creation Failed!");
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("Account Creation failed!", e);
 		}
 	}
 
 	@Override
-	public void setAccountStatus(int accountNo, ActiveStatus status) throws CustomException {
+	public void setAccountStatus(int accountNo, ActiveStatus status, int modifiedBy, long modifedOn)
+			throws CustomException {
 		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement statement = connection
-						.prepareStatement("UPDATE account SET status = ? WHERE accountNo = ?")) {
+				PreparedStatement statement = connection.prepareStatement(
+						"UPDATE account SET status = ?, modifiedOn = ?, modifiedBy = ? WHERE accountNo = ?")) {
 			statement.setObject(1, status.ordinal());
-			statement.setObject(2, accountNo);
+			statement.setObject(2, modifedOn);
+			statement.setInt(3, modifiedBy);
+			statement.setObject(4, accountNo);
 			statement.executeUpdate();
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("Account Deletion failed!", e);
@@ -52,8 +68,8 @@ public class AccountDao implements AccountManager {
 	}
 
 	@Override
-	public void deleteAccount(int accountNo) throws CustomException {
-		setAccountStatus(accountNo, ActiveStatus.INACTIVE);
+	public void deleteAccount(int accountNo, int modifiedBy) throws CustomException {
+		setAccountStatus(accountNo, ActiveStatus.INACTIVE, modifiedBy, modifiedBy);
 	}
 
 	@Override
@@ -201,14 +217,17 @@ public class AccountDao implements AccountManager {
 	}
 
 	@Override
-	public void setPrimaryAccount(int customerId, int accountNo) throws CustomException {
+	public void setPrimaryAccount(int customerId, int accountNo, int modifiedBy, long modifedOn)
+			throws CustomException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement offStatement = connection.prepareStatement(
 						"UPDATE account SET isPrimaryAccount = 0 WHERE customerId = ? and isPrimaryAccount = 1");
-				PreparedStatement setStatement = connection
-						.prepareStatement("UPDATE account SET isPrimaryAccount = 1 WHERE accountNo = ?")) {
+				PreparedStatement setStatement = connection.prepareStatement(
+						"UPDATE account SET isPrimaryAccount = 1, modifiedBy = ?, modifiedOn = ? WHERE accountNo = ?")) {
 			offStatement.setObject(1, customerId);
-			setStatement.setObject(1, accountNo);
+			setStatement.setObject(1, modifiedBy);
+			setStatement.setObject(2, modifedOn);
+			setStatement.setObject(3, accountNo);
 			try {
 				connection.setAutoCommit(false);
 				offStatement.executeUpdate();
@@ -226,13 +245,16 @@ public class AccountDao implements AccountManager {
 	}
 
 	@Override
-	public void setMpin(int accountNo, String newPin) throws CustomException, InvalidValueException {
+	public void setMpin(int accountNo, String newPin, int modifiedBy, long modifedOn)
+			throws CustomException, InvalidValueException {
 		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement statement = connection
-						.prepareStatement("UPDATE account SET mPin = ? WHERE accountNo = ?")) {
+				PreparedStatement statement = connection.prepareStatement(
+						"UPDATE account SET mPin = ?, modifiedBy = ?, modifiedOn = ? WHERE accountNo = ?")) {
 			String hashedMpin = Utils.hashPassword(newPin);
 			statement.setString(1, hashedMpin);
-			statement.setObject(2, accountNo);
+			statement.setObject(2, modifiedBy);
+			statement.setObject(3, modifedOn);
+			statement.setObject(4, accountNo);
 			statement.executeUpdate();
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("MPIN Updation failed!", e);

@@ -9,6 +9,8 @@ public class Branch {
 	private String city;
 	private String state;
 	private ActiveStatus status;
+	private Long modifiedOn;
+	private int modifiedBy;
 
 	public Integer getId() {
 		return id;
@@ -58,10 +60,26 @@ public class Branch {
 		this.status = status;
 	}
 
+	public int getModifiedBy() {
+		return modifiedBy;
+	}
+
+	public void setModifiedBy(int modifiedBy) {
+		this.modifiedBy = modifiedBy;
+	}
+
+	public Long getModifiedOn() {
+		return modifiedOn;
+	}
+
+	public void setModifiedOn(Long modifiedOn) {
+		this.modifiedOn = modifiedOn;
+	}
+
 	@Override
 	public String toString() {
 		return "Branch [id=" + id + ", ifsc=" + ifsc + ", location=" + location + ", city=" + city + ", state=" + state
-				+ ", status=" + status + "]";
+				+ ", status=" + status + ", modifiedOn=" + modifiedOn + ", modifiedBy=" + modifiedBy + "]";
 	}
 
 }

@@ -43,8 +43,8 @@ public class EmployeeHandler {
 		return customerManager.addCustomer(customer);
 	}
 
-	public void removeCustomer(int customerId) throws CustomException {
-		customerManager.removeCustomer(customerId);
+	public void removeCustomer(int customerId, int modifiedBy) throws CustomException {
+		customerManager.removeCustomer(customerId, modifiedBy);
 	}
 
 	public Customer getCustomer(int customerId) throws CustomException, InvalidValueException {
@@ -76,7 +76,7 @@ public class EmployeeHandler {
 		customerManager.updateCustomer(customer);
 	}
 
-	public void createAccount(int customerId, int branchId)
+	public int createAccount(int customerId, int branchId, int modifiedBy, long modifiedOn)
 			throws CustomException, InvalidValueException, InvalidOperationException {
 		Account account = new Account();
 		customerManager.getCustomer(customerId); // to validate existing customer
@@ -91,11 +91,13 @@ public class EmployeeHandler {
 		}
 		account.setCustomerId(customerId);
 		account.setBranchId(branchId);
-		accountManager.createAccount(account);
+		account.setModifiedBy(modifiedBy);
+		account.setModifiedOn(modifiedOn);
+		return accountManager.createAccount(account);
 	}
 
-	public void deleteAccount(int accountNo) throws CustomException {
-		accountManager.deleteAccount(accountNo);
+	public void deleteAccount(int accountNo, int modifiedBy) throws CustomException {
+		accountManager.deleteAccount(accountNo, modifiedBy);
 	}
 
 	public Account getAccount(int accountNo) throws InvalidValueException, CustomException {
@@ -118,14 +120,16 @@ public class EmployeeHandler {
 		return totalPages;
 	}
 
-	public void setAccountStatus(int accountNo, ActiveStatus status) throws CustomException {
+	public void setAccountStatus(int accountNo, ActiveStatus status, int modifiedBy, long modifiedOn)
+			throws CustomException {
 		CustomerHandler.accountCache.remove(accountNo);
-		accountManager.setAccountStatus(accountNo, status);
+		accountManager.setAccountStatus(accountNo, status, modifiedBy, modifiedOn);
 	}
 
-	public void setCustomerStatus(int customerId, ActiveStatus status) throws CustomException, InvalidValueException {
+	public void setCustomerStatus(int customerId, ActiveStatus status, int modifiedBy, long modifiedOn)
+			throws CustomException, InvalidValueException {
 		customerManager.getCustomer(customerId); // to validate existing customer
-		customerManager.setCustomerStatus(customerId, status);
+		customerManager.setCustomerStatus(customerId, status, modifiedBy, modifiedOn);
 	}
 
 	public int getTransactionPageCount(int accountNo, int months, int limit)
@@ -151,7 +155,7 @@ public class EmployeeHandler {
 		return transactionManager.getTransactions(accountNo, startTime, offset, limit);
 	}
 
-	public void deposit(int accountNo, double amount, String description)
+	public void deposit(int accountNo, double amount, String description, int modifiedBy, long modifiedOn)
 			throws CustomException, InvalidValueException {
 		if (amount < 1) {
 			throw new InvalidValueException("Invalid amount!");
@@ -164,12 +168,14 @@ public class EmployeeHandler {
 		transaction.setType(TransactionType.CREDIT);
 		transaction.setDescription(description);
 		transaction.setCustomerId(account.getCustomerId());
+		transaction.setModifiedBy(modifiedBy);
+		transaction.setModifiedOn(modifiedOn);
 		transactionManager.initTransaction(transaction);
 	}
 
-	public void changePassword(int customerId, String currentPassword, String newPassword)
-			throws InvalidValueException, CustomException {
+	public void changePassword(int customerId, String currentPassword, String newPassword, int modifiedBy,
+			long modifiedOn) throws InvalidValueException, CustomException {
 		EmployeeManager employeeManager = new EmployeeDao();
-		employeeManager.setPassword(customerId, currentPassword, newPassword);
+		employeeManager.setPassword(customerId, currentPassword, newPassword, modifiedBy, modifiedOn);
 	}
 }

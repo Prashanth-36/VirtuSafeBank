@@ -21,6 +21,7 @@ import logicallayer.CustomerHandler;
 import logicallayer.EmployeeHandler;
 import logicallayer.SessionHandler;
 import model.Account;
+import model.Audit;
 import model.Branch;
 import model.Customer;
 import model.Employee;
@@ -440,6 +441,20 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/logout": {
 			if (session != null) {
+				Audit audit = new Audit();
+				audit.setTime(System.currentTimeMillis());
+				audit.setAction("logout");
+				int userId = (int) session.getAttribute("userId");
+				audit.setModifiedBy(userId);
+				audit.setDescription("logged out successfully");
+				audit.setStatus(true);
+				audit.setTargetId(userId);
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 				session.removeAttribute("userId");
 				session.removeAttribute("branchId");
 				session.removeAttribute("userName");
@@ -464,8 +479,13 @@ public class ControllerServlet extends HttpServlet {
 		switch (path) {
 
 		case "/login": {
+			int userId = Integer.parseInt(request.getParameter("userId"));
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("login");
+			audit.setModifiedBy(userId);
 			try {
-				int userId = Integer.parseInt(request.getParameter("userId"));
 				String password = request.getParameter("password");
 				SessionHandler sessionHandler = new SessionHandler();
 				User user = sessionHandler.authenticate(userId, password);
@@ -488,17 +508,37 @@ public class ControllerServlet extends HttpServlet {
 				}
 				case USER: {
 					response.sendRedirect(request.getContextPath() + "/controller/user/home");
+					break;
 				}
 				}
+				audit.setDescription("logged in successfully");
+				audit.setStatus(true);
+				audit.setTargetId(userId);
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(userId);
 				request.setAttribute("error", e.getMessage());
 				request.getRequestDispatcher("/WEB-INF/jsp/index.jsp").forward(request, response);
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/user/changeMpin": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("account");
+			audit.setModifiedBy(sessionUserId);
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
 				CustomerHandler customerHandler = new CustomerHandler();
@@ -509,158 +549,309 @@ public class ControllerServlet extends HttpServlet {
 				if (!newMpin.equals(confirmMpin)) {
 					throw new InvalidValueException("Please re-enter new Mpin correctly!");
 				}
-				customerHandler.changeMpin(id, accountNo, currentMin, newMpin);
+				customerHandler.changeMpin(id, accountNo, currentMin, newMpin, sessionUserId, modifiedOn);
 				String message = "MPIN Updated Successful!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(accountNo);
 				String redirectUrl = request.getContextPath() + "/controller/user/account?accountNo=" + accountNo;
 				response.sendRedirect(redirectUrl + "&message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
+				audit.setDescription("MPIN Updation Failed");
+				audit.setStatus(false);
+				audit.setTargetId(accountNo);
 				String redirectUrl = request.getContextPath() + "/controller/user/account?accountNo=" + accountNo;
 				response.sendRedirect(redirectUrl + "&error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/user/changePassword": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("user");
+			audit.setModifiedBy(sessionUserId);
 			try {
 				CustomerHandler customerHandler = new CustomerHandler();
-				int id = (int) session.getAttribute("userId");
 				String currentPassword = request.getParameter("currentPassword");
 				String newPassword = request.getParameter("newPassword");
 				String confirmPassword = request.getParameter("confirmPassword");
 				if (!newPassword.equals(confirmPassword)) {
 					throw new InvalidValueException("Please re-enter new Password correctly!");
 				}
-				customerHandler.changePassword(id, currentPassword, newPassword);
+				customerHandler.changePassword(sessionUserId, currentPassword, newPassword, sessionUserId, modifiedOn);
 				String message = "Password Updated Successful!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(sessionUserId);
 				String redirectUrl = request.getContextPath() + "/controller/user/profile";
 				response.sendRedirect(redirectUrl + "?message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(sessionUserId);
 				String redirectUrl = request.getContextPath() + "/controller/user/profile";
 				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/user/setPrimary": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("account");
+			audit.setModifiedBy(sessionUserId);
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
 				CustomerHandler customerHandler = new CustomerHandler();
 				int id = (int) session.getAttribute("userId");
-				customerHandler.setPrimaryAccount(id, accountNo);
+				customerHandler.setPrimaryAccount(id, accountNo, sessionUserId, modifiedOn);
 				String message = "Primary Account Updated Successful!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(accountNo);
 				String redirectUrl = request.getContextPath() + "/controller/user/account?accountNo=" + accountNo;
 				response.sendRedirect(redirectUrl + "&message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(accountNo);
 				String redirectUrl = request.getContextPath() + "/controller/user/account?accountNo=" + accountNo;
 				response.sendRedirect(redirectUrl + "&error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/user/moneyTransfer": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("moneyTransfer");
+			audit.setModifiedBy(sessionUserId);
+			int accountNo = Utils.parseInt(request.getParameter("senderAccountNo"));
+			int benificiaryAccountNo = Utils.parseInt(request.getParameter("beneficiaryAccNo"));
 			try {
 				CustomerHandler customerHandler = new CustomerHandler();
 				int userId = (int) session.getAttribute("userId");
 				String mpin = request.getParameter("mpin");
 				Double amount = Utils.parseDouble(request.getParameter("amount"));
-				int accountNo = Utils.parseInt(request.getParameter("senderAccountNo"));
-				int benificiaryAccountNo = Utils.parseInt(request.getParameter("beneficiaryAccNo"));
 				String ifsc = request.getParameter("beneficiaryIfsc");
 				String description = request.getParameter("description");
-				customerHandler.moneyTransfer(userId, mpin, accountNo, benificiaryAccountNo, amount, ifsc, description);
+				customerHandler.moneyTransfer(userId, mpin, accountNo, benificiaryAccountNo, amount, ifsc, description,
+						sessionUserId, modifiedOn);
 				String message = "Transaction Successful!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(benificiaryAccountNo);
 				String redirectUrl = request.getContextPath() + "/controller/user/moneyTransfer";
 				response.sendRedirect(redirectUrl + "?message=" + message);
 			} catch (CustomException | InvalidValueException | InsufficientFundException
 					| InvalidOperationException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(benificiaryAccountNo);
 				String redirectUrl = request.getContextPath() + "/controller/user/moneyTransfer";
 				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/user/withdrawl": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("withdrawl");
+			audit.setModifiedBy(sessionUserId);
+			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
 				CustomerHandler customerHandler = new CustomerHandler();
 				int userId = (int) session.getAttribute("userId");
 				String mpin = request.getParameter("mpin");
 				Double amount = Utils.parseDouble(request.getParameter("amount"));
-				int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 				String description = request.getParameter("description");
-				customerHandler.withdrawl(userId, mpin, accountNo, amount, description);
+				customerHandler.withdrawl(userId, mpin, accountNo, amount, description, sessionUserId, modifiedOn);
 				String message = "Withdraw Successful!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(accountNo);
 				String redirectUrl = request.getContextPath() + "/controller/user/withdrawl";
 				response.sendRedirect(redirectUrl + "?message=" + message);
 			} catch (CustomException | InvalidValueException | InsufficientFundException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(accountNo);
 				String redirectUrl = request.getContextPath() + "/controller/user/withdrawl";
 				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/user/deposit": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("deposit");
+			audit.setModifiedBy(sessionUserId);
+			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
 				CustomerHandler customerHandler = new CustomerHandler();
 				int userId = (int) session.getAttribute("userId");
 				String mpin = request.getParameter("mpin");
 				Double amount = Utils.parseDouble(request.getParameter("amount"));
-				int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 				String description = request.getParameter("description");
-				customerHandler.deposit(userId, mpin, accountNo, amount, description);
+				customerHandler.deposit(userId, mpin, accountNo, amount, description, sessionUserId, modifiedOn);
 				String message = "Deposit Successful!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(accountNo);
 				String redirectUrl = request.getContextPath() + "/controller/user/deposit";
 				response.sendRedirect(redirectUrl + "?message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(accountNo);
 				String redirectUrl = request.getContextPath() + "/controller/user/deposit";
 				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/admin/manageAccount": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("account");
+			audit.setModifiedBy(sessionUserId);
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
 				String activate = request.getParameter("activate");
 				ActiveStatus status = ActiveStatus.values()[Integer.parseInt(activate)];
 				AdminHandler adminHandler = new AdminHandler();
-				adminHandler.setAccountStatus(accountNo, status);
+				adminHandler.setAccountStatus(accountNo, status, sessionUserId, modifiedOn);
 				String message = "Account Status Updated!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(accountNo);
 				String redirectUrl = request.getContextPath() + "/controller/admin/manageAccount?accountNo="
 						+ accountNo;
 				response.sendRedirect(redirectUrl + "&message=" + message);
 
 			} catch (CustomException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(accountNo);
 				String redirectUrl = request.getContextPath() + "/controller/admin/manageAccount?accountNo="
 						+ accountNo;
 				response.sendRedirect(redirectUrl + "&error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/admin/addAccount": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("account");
+			audit.setModifiedBy(sessionUserId);
 			try {
 				AdminHandler adminHandler = new AdminHandler();
 				int customerId = Utils.parseInt(request.getParameter("customerId"));
 				int branchId = Utils.parseInt(request.getParameter("branchId"));
-				adminHandler.createAccount(customerId, branchId);
+				int accountNo = adminHandler.createAccount(customerId, branchId, sessionUserId, modifiedOn);
 				String message = "Account Created Successfully!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(accountNo);
 				response.sendRedirect(request.getContextPath() + "/controller/admin/addAccount?message=" + message);
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
 				response.sendRedirect(
 						request.getContextPath() + "/controller/admin/addAccount?error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/admin/addBranch": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("branch");
+			audit.setModifiedBy(sessionUserId);
 			try {
 				AdminHandler adminHandler = new AdminHandler();
 				Branch branch = new Branch();
@@ -668,23 +859,46 @@ public class ControllerServlet extends HttpServlet {
 				branch.setLocation(request.getParameter("location"));
 				branch.setCity(request.getParameter("city"));
 				branch.setState(request.getParameter("state"));
-				adminHandler.addBranch(branch);
+				branch.setModifiedBy(sessionUserId);
+				branch.setModifiedOn(modifiedOn);
+				int branchId = adminHandler.addBranch(branch);
+				audit.setTargetId(branchId);
+				audit.setStatus(true);
+				audit.setDescription("Created new Branch");
 				response.sendRedirect(request.getContextPath() + "/controller/admin/branches");
 			} catch (CustomException e) {
+				audit.setStatus(false);
+				audit.setDescription(e.getMessage());
 				e.printStackTrace();
 				response.sendRedirect(request.getContextPath() + "/controller/admin/addBranch?error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/admin/branch": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("branch");
+			audit.setModifiedBy(sessionUserId);
 			int branchId = Utils.parseInt(request.getParameter("branchId"));
 			try {
 				String activate = request.getParameter("activate");
 				AdminHandler adminHandler = new AdminHandler();
 				if (activate.equals("0")) {
-					adminHandler.removeBranch(branchId);
+					adminHandler.removeBranch(branchId, sessionUserId, modifiedOn);
 					String message = "Removed Branch!";
+					audit.setDescription("Branch removed");
+					audit.setStatus(true);
+					audit.setTargetId(branchId);
 					response.sendRedirect(request.getContextPath() + "/controller/admin/branch?id=" + branchId
 							+ "&message=" + message);
 				} else {
@@ -692,13 +906,29 @@ public class ControllerServlet extends HttpServlet {
 				}
 			} catch (CustomException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(branchId);
 				response.sendRedirect(request.getContextPath() + "/controller/admin/branch?id=" + branchId + "&error="
 						+ e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/admin/manageUser": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("user");
+			audit.setModifiedBy(sessionUserId);
 			int userId = Utils.parseInt(request.getParameter("userId"));
 			String type = request.getParameter("userType");
 			try {
@@ -707,22 +937,41 @@ public class ControllerServlet extends HttpServlet {
 				ActiveStatus status = ActiveStatus.values()[Integer.parseInt(activate)];
 				AdminHandler adminHandler = new AdminHandler();
 				if (type != null && UserType.valueOf(type) == UserType.USER) {
-					adminHandler.setCustomerStatus(userId, status);
+					adminHandler.setCustomerStatus(userId, status, sessionUserId, modifiedOn);
 				} else {
-					adminHandler.setEmployeeStatus(userId, status);
+					adminHandler.setEmployeeStatus(userId, status, sessionUserId, modifiedOn);
 				}
 				String message = "User Status Updated!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(userId);
 				response.sendRedirect(request.getContextPath() + "/controller/admin/modifyUser?userId=" + userId
 						+ "&userType=" + UserType.valueOf(type).ordinal() + "&message=" + message);
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(userId);
 				response.sendRedirect(request.getContextPath() + "/controller/admin/modifyUser?userId=" + userId
 						+ "&userType=" + UserType.valueOf(type).ordinal() + "&error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/admin/addUser": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("user");
+			audit.setModifiedBy(sessionUserId);
 			int userId = 0;
 			int type = Integer.parseInt(request.getParameter("userType"));
 			try {
@@ -730,200 +979,387 @@ public class ControllerServlet extends HttpServlet {
 				if (type == 0) {
 					int branchId = Integer.parseInt(request.getParameter("branchId"));
 					Customer customer = getCustomerFormData(request, response);
+					customer.setModifiedOn(modifiedOn);
 					userId = adminHandler.addCustomer(customer);
-					adminHandler.createAccount(userId, branchId);
+					adminHandler.createAccount(userId, branchId, sessionUserId, modifiedOn);
 				} else {
 					Employee employee = getEmployeeFormData(request, response);
-					adminHandler.addEmployee(employee);
+					employee.setModifiedOn(modifiedOn);
+					userId = adminHandler.addEmployee(employee);
 				}
 				String message = "User Created Successfully!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(userId);
 				String redirectUrl = request.getContextPath() + "/controller/admin/modifyUser";
 				response.sendRedirect(redirectUrl + "?userId=" + userId + "&userType=" + type + "&message=" + message);
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(userId);
 				String redirectUrl = request.getContextPath() + "/controller/admin/modifyUser";
 				response.sendRedirect(
 						redirectUrl + "?userId=" + userId + "&userType=" + type + "&error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/admin/modifyUser": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("user");
+			audit.setModifiedBy(sessionUserId);
 			int userId = Integer.parseInt(request.getParameter("userId"));
 			int type = Integer.parseInt(request.getParameter("userType"));
 			try {
 				AdminHandler adminHandler = new AdminHandler();
 				if (type == 0) {
 					Customer customer = getCustomerFormData(request, response);
+					customer.setModifiedOn(modifiedOn);
 					customer.setUserId(userId);
 					adminHandler.updateCustomer(customer);
 				} else {
 					Employee employee = getEmployeeFormData(request, response);
+					employee.setModifiedOn(modifiedOn);
 					employee.setUserId(userId);
 					adminHandler.updateEmployee(employee);
 				}
 				String message = "User Data Updated Successfully!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(userId);
 				response.sendRedirect(request.getContextPath() + "/controller/admin/modifyUser?userId=" + userId
 						+ "&userType=" + type + "&message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(userId);
 				response.sendRedirect(request.getContextPath() + "/controller/admin/modifyUser?userId=" + userId
 						+ "&userType=" + type + "&error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/admin/changePassword": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("user");
+			audit.setModifiedBy(sessionUserId);
 			try {
 				AdminHandler adminHandler = new AdminHandler();
-				int id = (int) session.getAttribute("userId");
 				String currentPassword = request.getParameter("currentPassword");
 				String newPassword = request.getParameter("newPassword");
 				String confirmPassword = request.getParameter("confirmPassword");
 				if (!newPassword.equals(confirmPassword)) {
 					throw new InvalidValueException("Please re-enter new Password correctly!");
 				}
-				adminHandler.changePassword(id, currentPassword, newPassword);
+				adminHandler.changePassword(sessionUserId, currentPassword, newPassword, sessionUserId, modifiedOn);
 				String message = "Password Updated Successful!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(sessionUserId);
 				String redirectUrl = request.getContextPath() + "/controller/admin/profile";
 				response.sendRedirect(redirectUrl + "?message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(sessionUserId);
 				String redirectUrl = request.getContextPath() + "/controller/admin/profile";
 				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/employee/addAccount": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("account");
+			audit.setModifiedBy(sessionUserId);
 			try {
 				EmployeeHandler employeeHandler = new EmployeeHandler();
 				int customerId = Utils.parseInt(request.getParameter("customerId"));
 				int branchId = (int) session.getAttribute("branchId");
-				employeeHandler.createAccount(customerId, branchId);
+				int accountNo = employeeHandler.createAccount(customerId, branchId, sessionUserId, modifiedOn);
 				String message = "Account Created Successfully!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(accountNo);
 				response.sendRedirect(request.getContextPath() + "/controller/employee/addAccount?message=" + message);
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
 				response.sendRedirect(
 						request.getContextPath() + "/controller/employee/addAccount?error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/employee/manageAccount": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("account");
+			audit.setModifiedBy(sessionUserId);
 			try {
 				String activate = request.getParameter("activate");
 				ActiveStatus status = ActiveStatus.values()[Integer.parseInt(activate)];
 				EmployeeHandler employeeHandler = new EmployeeHandler();
-				employeeHandler.setAccountStatus(accountNo, status);
+				employeeHandler.setAccountStatus(accountNo, status, sessionUserId, modifiedOn);
 				String message = "Account Status Updated!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(accountNo);
 				String redirectUrl = request.getContextPath() + "/controller/employee/manageAccount?accountNo="
 						+ accountNo;
 				response.sendRedirect(redirectUrl + "&message=" + message);
 			} catch (CustomException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(accountNo);
 				String redirectUrl = request.getContextPath() + "/controller/employee/manageAccount?accountNo="
 						+ accountNo;
 				response.sendRedirect(redirectUrl + "&error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/employee/addUser": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("user");
+			audit.setModifiedBy(sessionUserId);
 			int userId = 0;
 			try {
 				EmployeeHandler employeeHandler = new EmployeeHandler();
 				Customer customer = getCustomerFormData(request, response);
+				customer.setModifiedOn(modifiedOn);
 				userId = employeeHandler.addCustomer(customer);
 				int branchId = (int) session.getAttribute("branchId");
-				employeeHandler.createAccount(userId, branchId);
+				employeeHandler.createAccount(userId, branchId, sessionUserId, modifiedOn);
 				String message = "User Created Successfully!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(userId);
 				String redirectUrl = request.getContextPath() + "/controller/employee/modifyUser";
 				response.sendRedirect(redirectUrl + "?message=" + message);
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(userId);
 				String redirectUrl = request.getContextPath() + "/controller/employee/modifyUser";
 				response.sendRedirect(redirectUrl + "?userId=" + userId + "&error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/employee/manageUser": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("user");
+			audit.setModifiedBy(sessionUserId);
 			int userId = Utils.parseInt(request.getParameter("userId"));
 			try {
 				String activate = request.getParameter("activate");
 				ActiveStatus status = ActiveStatus.values()[Integer.parseInt(activate)];
 				EmployeeHandler employeeHandler = new EmployeeHandler();
-				employeeHandler.setCustomerStatus(userId, status);
+				employeeHandler.setCustomerStatus(userId, status, sessionUserId, modifiedOn);
 				String message = "User Status Updated!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(userId);
 				response.sendRedirect(request.getContextPath() + "/controller/employee/modifyUser?userId=" + userId
 						+ "&message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(userId);
 				response.sendRedirect(request.getContextPath() + "/controller/employee/modifyUser?userId=" + userId
 						+ "&error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/employee/modifyUser": {
 			int userId = Integer.parseInt(request.getParameter("userId"));
+			long modifiedOn = System.currentTimeMillis();
+			int sessionUserId = (int) session.getAttribute("userId");
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("user");
+			audit.setModifiedBy(sessionUserId);
 			try {
 				EmployeeHandler employeeHandler = new EmployeeHandler();
 				Customer customer = getCustomerFormData(request, response);
+				customer.setModifiedOn(modifiedOn);
 				customer.setUserId(userId);
 				employeeHandler.updateCustomer(customer);
 				String message = "User Data Updated!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(userId);
 				request.setAttribute("message", message);
 				response.sendRedirect(request.getContextPath() + "/controller/employee/modifyUser?userId=" + userId
 						+ "&message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(userId);
 				response.sendRedirect(request.getContextPath() + "/controller/employee/modifyUser?userId=" + userId
 						+ "&error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/employee/fundTransfer": {
+			long modifiedOn = System.currentTimeMillis();
+			int sessionUserId = (int) session.getAttribute("userId");
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("deposit");
+			audit.setModifiedBy(sessionUserId);
+			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
 				EmployeeHandler employeeHandler = new EmployeeHandler();
-				int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 				double amount = Utils.parseDouble(request.getParameter("amount"));
 				String description = request.getParameter("description");
-				employeeHandler.deposit(accountNo, amount, description);
+				employeeHandler.deposit(accountNo, amount, description, sessionUserId, modifiedOn);
 				String message = "Amount Deposited!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(accountNo);
 				request.setAttribute("message", message);
 				response.sendRedirect(
 						request.getContextPath() + "/controller/employee/fundTransfer?message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(accountNo);
 				response.sendRedirect(
 						request.getContextPath() + "/controller/employee/fundTransfer?error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
 
 		case "/employee/changePassword": {
+			int sessionUserId = (int) session.getAttribute("userId");
+			long modifiedOn = System.currentTimeMillis();
+			Audit audit = new Audit();
+			audit.setTime(modifiedOn);
+			audit.setAction("user");
+			audit.setModifiedBy(sessionUserId);
 			try {
 				EmployeeHandler employeeHandler = new EmployeeHandler();
-				int id = (int) session.getAttribute("userId");
 				String currentPassword = request.getParameter("currentPassword");
 				String newPassword = request.getParameter("newPassword");
 				String confirmPassword = request.getParameter("confirmPassword");
 				if (!newPassword.equals(confirmPassword)) {
 					throw new InvalidValueException("Please re-enter new Password correctly!");
 				}
-				employeeHandler.changePassword(id, currentPassword, newPassword);
+				employeeHandler.changePassword(sessionUserId, currentPassword, newPassword, sessionUserId, modifiedOn);
 				String message = "Password Updated Successful!";
+				audit.setDescription(message);
+				audit.setStatus(true);
+				audit.setTargetId(sessionUserId);
 				String redirectUrl = request.getContextPath() + "/controller/employee/profile";
 				response.sendRedirect(redirectUrl + "?message=" + message);
 			} catch (CustomException | InvalidValueException e) {
 				e.printStackTrace();
+				audit.setDescription(e.getMessage());
+				audit.setStatus(false);
+				audit.setTargetId(sessionUserId);
 				String redirectUrl = request.getContextPath() + "/controller/employee/profile";
 				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
+			} finally {
+				SessionHandler sessionHandler = new SessionHandler();
+				try {
+					sessionHandler.audit(audit);
+				} catch (CustomException e) {
+					e.printStackTrace();
+				}
 			}
 			break;
 		}
@@ -953,6 +1389,8 @@ public class ControllerServlet extends HttpServlet {
 		employee.setCity(request.getParameter("city"));
 		employee.setState(request.getParameter("state"));
 		employee.setBranchId(Integer.parseInt(request.getParameter("branchId")));
+		HttpSession session = request.getSession();
+		employee.setModifiedBy((int) session.getAttribute("userId"));
 		return employee;
 	}
 
@@ -979,6 +1417,8 @@ public class ControllerServlet extends HttpServlet {
 		customer.setLocation(request.getParameter("location"));
 		customer.setCity(request.getParameter("city"));
 		customer.setState(request.getParameter("state"));
+		HttpSession session = request.getSession();
+		customer.setModifiedBy((int) session.getAttribute("userId"));
 		return customer;
 	}
 }

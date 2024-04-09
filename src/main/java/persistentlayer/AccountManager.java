@@ -9,9 +9,9 @@ import utility.ActiveStatus;
 
 public interface AccountManager {
 
-	void createAccount(Account account) throws CustomException, InvalidValueException;
+	int createAccount(Account account) throws CustomException, InvalidValueException;
 
-	void deleteAccount(int accountNo) throws CustomException;
+	void deleteAccount(int accountNo, int modifiedBy) throws CustomException;
 
 	double getCurrentBalance(int accountNo) throws CustomException, InvalidValueException;
 
@@ -19,9 +19,9 @@ public interface AccountManager {
 
 	boolean isValidAccount(int accountNo) throws CustomException;
 
-	void setAccountStatus(int accountNo, ActiveStatus status) throws CustomException;
+	void setAccountStatus(int accountNo, ActiveStatus status, int modifiedBy, long modifiedOn) throws CustomException;
 
-	void setPrimaryAccount(int customerId, int accountNo) throws CustomException;
+	void setPrimaryAccount(int customerId, int accountNo, int modifiedBy, long modifiedOn) throws CustomException;
 
 	Account getAccount(int accountNo) throws InvalidValueException, CustomException;
 
@@ -31,7 +31,8 @@ public interface AccountManager {
 
 	void checkValidRequest(int customerId, String mpin, int accountNo) throws InvalidValueException, CustomException;
 
-	void setMpin(int accountNo, String newPin) throws CustomException, InvalidValueException;
+	void setMpin(int accountNo, String newPin, int modifiedBy, long modifiedOn)
+			throws CustomException, InvalidValueException;
 
 	int getBranchAccountsCount(int branchId, int limit) throws CustomException;
 

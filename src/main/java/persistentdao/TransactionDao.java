@@ -18,9 +18,9 @@ public class TransactionDao implements TransactionManager {
 	public void initTransaction(Transaction transaction) throws CustomException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement transactionStatement = connection.prepareStatement(
-						"INSERT INTO transaction(transactionId,type,time,amount,primaryAccount,transactionalAccount,description,customerId,balance,ifsc) values(?,?,?,?,?,?,?,?,?,?)");
-				PreparedStatement accountStatement = connection
-						.prepareStatement("UPDATE account SET currentBalance = currentBalance + ? WHERE accountNo = ?");
+						"INSERT INTO transaction(transactionId,type,time,amount,primaryAccount,transactionalAccount,description,customerId,balance,ifsc,modifiedBy,modifiedOn) values(?,?,?,?,?,?,?,?,?,?,?,?)");
+				PreparedStatement accountStatement = connection.prepareStatement(
+						"UPDATE account SET currentBalance = currentBalance + ?, modifiedBy = ?,modifiedOn = ? WHERE accountNo = ?");
 				PreparedStatement balanceStatement = connection
 						.prepareStatement("SELECT currentBalance FROM account WHERE accountNo = ?")) {
 			String id = transaction.getId();
@@ -37,10 +37,14 @@ public class TransactionDao implements TransactionManager {
 			transactionStatement.setObject(8, transaction.getCustomerId());
 			transactionStatement.setObject(9, transaction.getBalance());
 			transactionStatement.setString(10, transaction.getIfsc());
+			transactionStatement.setObject(11, transaction.getModifiedBy());
+			transactionStatement.setObject(12, transaction.getModifiedOn());
 
 			balanceStatement.setObject(1, transaction.getPrimaryAccount());
 
-			accountStatement.setObject(2, transaction.getPrimaryAccount());
+			accountStatement.setObject(2, transaction.getModifiedBy());
+			accountStatement.setObject(3, transaction.getModifiedOn());
+			accountStatement.setObject(4, transaction.getPrimaryAccount());
 
 			if (transaction.getType() == TransactionType.DEBIT) {
 				accountStatement.setObject(1, -transaction.getAmount());

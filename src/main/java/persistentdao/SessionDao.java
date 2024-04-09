@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import customexceptions.CustomException;
 import customexceptions.InvalidOperationException;
 import customexceptions.InvalidValueException;
+import model.Audit;
 import model.User;
 import persistentlayer.SessionManager;
 import utility.UserType;
@@ -60,6 +61,23 @@ public class SessionDao implements SessionManager {
 			}
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("Authentication failed!", e);
+		}
+	}
+
+	@Override
+	public void audit(Audit audit) throws CustomException {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement(
+						"INSERT INTO audit(time,action,targetId,modifiedBy,description,status) VALUES(?,?,?,?,?,?)")) {
+			statement.setLong(1, audit.getTime());
+			statement.setString(2, audit.getAction());
+			statement.setInt(3, audit.getTargetId());
+			statement.setInt(4, audit.getModifiedBy());
+			statement.setString(5, audit.getDescription());
+			statement.setBoolean(6, audit.getStatus());
+			statement.executeUpdate();
+		} catch (SQLException | ClassNotFoundException e) {
+			throw new CustomException("Audit Logging failed!", e);
 		}
 	}
 

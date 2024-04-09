@@ -242,8 +242,22 @@ ul a {
 .border-table,
 .border-table td,
 .border-table th {
-  border: 1px solid gray;
+  border-right: 1px solid white;
   border-collapse: collapse;
+}
+
+.border-table tr:nth-child(odd){
+	background-color:rgba(128, 128, 128, 0.124)
+	
+}
+
+.border-table tr:hover:not(:has(th)) {
+  background-color: var(--lightBlue);
+ /* background-color: rgba(128, 128, 128, 0.124);*/
+  cursor: pointer;
+}
+.border-table{
+	box-shadow: 0 0 1px gray;
 }
 
 .border-table td,
@@ -451,11 +465,6 @@ div.activePage {
   border-radius: 0.5rem;
   height: 3rem;
   width: 100%;
-}
-
-.border-table tr:hover:not(:has(th)) {
-  background-color: rgba(128, 128, 128, 0.224);
-  cursor: pointer;
 }
 
 .credit {

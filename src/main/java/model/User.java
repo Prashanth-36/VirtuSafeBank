@@ -25,6 +25,8 @@ public class User implements Serializable {
 	private String state;
 	private String email;
 	private Gender gender;
+	private Long modifiedOn;
+	private int modifiedBy;
 
 	public String getLocation() {
 		return location;
@@ -122,12 +124,28 @@ public class User implements Serializable {
 		this.gender = gender;
 	}
 
+	public int getModifiedBy() {
+		return modifiedBy;
+	}
+
+	public void setModifiedBy(int modifiedBy) {
+		this.modifiedBy = modifiedBy;
+	}
+
 	@Override
 	public String toString() {
 		LocalDate date = Utils.millisToLocalDate(dob, ZoneId.systemDefault());
-
 		return "User [userId=" + userId + ", name=" + name + ", dob=" + date + ", number=" + number + ", status="
 				+ status + ", password=" + password + ", type=" + type + ", location=" + location + ", city=" + city
-				+ ", state=" + state + ", email=" + email + ", gender=" + gender + "]";
+				+ ", state=" + state + ", email=" + email + ", gender=" + gender + ", modifiedOn=" + getModifiedOn()
+				+ ", modifiedBy=" + modifiedBy + "]";
+	}
+
+	public Long getModifiedOn() {
+		return modifiedOn;
+	}
+
+	public void setModifiedOn(Long modifiedOn) {
+		this.modifiedOn = modifiedOn;
 	}
 }

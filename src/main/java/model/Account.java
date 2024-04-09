@@ -14,6 +14,8 @@ public class Account implements Serializable {
 	private Integer branchId;
 	private ActiveStatus status;
 	private String mpin;
+	private Long modifiedOn;
+	private int modifiedBy;
 
 	public Integer getAccountNo() {
 		return accountNo;
@@ -79,10 +81,27 @@ public class Account implements Serializable {
 		this.mpin = mpin;
 	}
 
+	public int getModifiedBy() {
+		return modifiedBy;
+	}
+
+	public void setModifiedBy(int modifiedBy) {
+		this.modifiedBy = modifiedBy;
+	}
+
+	public Long getModifiedOn() {
+		return modifiedOn;
+	}
+
+	public void setModifiedOn(Long modifiedOn) {
+		this.modifiedOn = modifiedOn;
+	}
+
 	@Override
 	public String toString() {
 		return "Account [accountNo=" + accountNo + ", customerId=" + customerId + ", currentBalance=" + currentBalance
-				+ ", isPrimaryAccout=" + isPrimaryAccount + ", openDate=" + openDate + ", branchId=" + branchId
-				+ ", status=" + status + ", mpin=" + mpin + "]";
+				+ ", isPrimaryAccount=" + isPrimaryAccount + ", openDate=" + openDate + ", branchId=" + branchId
+				+ ", status=" + status + ", mpin=" + mpin + ", modifiedOn=" + modifiedOn + ", modifiedBy=" + modifiedBy
+				+ "]";
 	}
 }

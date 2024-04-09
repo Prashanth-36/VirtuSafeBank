@@ -76,7 +76,8 @@ public class CustomerHandler {
 		return account;
 	}
 
-	public void setPrimaryAccount(int customerId, int accountNo) throws CustomException, InvalidValueException {
+	public void setPrimaryAccount(int customerId, int accountNo, int modifiedBy, long modifiedOn)
+			throws CustomException, InvalidValueException {
 		if (!getAccounts(customerId).keySet().contains(accountNo)) {
 			throw new InvalidValueException("Invalid Account Number / Restricted Access");
 		}
@@ -86,11 +87,11 @@ public class CustomerHandler {
 				accountCache.remove(num);
 			}
 		}
-		accountManager.setPrimaryAccount(customerId, accountNo);
+		accountManager.setPrimaryAccount(customerId, accountNo, modifiedBy, modifiedOn);
 	}
 
-	public void deposit(int customerId, String mpin, int accountNo, double amount, String description)
-			throws CustomException, InvalidValueException {
+	public void deposit(int customerId, String mpin, int accountNo, double amount, String description, int modifiedBy,
+			long modifiedOn) throws CustomException, InvalidValueException {
 		checkValidRequest(customerId, mpin, accountNo);
 		checkNegativeAmount(amount);
 		accountCache.remove(accountNo);
@@ -100,11 +101,13 @@ public class CustomerHandler {
 		transaction.setType(TransactionType.CREDIT);
 		transaction.setDescription(description);
 		transaction.setCustomerId(customerId);
+		transaction.setModifiedBy(modifiedBy);
+		transaction.setModifiedOn(modifiedOn);
 		transactionManager.initTransaction(transaction);
 	}
 
-	public void withdrawl(int customerId, String mpin, int accountNo, double amount, String description)
-			throws CustomException, InvalidValueException, InsufficientFundException {
+	public void withdrawl(int customerId, String mpin, int accountNo, double amount, String description, int modifiedBy,
+			long modifiedOn) throws CustomException, InvalidValueException, InsufficientFundException {
 		checkValidRequest(customerId, mpin, accountNo);
 		checkSufficientBalance(accountNo, amount);
 		accountCache.remove(accountNo);
@@ -114,11 +117,13 @@ public class CustomerHandler {
 		transaction.setType(TransactionType.DEBIT);
 		transaction.setDescription(description);
 		transaction.setCustomerId(customerId);
+		transaction.setModifiedBy(modifiedBy);
+		transaction.setModifiedOn(modifiedOn);
 		transactionManager.initTransaction(transaction);
 	}
 
 	public void moneyTransfer(int customerId, String mpin, int sourceAccountNo, int targetAccountNo, double amount,
-			String ifsc, String description)
+			String ifsc, String description, int modifiedBy, long modifiedOn)
 			throws InvalidValueException, CustomException, InsufficientFundException, InvalidOperationException {
 
 		if (sourceAccountNo == targetAccountNo) {
@@ -136,6 +141,8 @@ public class CustomerHandler {
 		primaryTransaction.setDescription(description);
 		primaryTransaction.setCustomerId(customerId);
 		primaryTransaction.setIfsc(ifsc);
+		primaryTransaction.setModifiedBy(modifiedBy);
+		primaryTransaction.setModifiedOn(modifiedOn);
 
 		try {
 			Account transactionalAccount = getAccount(targetAccountNo);
@@ -148,6 +155,8 @@ public class CustomerHandler {
 			secondaryTransaction.setDescription(description);
 			secondaryTransaction.setIfsc(ifsc);
 			secondaryTransaction.setCustomerId(transactionalAccount.getCustomerId());
+			secondaryTransaction.setModifiedBy(modifiedBy);
+			secondaryTransaction.setModifiedOn(modifiedOn);
 
 			List<Transaction> transactions = new ArrayList<Transaction>();
 			transactions.add(primaryTransaction);
@@ -206,15 +215,15 @@ public class CustomerHandler {
 		accountManager.checkValidRequest(customerId, mpin, accountNo);
 	}
 
-	public void changeMpin(int customerId, int accountNo, String currentPin, String newPin)
-			throws InvalidValueException, CustomException {
+	public void changeMpin(int customerId, int accountNo, String currentPin, String newPin, int modifiedBy,
+			long modifiedOn) throws InvalidValueException, CustomException {
 		checkValidRequest(customerId, currentPin, accountNo);
-		accountManager.setMpin(accountNo, newPin);
+		accountManager.setMpin(accountNo, newPin, modifiedBy, modifiedOn);
 	}
 
-	public void changePassword(int customerId, String currentPassword, String newPassword)
-			throws InvalidValueException, CustomException {
-		customerManager.setPassword(customerId, currentPassword, newPassword);
+	public void changePassword(int customerId, String currentPassword, String newPassword, int modifiedBy,
+			long modifiedOn) throws InvalidValueException, CustomException {
+		customerManager.setPassword(customerId, currentPassword, newPassword, modifiedBy, modifiedOn);
 	}
 
 }

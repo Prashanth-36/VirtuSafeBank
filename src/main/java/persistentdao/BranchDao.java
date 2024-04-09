@@ -17,10 +17,10 @@ import utility.ActiveStatus;
 public class BranchDao implements BranchManager {
 
 	@Override
-	public void addBranch(Branch branch) throws CustomException {
+	public int addBranch(Branch branch) throws CustomException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(
-						"INSERT INTO branch(location,city,state,status) values(?,?,?,?)",
+						"INSERT INTO branch(location,city,state,status,modifiedBy,modifiedOn) values(?,?,?,?,?,?)",
 						Statement.RETURN_GENERATED_KEYS);
 				PreparedStatement updateStatement = connection
 						.prepareStatement("UPDATE branch SET ifsc = ? WHERE id = ?")) {
@@ -28,6 +28,8 @@ public class BranchDao implements BranchManager {
 			statement.setString(2, branch.getCity());
 			statement.setString(3, branch.getState());
 			statement.setObject(4, ActiveStatus.ACTIVE.ordinal());
+			statement.setObject(5, branch.getModifiedBy());
+			statement.setObject(6, branch.getModifiedOn());
 			try {
 				connection.setAutoCommit(false);
 				int rows = statement.executeUpdate();
@@ -41,9 +43,11 @@ public class BranchDao implements BranchManager {
 							updateStatement.setObject(2, id);
 							updateStatement.executeUpdate();
 							connection.commit();
+							return id;
 						}
 					}
 				}
+				throw new CustomException("Branch not created!");
 			} catch (SQLException e) {
 				connection.rollback();
 				throw e;
@@ -90,12 +94,14 @@ public class BranchDao implements BranchManager {
 	}
 
 	@Override
-	public void removeBranch(int branchId) throws CustomException {
+	public void removeBranch(int branchId, int modifiedBy, long modifedOn) throws CustomException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
-						.prepareStatement("UPDATE branch SET status = ? WHERE id = ?")) {
+						.prepareStatement("UPDATE branch SET status = ?, modifiedBy = ?,modifiedOn = ? WHERE id = ?")) {
 			statement.setObject(1, ActiveStatus.INACTIVE.ordinal());
-			statement.setObject(2, branchId);
+			statement.setObject(2, modifiedBy);
+			statement.setObject(3, modifedOn);
+			statement.setObject(4, branchId);
 			statement.executeUpdate();
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("Branch Deletion failed!", e);

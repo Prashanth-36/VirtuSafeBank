@@ -9,11 +9,11 @@ import utility.ActiveStatus;
 
 public interface BranchManager {
 
-	void addBranch(Branch branch) throws CustomException;
+	int addBranch(Branch branch) throws CustomException;
 
 	Branch getBranch(int branchId) throws CustomException, InvalidValueException;
 
-	void removeBranch(int branchId) throws CustomException;
+	void removeBranch(int branchId, int modifiedBy, long modifiedOn) throws CustomException;
 
 	boolean isValidBranch(int branchId) throws InvalidValueException, CustomException;
 

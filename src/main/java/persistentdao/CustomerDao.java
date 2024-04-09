@@ -25,7 +25,7 @@ public class CustomerDao implements CustomerManager {
 	public int addCustomer(Customer customer) throws CustomException, InvalidValueException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement userStatement = connection.prepareStatement(
-						"INSERT INTO user(name, dob, number,password,status,type,location,city,state,email,gender) values(?,?,?,?,?,?,?,?,?,?,?)",
+						"INSERT INTO user(name, dob, number,password,status,type,location,city,state,email,gender,modifiedBy,modifiedOn) values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
 						Statement.RETURN_GENERATED_KEYS);
 				PreparedStatement customerStatement = connection
 						.prepareStatement("INSERT INTO customer(id,aadhaarNo,panNo) VALUES(?,?,?)");) {
@@ -42,6 +42,8 @@ public class CustomerDao implements CustomerManager {
 			userStatement.setString(9, customer.getState());
 			userStatement.setString(10, customer.getEmail());
 			userStatement.setObject(11, customer.getGender().ordinal());
+			userStatement.setObject(12, customer.getModifiedBy());
+			userStatement.setObject(13, customer.getModifiedOn());
 
 			customerStatement.setObject(2, customer.getAadhaarNo());
 			customerStatement.setString(3, customer.getPanNo());
@@ -73,11 +75,15 @@ public class CustomerDao implements CustomerManager {
 	}
 
 	@Override
-	public void setCustomerStatus(int customerId, ActiveStatus status) throws CustomException {
+	public void setCustomerStatus(int customerId, ActiveStatus status, int modifiedBy, long modifedOn)
+			throws CustomException {
 		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement statement = connection.prepareStatement("UPDATE user SET status = ? where id = ?");) {
+				PreparedStatement statement = connection
+						.prepareStatement("UPDATE user SET status = ?, modifiedBy = ?, modifiedOn = ? where id = ?");) {
 			statement.setObject(1, status.ordinal());
-			statement.setObject(2, customerId);
+			statement.setObject(2, modifiedBy);
+			statement.setObject(3, modifedOn);
+			statement.setObject(4, customerId);
 			statement.executeUpdate();
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("Customer Status Modification failed!", e);
@@ -85,8 +91,8 @@ public class CustomerDao implements CustomerManager {
 	}
 
 	@Override
-	public void removeCustomer(int customerId) throws CustomException {
-		setCustomerStatus(customerId, ActiveStatus.INACTIVE);
+	public void removeCustomer(int customerId, int modifiedBy) throws CustomException {
+		setCustomerStatus(customerId, ActiveStatus.INACTIVE, modifiedBy, modifiedBy);
 	}
 
 	@Override
@@ -261,16 +267,18 @@ public class CustomerDao implements CustomerManager {
 	}
 
 	@Override
-	public void setPassword(int customerId, String currentPassword, String newPassword)
+	public void setPassword(int customerId, String currentPassword, String newPassword, int modifiedBy, long modifedOn)
 			throws InvalidValueException, CustomException {
 		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement statement = connection
-						.prepareStatement("UPDATE user SET password = ? WHERE id = ? && password = ?")) {
+				PreparedStatement statement = connection.prepareStatement(
+						"UPDATE user SET password = ?, modifiedBy = ?,modifiedOn = ? WHERE id = ? && password = ?")) {
 			String hashedPassword = Utils.hashPassword(newPassword);
 			statement.setString(1, hashedPassword);
-			statement.setObject(2, customerId);
+			statement.setObject(2, modifiedBy);
+			statement.setObject(3, modifedOn);
+			statement.setObject(4, customerId);
 			String currentHashedPassword = Utils.hashPassword(currentPassword);
-			statement.setString(3, currentHashedPassword);
+			statement.setString(5, currentHashedPassword);
 			int affected = statement.executeUpdate();
 			if (affected == 0) {
 				throw new InvalidValueException("Invalid Current Password!");

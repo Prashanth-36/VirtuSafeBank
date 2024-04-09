@@ -17,6 +17,8 @@ public class Transaction {
 	private Integer customerId;
 	private Double balance;
 	private String ifsc;
+	private Long modifiedOn;
+	private int modifiedBy;
 
 	public String getId() {
 		return id;
@@ -98,12 +100,28 @@ public class Transaction {
 		this.ifsc = ifsc;
 	}
 
+	public int getModifiedBy() {
+		return modifiedBy;
+	}
+
+	public void setModifiedBy(int modifiedBy) {
+		this.modifiedBy = modifiedBy;
+	}
+
+	public Long getModifiedOn() {
+		return modifiedOn;
+	}
+
+	public void setModifiedOn(Long modifiedOn) {
+		this.modifiedOn = modifiedOn;
+	}
+
 	@Override
 	public String toString() {
 		LocalDateTime time = Utils.millisToLocalDateTime(timestamp, ZoneId.systemDefault());
 		return "Transaction [id=" + id + ", type=" + type + ", amount=" + amount + ", primaryAccount=" + primaryAccount
 				+ ", transactionalAccount=" + transactionalAccount + ", timestamp=" + time + ", description="
-				+ description + ", customerId=" + customerId + ", balance=" + balance + ", ifsc=" + ifsc + "]";
+				+ description + ", customerId=" + customerId + ", balance=" + balance + ", ifsc=" + ifsc
+				+ ", modifiedOn=" + modifiedOn + ", modifiedBy=" + modifiedBy + "]";
 	}
-
 }

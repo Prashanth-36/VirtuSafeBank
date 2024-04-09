@@ -12,7 +12,7 @@ public interface CustomerManager {
 
 	int addCustomer(Customer customer) throws CustomException, InvalidValueException;
 
-	void removeCustomer(int customerId) throws CustomException;
+	void removeCustomer(int customerId, int modifiedBy) throws CustomException;
 
 	Customer getCustomer(int id) throws CustomException, InvalidValueException;
 
@@ -25,7 +25,7 @@ public interface CustomerManager {
 
 	List<Integer> getCustomerBranches(int customerId) throws CustomException;
 
-	void setCustomerStatus(int customerId, ActiveStatus status) throws CustomException;
+	void setCustomerStatus(int customerId, ActiveStatus status, int modifiedBy, long modifiedOn) throws CustomException;
 
 	Map<Integer, Customer> getAllCustomers(int offset, int limit) throws CustomException;
 
@@ -33,6 +33,6 @@ public interface CustomerManager {
 
 	void updateCustomer(Customer customer) throws CustomException, InvalidValueException;
 
-	void setPassword(int customerId, String currentPassword, String newPassword)
+	void setPassword(int customerId, String currentPassword, String newPassword, int modifiedBy, long modifiedOn)
 			throws InvalidValueException, CustomException;
 }

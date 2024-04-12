@@ -36,6 +36,11 @@ import utility.Validate;
 public class ControllerServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
+	static AdminHandler adminHandler = new AdminHandler();
+	static SessionHandler sessionHandler = new SessionHandler();
+	static EmployeeHandler employeeHandler = new EmployeeHandler();
+	static CustomerHandler customerHandler = new CustomerHandler();
+
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String path = request.getPathInfo();
@@ -50,7 +55,6 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/user/home": {
 			try {
-				CustomerHandler customerHandler = new CustomerHandler();
 				int customerId = (int) session.getAttribute("userId");
 				Map<Integer, Account> accounts = customerHandler.getAccounts(customerId);
 				request.setAttribute("accounts", accounts);
@@ -67,7 +71,6 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/admin/home": {
 			try {
-				AdminHandler handler = new AdminHandler();
 				String id = request.getParameter("branchId");
 				Map<Integer, Account> accounts = null;
 				int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
@@ -75,8 +78,8 @@ public class ControllerServlet extends HttpServlet {
 				int pages = 0;
 				if (id != null && !id.isEmpty()) {
 					int branchId = Integer.parseInt(id);
-					accounts = handler.getBranchAccounts(branchId);
-					pages = handler.getBranchAccountsPageCount(branchId, 10);
+					accounts = adminHandler.getBranchAccounts(branchId);
+					pages = adminHandler.getBranchAccountsPageCount(branchId, 10);
 					request.setAttribute("branchId", branchId);
 				}
 				request.setAttribute("totalPages", pages);
@@ -84,7 +87,7 @@ public class ControllerServlet extends HttpServlet {
 				int status = Math.abs(Utils.parseInt(request.getParameter("branchStatus")));
 				ActiveStatus branchStatus = ActiveStatus.values()[status];
 				request.setAttribute("status", status);
-				request.setAttribute("branches", handler.getBranches(branchStatus));
+				request.setAttribute("branches", adminHandler.getBranches(branchStatus));
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/accounts.jsp").forward(request, response);
 
 			} catch (InvalidValueException | CustomException e) {
@@ -99,14 +102,13 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/employee/home": {
 			try {
-				EmployeeHandler handler = new EmployeeHandler();
 				int branchId = (int) session.getAttribute("branchId");
 				Map<Integer, Account> accounts = null;
 				int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
 				request.setAttribute("page", pageNo);
 				int pages = 0;
-				accounts = handler.getBranchAccounts(branchId);
-				pages = handler.getBranchAccountsPageCount(branchId, 10);
+				accounts = employeeHandler.getBranchAccounts(branchId);
+				pages = employeeHandler.getBranchAccountsPageCount(branchId, 10);
 				request.setAttribute("accounts", accounts);
 				request.setAttribute("totalPages", pages);
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/accounts.jsp").forward(request, response);
@@ -129,7 +131,6 @@ public class ControllerServlet extends HttpServlet {
 					request.setAttribute("months", months);
 					int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
 					request.setAttribute("page", pageNo);
-					CustomerHandler customerHandler = new CustomerHandler();
 					int userId = (int) session.getAttribute("userId");
 					Account account = customerHandler.getAccount(accountNo);
 					request.setAttribute("isPrimary", account.getIsPrimaryAccount());
@@ -148,7 +149,6 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/user/moneyTransfer": {
 			try {
-				CustomerHandler customerHandler = new CustomerHandler();
 				int userId = (int) session.getAttribute("userId");
 				Map<Integer, Account> accounts = (Map<Integer, Account>) customerHandler.getAccounts(userId);
 				request.setAttribute("accounts", accounts);
@@ -163,7 +163,6 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/user/withdrawl": {
 			try {
-				CustomerHandler customerHandler = new CustomerHandler();
 				int userId = (int) session.getAttribute("userId");
 				Map<Integer, Account> accounts = (Map<Integer, Account>) customerHandler.getAccounts(userId);
 				request.setAttribute("accounts", accounts);
@@ -178,7 +177,6 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/user/deposit": {
 			try {
-				CustomerHandler customerHandler = new CustomerHandler();
 				int userId = (int) session.getAttribute("userId");
 				Map<Integer, Account> accounts = (Map<Integer, Account>) customerHandler.getAccounts(userId);
 				request.setAttribute("accounts", accounts);
@@ -193,7 +191,6 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/user/profile": {
 			try {
-				EmployeeHandler employeeHandler = new EmployeeHandler();
 				int userId = (int) session.getAttribute("userId");
 				Customer profile = (Customer) employeeHandler.getCustomer(userId);
 				request.setAttribute("profile", profile);
@@ -207,7 +204,6 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/admin/addAccount": {
 			try {
-				AdminHandler adminHandler = new AdminHandler();
 				Map<Integer, Branch> branches = adminHandler.getBranches(ActiveStatus.ACTIVE);
 				request.setAttribute("branches", branches);
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/accountForm.jsp").forward(request, response);
@@ -224,7 +220,6 @@ public class ControllerServlet extends HttpServlet {
 				int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
 				int months = Math.abs(Utils.parseInt(request.getParameter("months")));
 				request.setAttribute("months", months);
-				AdminHandler adminHandler = new AdminHandler();
 				request.setAttribute("account", adminHandler.getAccount(accountNo));
 				request.setAttribute("totalPages", adminHandler.getTransactionPageCount(accountNo, 1, 10));
 				request.setAttribute("page", pageNo);
@@ -240,11 +235,10 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/admin/branches": {
 			try {
-				AdminHandler handler = new AdminHandler();
 				int branchStatus = Math.abs(Utils.parseInt(request.getParameter("branchStatus")));
 				request.setAttribute("status", branchStatus);
 				ActiveStatus status = ActiveStatus.values()[branchStatus];
-				Map<Integer, Branch> branches = handler.getBranches(status);
+				Map<Integer, Branch> branches = adminHandler.getBranches(status);
 				request.setAttribute("branches", branches);
 				request.getRequestDispatcher("/WEB-INF/jsp/admin/branches.jsp").forward(request, response);
 			} catch (CustomException e) {
@@ -263,7 +257,6 @@ public class ControllerServlet extends HttpServlet {
 			try {
 				int branchId = Utils.parseInt(request.getParameter("id"));
 				request.setAttribute("branchId", branchId);
-				AdminHandler adminHandler = new AdminHandler();
 				Branch branch = adminHandler.getBranch(branchId);
 				request.setAttribute("branch", branch);
 				request.getRequestDispatcher("/WEB-INF/jsp/admin/viewBranch.jsp").forward(request, response);
@@ -276,16 +269,15 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/admin/users": {
 			try {
-				AdminHandler handler = new AdminHandler();
 				int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
 				request.setAttribute("page", pageNo);
 				int uType = Math.abs(Utils.parseInt(request.getParameter("userType")));
 				if (uType == 0) {
-					request.setAttribute("totalPages", handler.getAllCustomerPageCount(10));
-					request.setAttribute("customers", handler.getAllCustomers(pageNo, 10));
+					request.setAttribute("totalPages", adminHandler.getAllCustomerPageCount(10));
+					request.setAttribute("customers", adminHandler.getAllCustomers(pageNo, 10));
 				} else {
-					request.setAttribute("totalPages", handler.getAllEmployeesPageCount(10));
-					request.setAttribute("employees", handler.getAllEmployees(pageNo, 10));
+					request.setAttribute("totalPages", adminHandler.getAllEmployeesPageCount(10));
+					request.setAttribute("employees", adminHandler.getAllEmployees(pageNo, 10));
 				}
 				request.setAttribute("userType", uType);
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/users.jsp").forward(request, response);
@@ -299,7 +291,6 @@ public class ControllerServlet extends HttpServlet {
 		case "/employee/addUser":
 		case "/admin/addUser": {
 			try {
-				AdminHandler adminHandler = new AdminHandler();
 				Map<Integer, Branch> branches = adminHandler.getBranches(ActiveStatus.ACTIVE);
 				request.setAttribute("branches", branches);
 				request.getRequestDispatcher("/WEB-INF/jsp/employee/userForm.jsp").forward(request, response);
@@ -317,11 +308,9 @@ public class ControllerServlet extends HttpServlet {
 			try {
 				int userId = Utils.parseInt(request.getParameter("userId"));
 				int type = Integer.parseInt(request.getParameter("userType"));
-				AdminHandler adminHandler = new AdminHandler();
 				if (UserType.values()[type] == UserType.USER) {
 					String getAccounts = request.getParameter("getAllAccounts");
 					if (getAccounts != null && getAccounts.equals("1")) {
-						CustomerHandler customerHandler = new CustomerHandler();
 						request.setAttribute("accounts", customerHandler.getAccounts(userId));
 					}
 					request.setAttribute("user", adminHandler.getCustomer(userId));
@@ -341,7 +330,6 @@ public class ControllerServlet extends HttpServlet {
 		case "/employee/profile":
 		case "/admin/profile": {
 			try {
-				AdminHandler adminHandler = new AdminHandler();
 				int userId = (int) session.getAttribute("userId");
 				Employee profile = (Employee) adminHandler.getEmployee(userId);
 				request.setAttribute("profile", profile);
@@ -368,7 +356,6 @@ public class ControllerServlet extends HttpServlet {
 				int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
 				int months = Math.abs(Utils.parseInt(request.getParameter("months")));
 				request.setAttribute("months", months);
-				EmployeeHandler employeeHandler = new EmployeeHandler();
 				request.setAttribute("account", employeeHandler.getAccount(accountNo));
 				request.setAttribute("totalPages", employeeHandler.getTransactionPageCount(accountNo, 1, 10));
 				request.setAttribute("page", pageNo);
@@ -384,7 +371,6 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/employee/users": {
 			try {
-				EmployeeHandler employeeHandler = new EmployeeHandler();
 				int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
 				request.setAttribute("page", pageNo);
 				request.setAttribute("userType", 0);
@@ -405,10 +391,8 @@ public class ControllerServlet extends HttpServlet {
 		case "/employee/modifyUser": {
 			try {
 				int userId = Utils.parseInt(request.getParameter("userId"));
-				EmployeeHandler employeeHandler = new EmployeeHandler();
 				String getAccounts = request.getParameter("getAllAccounts");
 				if (getAccounts != null && getAccounts.equals("1")) {
-					CustomerHandler customerHandler = new CustomerHandler();
 					request.setAttribute("accounts", customerHandler.getAccounts(userId));
 				}
 				request.setAttribute("user", employeeHandler.getCustomer(userId));
@@ -422,7 +406,6 @@ public class ControllerServlet extends HttpServlet {
 
 		case "/employee/fundTransfer": {
 			try {
-				EmployeeHandler employeeHandler = new EmployeeHandler();
 				int branchId = (int) session.getAttribute("branchId");
 				Set<Integer> accounts = employeeHandler.getBranchAccounts(branchId).keySet();
 				request.setAttribute("accounts", accounts);
@@ -449,7 +432,6 @@ public class ControllerServlet extends HttpServlet {
 				audit.setDescription("logged out successfully");
 				audit.setStatus(true);
 				audit.setTargetId(userId);
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -487,7 +469,6 @@ public class ControllerServlet extends HttpServlet {
 			audit.setModifiedBy(userId);
 			try {
 				String password = request.getParameter("password");
-				SessionHandler sessionHandler = new SessionHandler();
 				User user = sessionHandler.authenticate(userId, password);
 				HttpSession httpSession = request.getSession();
 				httpSession.setAttribute("userId", user.getUserId());
@@ -522,7 +503,6 @@ public class ControllerServlet extends HttpServlet {
 				request.setAttribute("error", e.getMessage());
 				request.getRequestDispatcher("/WEB-INF/jsp/index.jsp").forward(request, response);
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -541,7 +521,6 @@ public class ControllerServlet extends HttpServlet {
 			audit.setModifiedBy(sessionUserId);
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
-				CustomerHandler customerHandler = new CustomerHandler();
 				int id = (int) session.getAttribute("userId");
 				String currentMin = request.getParameter("currentMpin");
 				String newMpin = request.getParameter("newMpin");
@@ -564,7 +543,6 @@ public class ControllerServlet extends HttpServlet {
 				String redirectUrl = request.getContextPath() + "/controller/user/account?accountNo=" + accountNo;
 				response.sendRedirect(redirectUrl + "&error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -582,7 +560,6 @@ public class ControllerServlet extends HttpServlet {
 			audit.setAction("user");
 			audit.setModifiedBy(sessionUserId);
 			try {
-				CustomerHandler customerHandler = new CustomerHandler();
 				String currentPassword = request.getParameter("currentPassword");
 				String newPassword = request.getParameter("newPassword");
 				String confirmPassword = request.getParameter("confirmPassword");
@@ -604,7 +581,6 @@ public class ControllerServlet extends HttpServlet {
 				String redirectUrl = request.getContextPath() + "/controller/user/profile";
 				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -623,7 +599,6 @@ public class ControllerServlet extends HttpServlet {
 			audit.setModifiedBy(sessionUserId);
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
-				CustomerHandler customerHandler = new CustomerHandler();
 				int id = (int) session.getAttribute("userId");
 				customerHandler.setPrimaryAccount(id, accountNo, sessionUserId, modifiedOn);
 				String message = "Primary Account Updated Successful!";
@@ -640,7 +615,6 @@ public class ControllerServlet extends HttpServlet {
 				String redirectUrl = request.getContextPath() + "/controller/user/account?accountNo=" + accountNo;
 				response.sendRedirect(redirectUrl + "&error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -660,7 +634,6 @@ public class ControllerServlet extends HttpServlet {
 			int accountNo = Utils.parseInt(request.getParameter("senderAccountNo"));
 			int benificiaryAccountNo = Utils.parseInt(request.getParameter("beneficiaryAccNo"));
 			try {
-				CustomerHandler customerHandler = new CustomerHandler();
 				int userId = (int) session.getAttribute("userId");
 				String mpin = request.getParameter("mpin");
 				Double amount = Utils.parseDouble(request.getParameter("amount"));
@@ -683,7 +656,6 @@ public class ControllerServlet extends HttpServlet {
 				String redirectUrl = request.getContextPath() + "/controller/user/moneyTransfer";
 				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -702,7 +674,6 @@ public class ControllerServlet extends HttpServlet {
 			audit.setModifiedBy(sessionUserId);
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
-				CustomerHandler customerHandler = new CustomerHandler();
 				int userId = (int) session.getAttribute("userId");
 				String mpin = request.getParameter("mpin");
 				Double amount = Utils.parseDouble(request.getParameter("amount"));
@@ -722,7 +693,6 @@ public class ControllerServlet extends HttpServlet {
 				String redirectUrl = request.getContextPath() + "/controller/user/withdrawl";
 				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -741,7 +711,6 @@ public class ControllerServlet extends HttpServlet {
 			audit.setModifiedBy(sessionUserId);
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
-				CustomerHandler customerHandler = new CustomerHandler();
 				int userId = (int) session.getAttribute("userId");
 				String mpin = request.getParameter("mpin");
 				Double amount = Utils.parseDouble(request.getParameter("amount"));
@@ -761,7 +730,6 @@ public class ControllerServlet extends HttpServlet {
 				String redirectUrl = request.getContextPath() + "/controller/user/deposit";
 				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -782,7 +750,6 @@ public class ControllerServlet extends HttpServlet {
 			try {
 				String activate = request.getParameter("activate");
 				ActiveStatus status = ActiveStatus.values()[Integer.parseInt(activate)];
-				AdminHandler adminHandler = new AdminHandler();
 				adminHandler.setAccountStatus(accountNo, status, sessionUserId, modifiedOn);
 				String message = "Account Status Updated!";
 				audit.setDescription(message);
@@ -791,7 +758,6 @@ public class ControllerServlet extends HttpServlet {
 				String redirectUrl = request.getContextPath() + "/controller/admin/manageAccount?accountNo="
 						+ accountNo;
 				response.sendRedirect(redirectUrl + "&message=" + message);
-
 			} catch (CustomException e) {
 				e.printStackTrace();
 				audit.setDescription(e.getMessage());
@@ -801,7 +767,6 @@ public class ControllerServlet extends HttpServlet {
 						+ accountNo;
 				response.sendRedirect(redirectUrl + "&error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -819,7 +784,6 @@ public class ControllerServlet extends HttpServlet {
 			audit.setAction("account");
 			audit.setModifiedBy(sessionUserId);
 			try {
-				AdminHandler adminHandler = new AdminHandler();
 				int customerId = Utils.parseInt(request.getParameter("customerId"));
 				int branchId = Utils.parseInt(request.getParameter("branchId"));
 				int accountNo = adminHandler.createAccount(customerId, branchId, sessionUserId, modifiedOn);
@@ -835,7 +799,6 @@ public class ControllerServlet extends HttpServlet {
 				response.sendRedirect(
 						request.getContextPath() + "/controller/admin/addAccount?error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -853,7 +816,6 @@ public class ControllerServlet extends HttpServlet {
 			audit.setAction("branch");
 			audit.setModifiedBy(sessionUserId);
 			try {
-				AdminHandler adminHandler = new AdminHandler();
 				Branch branch = new Branch();
 				branch.setIfsc(request.getParameter("ifsc"));
 				branch.setLocation(request.getParameter("location"));
@@ -872,7 +834,6 @@ public class ControllerServlet extends HttpServlet {
 				e.printStackTrace();
 				response.sendRedirect(request.getContextPath() + "/controller/admin/addBranch?error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -892,7 +853,6 @@ public class ControllerServlet extends HttpServlet {
 			int branchId = Utils.parseInt(request.getParameter("branchId"));
 			try {
 				String activate = request.getParameter("activate");
-				AdminHandler adminHandler = new AdminHandler();
 				if (activate.equals("0")) {
 					adminHandler.removeBranch(branchId, sessionUserId, modifiedOn);
 					String message = "Removed Branch!";
@@ -912,7 +872,6 @@ public class ControllerServlet extends HttpServlet {
 				response.sendRedirect(request.getContextPath() + "/controller/admin/branch?id=" + branchId + "&error="
 						+ e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -935,7 +894,6 @@ public class ControllerServlet extends HttpServlet {
 				String activate = request.getParameter("activate");
 				Utils.checkNull(activate);
 				ActiveStatus status = ActiveStatus.values()[Integer.parseInt(activate)];
-				AdminHandler adminHandler = new AdminHandler();
 				if (type != null && UserType.valueOf(type) == UserType.USER) {
 					adminHandler.setCustomerStatus(userId, status, sessionUserId, modifiedOn);
 				} else {
@@ -955,7 +913,6 @@ public class ControllerServlet extends HttpServlet {
 				response.sendRedirect(request.getContextPath() + "/controller/admin/modifyUser?userId=" + userId
 						+ "&userType=" + UserType.valueOf(type).ordinal() + "&error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -975,7 +932,6 @@ public class ControllerServlet extends HttpServlet {
 			int userId = 0;
 			int type = Integer.parseInt(request.getParameter("userType"));
 			try {
-				AdminHandler adminHandler = new AdminHandler();
 				if (type == 0) {
 					int branchId = Integer.parseInt(request.getParameter("branchId"));
 					Customer customer = getCustomerFormData(request, response);
@@ -1002,7 +958,6 @@ public class ControllerServlet extends HttpServlet {
 				response.sendRedirect(
 						redirectUrl + "?userId=" + userId + "&userType=" + type + "&error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -1022,7 +977,6 @@ public class ControllerServlet extends HttpServlet {
 			int userId = Integer.parseInt(request.getParameter("userId"));
 			int type = Integer.parseInt(request.getParameter("userType"));
 			try {
-				AdminHandler adminHandler = new AdminHandler();
 				if (type == 0) {
 					Customer customer = getCustomerFormData(request, response);
 					customer.setModifiedOn(modifiedOn);
@@ -1048,7 +1002,6 @@ public class ControllerServlet extends HttpServlet {
 				response.sendRedirect(request.getContextPath() + "/controller/admin/modifyUser?userId=" + userId
 						+ "&userType=" + type + "&error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -1066,7 +1019,6 @@ public class ControllerServlet extends HttpServlet {
 			audit.setAction("user");
 			audit.setModifiedBy(sessionUserId);
 			try {
-				AdminHandler adminHandler = new AdminHandler();
 				String currentPassword = request.getParameter("currentPassword");
 				String newPassword = request.getParameter("newPassword");
 				String confirmPassword = request.getParameter("confirmPassword");
@@ -1088,7 +1040,6 @@ public class ControllerServlet extends HttpServlet {
 				String redirectUrl = request.getContextPath() + "/controller/admin/profile";
 				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -1106,7 +1057,6 @@ public class ControllerServlet extends HttpServlet {
 			audit.setAction("account");
 			audit.setModifiedBy(sessionUserId);
 			try {
-				EmployeeHandler employeeHandler = new EmployeeHandler();
 				int customerId = Utils.parseInt(request.getParameter("customerId"));
 				int branchId = (int) session.getAttribute("branchId");
 				int accountNo = employeeHandler.createAccount(customerId, branchId, sessionUserId, modifiedOn);
@@ -1122,7 +1072,6 @@ public class ControllerServlet extends HttpServlet {
 				response.sendRedirect(
 						request.getContextPath() + "/controller/employee/addAccount?error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -1143,7 +1092,6 @@ public class ControllerServlet extends HttpServlet {
 			try {
 				String activate = request.getParameter("activate");
 				ActiveStatus status = ActiveStatus.values()[Integer.parseInt(activate)];
-				EmployeeHandler employeeHandler = new EmployeeHandler();
 				employeeHandler.setAccountStatus(accountNo, status, sessionUserId, modifiedOn);
 				String message = "Account Status Updated!";
 				audit.setDescription(message);
@@ -1161,7 +1109,6 @@ public class ControllerServlet extends HttpServlet {
 						+ accountNo;
 				response.sendRedirect(redirectUrl + "&error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -1180,7 +1127,6 @@ public class ControllerServlet extends HttpServlet {
 			audit.setModifiedBy(sessionUserId);
 			int userId = 0;
 			try {
-				EmployeeHandler employeeHandler = new EmployeeHandler();
 				Customer customer = getCustomerFormData(request, response);
 				customer.setModifiedOn(modifiedOn);
 				userId = employeeHandler.addCustomer(customer);
@@ -1200,7 +1146,6 @@ public class ControllerServlet extends HttpServlet {
 				String redirectUrl = request.getContextPath() + "/controller/employee/modifyUser";
 				response.sendRedirect(redirectUrl + "?userId=" + userId + "&error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -1221,7 +1166,6 @@ public class ControllerServlet extends HttpServlet {
 			try {
 				String activate = request.getParameter("activate");
 				ActiveStatus status = ActiveStatus.values()[Integer.parseInt(activate)];
-				EmployeeHandler employeeHandler = new EmployeeHandler();
 				employeeHandler.setCustomerStatus(userId, status, sessionUserId, modifiedOn);
 				String message = "User Status Updated!";
 				audit.setDescription(message);
@@ -1237,7 +1181,6 @@ public class ControllerServlet extends HttpServlet {
 				response.sendRedirect(request.getContextPath() + "/controller/employee/modifyUser?userId=" + userId
 						+ "&error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -1256,7 +1199,6 @@ public class ControllerServlet extends HttpServlet {
 			audit.setAction("user");
 			audit.setModifiedBy(sessionUserId);
 			try {
-				EmployeeHandler employeeHandler = new EmployeeHandler();
 				Customer customer = getCustomerFormData(request, response);
 				customer.setModifiedOn(modifiedOn);
 				customer.setUserId(userId);
@@ -1276,7 +1218,6 @@ public class ControllerServlet extends HttpServlet {
 				response.sendRedirect(request.getContextPath() + "/controller/employee/modifyUser?userId=" + userId
 						+ "&error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -1295,7 +1236,6 @@ public class ControllerServlet extends HttpServlet {
 			audit.setModifiedBy(sessionUserId);
 			int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 			try {
-				EmployeeHandler employeeHandler = new EmployeeHandler();
 				double amount = Utils.parseDouble(request.getParameter("amount"));
 				String description = request.getParameter("description");
 				employeeHandler.deposit(accountNo, amount, description, sessionUserId, modifiedOn);
@@ -1314,7 +1254,6 @@ public class ControllerServlet extends HttpServlet {
 				response.sendRedirect(
 						request.getContextPath() + "/controller/employee/fundTransfer?error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {
@@ -1332,7 +1271,6 @@ public class ControllerServlet extends HttpServlet {
 			audit.setAction("user");
 			audit.setModifiedBy(sessionUserId);
 			try {
-				EmployeeHandler employeeHandler = new EmployeeHandler();
 				String currentPassword = request.getParameter("currentPassword");
 				String newPassword = request.getParameter("newPassword");
 				String confirmPassword = request.getParameter("confirmPassword");
@@ -1354,7 +1292,6 @@ public class ControllerServlet extends HttpServlet {
 				String redirectUrl = request.getContextPath() + "/controller/employee/profile";
 				response.sendRedirect(redirectUrl + "?error=" + e.getMessage());
 			} finally {
-				SessionHandler sessionHandler = new SessionHandler();
 				try {
 					sessionHandler.audit(audit);
 				} catch (CustomException e) {

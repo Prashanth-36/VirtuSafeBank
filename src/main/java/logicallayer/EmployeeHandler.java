@@ -160,17 +160,20 @@ public class EmployeeHandler {
 		if (amount < 1) {
 			throw new InvalidValueException("Invalid amount!");
 		}
-		Account account = getAccount(accountNo);
-		CustomerHandler.accountCache.remove(accountNo);
-		Transaction transaction = new Transaction();
-		transaction.setPrimaryAccount(accountNo);
-		transaction.setAmount(amount);
-		transaction.setType(TransactionType.CREDIT);
-		transaction.setDescription(description);
-		transaction.setCustomerId(account.getCustomerId());
-		transaction.setModifiedBy(modifiedBy);
-		transaction.setModifiedOn(modifiedOn);
-		transactionManager.initTransaction(transaction);
+		synchronized (Lock.lock(accountNo)) {
+			Account account = getAccount(accountNo);
+			CustomerHandler.accountCache.remove(accountNo);
+			Transaction transaction = new Transaction();
+			transaction.setPrimaryAccount(accountNo);
+			transaction.setAmount(amount);
+			transaction.setType(TransactionType.CREDIT);
+			transaction.setDescription(description);
+			transaction.setCustomerId(account.getCustomerId());
+			transaction.setModifiedBy(modifiedBy);
+			transaction.setModifiedOn(modifiedOn);
+			transactionManager.initTransaction(transaction);
+			Lock.unLock(accountNo);
+		}
 	}
 
 	public void changePassword(int customerId, String currentPassword, String newPassword, int modifiedBy,

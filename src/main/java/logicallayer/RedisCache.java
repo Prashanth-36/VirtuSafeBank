@@ -23,10 +23,28 @@ public class RedisCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
-	public void set(K key, V value) throws CustomException {
+	public synchronized void set(K key, V value) throws CustomException {
 		byte[] keyArray = serializeObject(key);
 		byte[] valueArray = serializeObject(value);
 		jedis.set(keyArray, valueArray);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public synchronized V get(K key) throws CustomException {
+		byte[] keyArray = serializeObject(key);
+		byte[] valueArray = jedis.get(keyArray);
+		if (valueArray == null) {
+			return null;
+		}
+		V value = (V) deSerializeObject(valueArray);
+		return value;
+	}
+
+	@Override
+	public synchronized void remove(K key) throws CustomException {
+		byte[] keyArray = serializeObject(key);
+		jedis.del(keyArray);
 	}
 
 	public byte[] serializeObject(Object obj) throws CustomException {
@@ -47,24 +65,6 @@ public class RedisCache<K, V> implements Cache<K, V> {
 		} catch (ClassNotFoundException e) {
 			throw new CustomException("Class Not found!", e);
 		}
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public V get(K key) throws CustomException {
-		byte[] keyArray = serializeObject(key);
-		byte[] valueArray = jedis.get(keyArray);
-		if (valueArray == null) {
-			return null;
-		}
-		V value = (V) deSerializeObject(valueArray);
-		return value;
-	}
-
-	@Override
-	public void remove(K key) throws CustomException {
-		byte[] keyArray = serializeObject(key);
-		jedis.del(keyArray);
 	}
 
 }

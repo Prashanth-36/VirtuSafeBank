@@ -25,6 +25,7 @@ import model.Audit;
 import model.Branch;
 import model.Customer;
 import model.Employee;
+import model.Token;
 import model.User;
 import utility.ActiveStatus;
 import utility.Gender;
@@ -355,8 +356,9 @@ public class ControllerServlet extends HttpServlet {
 				int accountNo = Utils.parseInt(request.getParameter("accountNo"));
 				int pageNo = Math.abs(Utils.parseInt(request.getParameter("page")));
 				int months = Math.abs(Utils.parseInt(request.getParameter("months")));
+				int branchId = (int) session.getAttribute("branchId");
 				request.setAttribute("months", months);
-				request.setAttribute("account", employeeHandler.getAccount(accountNo));
+				request.setAttribute("account", employeeHandler.getAccount(accountNo, branchId));
 				request.setAttribute("totalPages", employeeHandler.getTransactionPageCount(accountNo, 1, 10));
 				request.setAttribute("page", pageNo);
 				request.setAttribute("transactions", employeeHandler.getTransactions(accountNo, months, pageNo, 10));
@@ -417,8 +419,15 @@ public class ControllerServlet extends HttpServlet {
 			break;
 		}
 
-		case "/error": {
-			request.getRequestDispatcher("/WEB-INF/jsp/error.jsp").forward(request, response);
+		case "/admin/api":
+		case "/employee/api": {
+			try {
+				request.setAttribute("token", sessionHandler.getToken((int) session.getAttribute("userId")));
+				request.getRequestDispatcher("/WEB-INF/jsp/employee/api.jsp").forward(request, response);
+			} catch (CustomException | InvalidValueException e) {
+				e.printStackTrace();
+				response.sendRedirect(request.getContextPath() + "/controller/employee/home?error=" + e.getMessage());
+			}
 			break;
 		}
 
@@ -1230,6 +1239,7 @@ public class ControllerServlet extends HttpServlet {
 		case "/employee/fundTransfer": {
 			long modifiedOn = System.currentTimeMillis();
 			int sessionUserId = (int) session.getAttribute("userId");
+			int branchId = (int) session.getAttribute("branchId");
 			Audit audit = new Audit();
 			audit.setTime(modifiedOn);
 			audit.setAction("deposit");
@@ -1238,7 +1248,7 @@ public class ControllerServlet extends HttpServlet {
 			try {
 				double amount = Utils.parseDouble(request.getParameter("amount"));
 				String description = request.getParameter("description");
-				employeeHandler.deposit(accountNo, amount, description, sessionUserId, modifiedOn);
+				employeeHandler.deposit(accountNo, branchId, amount, description, sessionUserId, modifiedOn);
 				String message = "Amount Deposited!";
 				audit.setDescription(message);
 				audit.setStatus(true);
@@ -1297,6 +1307,19 @@ public class ControllerServlet extends HttpServlet {
 				} catch (CustomException e) {
 					e.printStackTrace();
 				}
+			}
+			break;
+		}
+
+		case "/admin/api":
+		case "/employee/api": {
+			int accessLevel = Integer.parseInt(request.getParameter("accessLevel"));
+			try {
+				Token token = sessionHandler.generateToken((int) session.getAttribute("userId"), accessLevel);
+				request.setAttribute("token", token);
+				request.getRequestDispatcher("/WEB-INF/jsp/employee/api.jsp").forward(request, response);
+			} catch (CustomException e) {
+				e.printStackTrace();
 			}
 			break;
 		}

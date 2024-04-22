@@ -100,13 +100,15 @@ public class EmployeeHandler {
 		accountManager.deleteAccount(accountNo, modifiedBy);
 	}
 
-	public Account getAccount(int accountNo) throws InvalidValueException, CustomException {
+	public Account getAccount(int accountNo, int branchId) throws InvalidValueException, CustomException {
 		Account account = CustomerHandler.accountCache.get(accountNo);
-		if (account != null) {
-			return account;
+		if (account == null) {
+			account = accountManager.getAccount(accountNo);
+			CustomerHandler.accountCache.set(accountNo, account);
 		}
-		account = accountManager.getAccount(accountNo);
-		CustomerHandler.accountCache.set(accountNo, account);
+		if (account.getBranchId() != branchId) {
+			throw new CustomException("Account access restricted!");
+		}
 		return account;
 	}
 
@@ -155,13 +157,13 @@ public class EmployeeHandler {
 		return transactionManager.getTransactions(accountNo, startTime, offset, limit);
 	}
 
-	public void deposit(int accountNo, double amount, String description, int modifiedBy, long modifiedOn)
+	public void deposit(int accountNo, int branchId, double amount, String description, int modifiedBy, long modifiedOn)
 			throws CustomException, InvalidValueException {
 		if (amount < 1) {
 			throw new InvalidValueException("Invalid amount!");
 		}
 		synchronized (Lock.lock(accountNo)) {
-			Account account = getAccount(accountNo);
+			Account account = getAccount(accountNo, branchId);
 			CustomerHandler.accountCache.remove(accountNo);
 			Transaction transaction = new Transaction();
 			transaction.setPrimaryAccount(accountNo);

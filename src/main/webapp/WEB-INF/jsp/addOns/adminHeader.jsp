@@ -8,6 +8,8 @@
           class=<%=activePath.equals("branches")?"active":"" %>>Branches</a></li>
       <li><a href="<%=request.getContextPath() %>/controller/admin/users"
           class=<%=activePath.equals("users")?"active":"" %>>User</a></li>
+      <li><a href="<%=request.getContextPath() %>/controller/admin/api"
+          class=<%=activePath.equals("api")?"active":"" %>>API</a></li>
     </ul>
     <div id="userName">
       <%=session.getAttribute("userName") %>

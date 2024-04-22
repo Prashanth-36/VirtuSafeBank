@@ -9,6 +9,7 @@ import customexceptions.CustomException;
 import customexceptions.InvalidOperationException;
 import customexceptions.InvalidValueException;
 import model.Audit;
+import model.Token;
 import model.User;
 import persistentlayer.SessionManager;
 import utility.UserType;
@@ -78,6 +79,77 @@ public class SessionDao implements SessionManager {
 			statement.executeUpdate();
 		} catch (SQLException | ClassNotFoundException e) {
 			throw new CustomException("Audit Logging failed!", e);
+		}
+	}
+
+	@Override
+	public void generateToken(Token token) throws CustomException {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement removeStatement = connection.prepareStatement("DELETE FROM token WHERE userId = ?");
+				PreparedStatement statement = connection
+						.prepareStatement("INSERT INTO token(userId,token,accessLevel,validTill) VALUES(?,?,?,?)");) {
+			removeStatement.setInt(1, token.getUserId());
+			removeStatement.executeUpdate();
+			statement.setInt(1, token.getUserId());
+			statement.setString(2, token.getToken());
+			statement.setInt(3, token.getAccessLevel());
+			statement.setLong(4, token.getValidTill());
+			statement.executeUpdate();
+		} catch (ClassNotFoundException | SQLException e) {
+			throw new CustomException("Token Generation Failed!", e);
+		}
+	}
+
+	@Override
+	public Token getToken(String token) throws CustomException, InvalidValueException {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM token WHERE token = ?");) {
+			statement.setString(1, token);
+			try (ResultSet resultSet = statement.executeQuery()) {
+				if (resultSet.next()) {
+					Token data = new Token();
+					data.setToken(token);
+					data.setUserId(resultSet.getInt("userId"));
+					data.setValidTill(resultSet.getLong("validTill"));
+					data.setAccessLevel(resultSet.getInt("accessLevel"));
+					return data;
+				}
+				throw new InvalidValueException("Invalid Token!");
+			}
+		} catch (ClassNotFoundException | SQLException e) {
+			throw new CustomException("Token Generation Failed!", e);
+		}
+	}
+
+	@Override
+	public Token getToken(int userId) throws CustomException, InvalidValueException {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM token WHERE userId = ?");) {
+			statement.setInt(1, userId);
+			try (ResultSet resultSet = statement.executeQuery()) {
+				if (resultSet.next()) {
+					Token data = new Token();
+					data.setToken(resultSet.getString("token"));
+					data.setUserId(resultSet.getInt("userId"));
+					data.setValidTill(resultSet.getLong("validTill"));
+					data.setAccessLevel(resultSet.getInt("accessLevel"));
+					return data;
+				}
+				return null;
+			}
+		} catch (ClassNotFoundException | SQLException e) {
+			throw new CustomException("Token Generation Failed!", e);
+		}
+	}
+
+	@Override
+	public void removeToken(String userToken) throws CustomException {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement("DELETE FROM token WHERE token = ?");) {
+			statement.setString(1, userToken);
+			statement.executeUpdate();
+		} catch (ClassNotFoundException | SQLException e) {
+			throw new CustomException("Token Deletion Failed!", e);
 		}
 	}
 

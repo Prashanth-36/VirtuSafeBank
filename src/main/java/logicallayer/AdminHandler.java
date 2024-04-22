@@ -5,6 +5,7 @@ import java.util.Map;
 import customexceptions.CustomException;
 import customexceptions.InvalidOperationException;
 import customexceptions.InvalidValueException;
+import model.Account;
 import model.Branch;
 import model.Customer;
 import model.Employee;
@@ -93,6 +94,15 @@ public class AdminHandler extends EmployeeHandler {
 		}
 		employeeManager.getEmployee(employeeId); // validate existing employee
 		employeeManager.setEmployeeStatus(employeeId, status, modifiedBy, modifiedOn);
+	}
+
+	public Account getAccount(int accountNo) throws InvalidValueException, CustomException {
+		Account account = CustomerHandler.accountCache.get(accountNo);
+		if (account == null) {
+			account = accountManager.getAccount(accountNo);
+			CustomerHandler.accountCache.set(accountNo, account);
+		}
+		return account;
 	}
 
 	public Map<Integer, Customer> getAllCustomers(int pageNo, int limit) throws CustomException, InvalidValueException {

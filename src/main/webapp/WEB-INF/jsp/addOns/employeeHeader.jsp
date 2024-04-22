@@ -6,6 +6,7 @@
     <li><a href="<%=request.getContextPath() %>/controller/employee/home" class=<%=activePath.equals("accounts")?"active":"" %>>Accounts</a></li>
     <li><a href="<%=request.getContextPath() %>/controller/employee/users" class=<%=activePath.equals("users")?"active":"" %>>Customers</a></li>
     <li><a href="<%=request.getContextPath() %>/controller/employee/fundTransfer" class=<%=activePath.equals("fundTransfer")?"active":"" %>>Fund Transfer</a></li>
+    <li><a href="<%=request.getContextPath() %>/controller/employee/api" class=<%=activePath.equals("api")?"active":"" %>>API</a></li>
   </ul>
   <div id="userName"><%=session.getAttribute("userName") %></div>
   <img src="<%=request.getContextPath()%>/static/images/profile-user.png" onclick="window.location.href='<%=request.getContextPath()%>/controller/employee/profile'"

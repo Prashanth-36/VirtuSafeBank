@@ -581,3 +581,23 @@ button:disabled {
   gap: 1rem;
   align-items: center;
 }
+.token-form{
+  margin: 5rem auto 2rem;
+  width: 15%;
+  background-color: white;
+  box-shadow: 0.5px 0.5px 5px gray;
+  padding: 1rem;
+  border-radius:1rem;
+}
+.token-form input{
+	margin:1rem;
+}
+.token-form button{
+  background-color: var(--blue);
+  display:block;
+  margin:auto;
+  color: white;
+  padding: 0.5rem;
+  height: 3rem;
+  font-size: larger;
+}

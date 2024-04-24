@@ -105,12 +105,13 @@ public class CustomerHandler {
 			transaction.setModifiedBy(modifiedBy);
 			transaction.setModifiedOn(modifiedOn);
 			transactionManager.initTransaction(transaction);
-			Lock.unLock(accountNo);
 		}
+		Lock.unLock(accountNo);
 	}
 
 	public void withdrawl(int customerId, String mpin, int accountNo, double amount, String description, int modifiedBy,
 			long modifiedOn) throws CustomException, InvalidValueException, InsufficientFundException {
+		checkValidRequest(customerId, mpin, accountNo);
 		synchronized (Lock.lock(accountNo)) {
 			checkSufficientBalance(accountNo, amount);
 			accountCache.remove(accountNo);
@@ -123,8 +124,8 @@ public class CustomerHandler {
 			transaction.setModifiedBy(modifiedBy);
 			transaction.setModifiedOn(modifiedOn);
 			transactionManager.initTransaction(transaction);
-			Lock.unLock(accountNo);
 		}
+		Lock.unLock(accountNo);
 	}
 
 	public void moneyTransfer(int customerId, String mpin, int sourceAccountNo, int targetAccountNo, double amount,
@@ -134,24 +135,26 @@ public class CustomerHandler {
 			throw new InvalidOperationException("Can't send money to same account!");
 		}
 		checkValidRequest(customerId, mpin, sourceAccountNo);
-		synchronized (Lock.lock(sourceAccountNo)) {
-			checkSufficientBalance(sourceAccountNo, amount);
-			accountCache.remove(sourceAccountNo);
-			accountCache.remove(targetAccountNo);
-			Transaction primaryTransaction = new Transaction();
-			primaryTransaction.setPrimaryAccount(sourceAccountNo);
-			primaryTransaction.setTransactionalAccount(targetAccountNo);
-			primaryTransaction.setAmount(amount);
-			primaryTransaction.setType(TransactionType.DEBIT);
-			primaryTransaction.setDescription(description);
-			primaryTransaction.setCustomerId(customerId);
-			primaryTransaction.setIfsc(ifsc);
-			primaryTransaction.setModifiedBy(modifiedBy);
-			primaryTransaction.setModifiedOn(modifiedOn);
-			try {
-				Account transactionalAccount = getAccount(targetAccountNo);
+		int account1 = Math.min(sourceAccountNo, targetAccountNo);
+		int account2 = Math.max(sourceAccountNo, targetAccountNo);
+		synchronized (Lock.lock(account1)) {
+			synchronized (Lock.lock(account2)) {
+				checkSufficientBalance(sourceAccountNo, amount);
+				accountCache.remove(sourceAccountNo);
+				accountCache.remove(targetAccountNo);
+				Transaction primaryTransaction = new Transaction();
+				primaryTransaction.setPrimaryAccount(sourceAccountNo);
+				primaryTransaction.setTransactionalAccount(targetAccountNo);
+				primaryTransaction.setAmount(amount);
+				primaryTransaction.setType(TransactionType.DEBIT);
+				primaryTransaction.setDescription(description);
+				primaryTransaction.setCustomerId(customerId);
+				primaryTransaction.setIfsc(ifsc);
+				primaryTransaction.setModifiedBy(modifiedBy);
+				primaryTransaction.setModifiedOn(modifiedOn);
+				try {
+					Account transactionalAccount = getAccount(targetAccountNo);
 
-				synchronized (Lock.lock(targetAccountNo)) {
 					Transaction secondaryTransaction = new Transaction();
 					secondaryTransaction.setPrimaryAccount(targetAccountNo);
 					secondaryTransaction.setTransactionalAccount(sourceAccountNo);
@@ -168,13 +171,13 @@ public class CustomerHandler {
 					transactions.add(secondaryTransaction);
 
 					transactionManager.initTransaction(transactions);
-					Lock.unLock(targetAccountNo);
+				} catch (InvalidValueException e) { // other bank transaction
+					transactionManager.initTransaction(primaryTransaction);
 				}
-			} catch (InvalidValueException e) { // other bank transaction
-				transactionManager.initTransaction(primaryTransaction);
 			}
-			Lock.unLock(sourceAccountNo);
 		}
+		Lock.unLock(account1);
+		Lock.unLock(account2);
 	}
 
 	public int getTransactionPageCount(int customerId, int accountNo, int months, int limit)

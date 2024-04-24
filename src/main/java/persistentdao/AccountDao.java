@@ -28,8 +28,8 @@ public class AccountDao implements AccountManager {
 			statement.setObject(3, account.getBranchId());
 			statement.setObject(4, ActiveStatus.ACTIVE.ordinal());
 			statement.setObject(5, account.getIsPrimaryAccount());
-			statement.setObject(6, account.getModifiedBy());
-			statement.setObject(7, account.getModifiedOn());
+			statement.setObject(7, account.getModifiedBy());
+			statement.setObject(8, account.getModifiedOn());
 			String mpin = account.getMpin();
 			if (mpin == null || mpin.isEmpty()) {
 				mpin = "0000";

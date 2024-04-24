@@ -7,14 +7,11 @@
   <script>
     setTimeout(() => {
       document.getElementById('message').style.display = 'none';
-      /*const params = new URLSearchParams(location.search);
-      params.delete("message");
-      params.delete("error");
-      location.search = params;*/
-      const url = new URL(window.location.href);
-      url.searchParams.delete('error');
-      url.searchParams.delete('message');
-      history.replaceState({}, '', url);
-    }, 4000)
+    }, 4000);
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete('error');
+    url.searchParams.delete('message');
+    history.replaceState({}, '', url);
   </script>
   <% } %>

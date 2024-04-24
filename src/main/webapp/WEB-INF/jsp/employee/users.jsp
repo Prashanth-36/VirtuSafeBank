@@ -58,8 +58,10 @@
         <%}%>
       </form>
       <form action="<%=request.getContextPath()%>/controller/<%=userType.name().toLowerCase() %>/modifyUser" method="get">
-        <label for="userId"><%=userType==UserType.ADMIN?"User ID:":"Customer ID:" %></label>
+       <% if(userType==UserType.ADMIN){ %>
         <input type="hidden" name="userType" value="<%=selectedUserType%>"/>
+       <%} %>
+        <label for="userId"><%=userType==UserType.ADMIN?"User ID:":"Customer ID:" %></label>
         <input
           type="number"
           id="userId"
@@ -109,8 +111,12 @@
               for(Map.Entry<Integer,Customer> e:customers.entrySet()){
                 int userId=e.getKey();
                 Customer customer=e.getValue();
+                String params = "?userId="+userId;
+                if(userType==UserType.ADMIN){
+                  params+="&userType="+customer.getType().ordinal();
+                }
       %>
-        <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=userType.name().toLowerCase() %>/modifyUser?userId=<%=userId%>&userType=<%=customer.getType().ordinal()%>'">
+        <tr onclick="window.location.href='<%=request.getContextPath()%>/controller/<%=userType.name().toLowerCase() %>/modifyUser<%=params%>'">
           <td><%=userId %></td>
           <td><%=customer.getName() %></td>
           <td><%=Utils.millisToLocalDate(customer.getDob(), ZoneId.systemDefault())  %></td>

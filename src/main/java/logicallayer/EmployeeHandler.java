@@ -174,8 +174,8 @@ public class EmployeeHandler {
 			transaction.setModifiedBy(modifiedBy);
 			transaction.setModifiedOn(modifiedOn);
 			transactionManager.initTransaction(transaction);
-			Lock.unLock(accountNo);
 		}
+		Lock.unLock(accountNo);
 	}
 
 	public void changePassword(int customerId, String currentPassword, String newPassword, int modifiedBy,

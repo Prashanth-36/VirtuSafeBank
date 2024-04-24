@@ -36,7 +36,7 @@
           %>
       </select>
       <label for="amount">Amount</label>
-      <input type="number" name="amount" min="0.01" id="amount" step="0.01" placeholder="Amount" required/>
+      <input type="number" name="amount" min="0.01" max="500000" id="amount" step="0.01" placeholder="Amount" required/>
       <label for="mpin">MPIN</label>
       <input type="password" name="mpin" id="mpin" placeholder="MPIN" required/>
       <label for="description">Description</label>

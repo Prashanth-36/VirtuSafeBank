@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,9 +30,7 @@ import utility.ActiveStatus;
 import utility.Gender;
 import utility.UserType;
 import utility.Utils;
-import utility.Validate;
 
-@WebServlet("/controller/*")
 public class ControllerServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -449,7 +446,6 @@ public class ControllerServlet extends HttpServlet {
 				session.removeAttribute("userId");
 				session.removeAttribute("branchId");
 				session.removeAttribute("userName");
-				session.invalidate();
 			}
 			response.sendRedirect(request.getContextPath() + "/controller/login");
 			break;
@@ -963,9 +959,9 @@ public class ControllerServlet extends HttpServlet {
 				audit.setDescription(e.getMessage());
 				audit.setStatus(false);
 				audit.setTargetId(userId);
-				String redirectUrl = request.getContextPath() + "/controller/admin/modifyUser";
-				response.sendRedirect(
-						redirectUrl + "?userId=" + userId + "&userType=" + type + "&error=" + e.getMessage());
+				response.getWriter().write(
+						"<script>const referrer=document.referrer;window.location.href=referrer+(referrer.includes('?')?'&':'?')+'error="
+								+ e.getMessage() + "'</script>");
 			} finally {
 				try {
 					sessionHandler.audit(audit);
@@ -1146,14 +1142,15 @@ public class ControllerServlet extends HttpServlet {
 				audit.setStatus(true);
 				audit.setTargetId(userId);
 				String redirectUrl = request.getContextPath() + "/controller/employee/modifyUser";
-				response.sendRedirect(redirectUrl + "?message=" + message);
+				response.sendRedirect(redirectUrl + "?userId=" + userId + "&message=" + message);
 			} catch (CustomException | InvalidValueException | InvalidOperationException e) {
 				e.printStackTrace();
 				audit.setDescription(e.getMessage());
 				audit.setStatus(false);
 				audit.setTargetId(userId);
-				String redirectUrl = request.getContextPath() + "/controller/employee/modifyUser";
-				response.sendRedirect(redirectUrl + "?userId=" + userId + "&error=" + e.getMessage());
+				response.getWriter().write(
+						"<script>const referrer=document.referrer;window.location.href=referrer+(referrer.includes('?')?'&':'?')+'error="
+								+ e.getMessage() + "'</script>");
 			} finally {
 				try {
 					sessionHandler.audit(audit);
@@ -1338,10 +1335,8 @@ public class ControllerServlet extends HttpServlet {
 		employee.setDob(Utils.getMillis(LocalDate.parse(request.getParameter("dob"))));
 		employee.setGender(Gender.values()[Integer.parseInt(request.getParameter("gender"))]);
 		String number = request.getParameter("number");
-		Validate.mobile(number);
 		employee.setNumber(Long.parseLong(number));
 		String email = request.getParameter("email");
-		Validate.email(email);
 		employee.setEmail(email);
 		employee.setType(UserType.values()[Integer.parseInt(request.getParameter("userType"))]);
 		employee.setPassword(request.getParameter("password"));
@@ -1361,18 +1356,14 @@ public class ControllerServlet extends HttpServlet {
 		customer.setDob(Utils.getMillis(LocalDate.parse(request.getParameter("dob"))));
 		customer.setGender(Gender.values()[Integer.parseInt(request.getParameter("gender"))]);
 		String number = request.getParameter("number");
-		Validate.mobile(number);
 		customer.setNumber(Long.parseLong(number));
 		String email = request.getParameter("email");
-		Validate.email(email);
 		customer.setEmail(email);
 		customer.setType(UserType.values()[Integer.parseInt(request.getParameter("userType"))]);
 		customer.setPassword(request.getParameter("password"));
 		String aadhaar = request.getParameter("aadhaarNo");
-		Validate.aadhaar(aadhaar);
 		customer.setAadhaarNo(Long.parseLong(aadhaar));
 		String pan = request.getParameter("panNo");
-		Validate.pan(pan);
 		customer.setPanNo(pan);
 		customer.setLocation(request.getParameter("location"));
 		customer.setCity(request.getParameter("city"));

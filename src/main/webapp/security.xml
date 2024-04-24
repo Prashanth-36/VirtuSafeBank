@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<url-path>
+
+	<login method="POST">
+		<property>userId</property>
+		<property>password</property>
+	</login>
+	
+	<admin-home method="GET">
+		<property>branchId</property>
+		<property>page</property>
+		<property>branchStatus</property>		
+	</admin-home>
+	
+	<employee-home method="GET">
+		<property>page</property>
+	</employee-home>
+	
+	<user-account method="GET">
+		<property>accountNo</property>
+		<property>months</property>
+		<property>page</property>
+	</user-account>
+	
+	<admin-manageAccount method="GET">
+		<property>accountNo</property>
+		<property>months</property>
+		<property>page</property>
+	</admin-manageAccount>
+	
+	<admin-branches method="GET">
+		<property>branchStatus</property>
+	</admin-branches>
+	
+	<admin-branch method="GET">
+		<property>id</property>	
+	</admin-branch>
+	
+	<admin-users method="GET">
+		<property>page</property>	
+		<property>userType</property>	
+	</admin-users>
+	
+	<admin-modifyUser method="GET">
+		<property>userType</property>	
+		<property>userId</property>	
+		<property>getAllAccounts</property>	
+	</admin-modifyUser>
+	
+	<employee-manageAccount method="GET">
+		<property>accountNo</property>
+		<property>months</property>
+		<property>page</property>
+	</employee-manageAccount>
+	
+	<employee-users method="GET">
+		<property>page</property>
+		<property>status</property>
+	</employee-users>
+	
+	<employee-modifyUser method="GET">
+		<property>userId</property>
+		<property>getAllAccounts</property>
+	</employee-modifyUser>
+	
+	<user-changeMpin method="POST">
+		<property>accountNo</property>
+		<property>currentMpin</property>
+		<property>newMpin</property>
+		<property>confirmMpin</property>
+	</user-changeMpin>
+	
+	<user-changePassword method="POST">
+		<property>currentPassword</property>
+		<property>newPassword</property>
+		<property>confirmPassword</property>
+	</user-changePassword>
+	
+	<user-setPrimary method="POST">
+		<property>accountNo</property>
+	</user-setPrimary>
+	
+	<user-moneyTransfer method="POST">
+		<property>senderAccountNo</property>
+		<property>beneficiaryAccNo</property>
+		<property>mpin</property>
+		<property>amount</property>
+		<property>beneficiaryIfsc</property>
+		<property>description</property>
+	</user-moneyTransfer>
+	
+	<user-withdrawl method="POST">
+		<property>accountNo</property>
+		<property>mpin</property>
+		<property>amount</property>
+		<property>description</property>
+	</user-withdrawl>
+
+	<user-deposit method="POST">
+		<property>accountNo</property>
+		<property>mpin</property>
+		<property>amount</property>
+		<property>description</property>
+	</user-deposit>
+	
+	<admin-manageAccount method="POST">
+		<property>accountNo</property>
+		<property>activate</property>
+	</admin-manageAccount>
+
+	<admin-addAccount method="POST">
+		<property>customerId</property>
+		<property>branchId</property>
+	</admin-addAccount>
+	
+	<admin-addBranch method="POST">
+		<property>ifsc</property>
+		<property>location</property>
+		<property>city</property>
+		<property>state</property>
+	</admin-addBranch>
+	
+	<admin-branch method="POST">
+		<property>branchId</property>
+		<property>activate</property>
+	</admin-branch>
+	
+	<admin-manageUser method="POST">
+		<property>userId</property>
+		<property>userType</property>
+		<property>activate</property>
+	</admin-manageUser>
+	
+	<admin-addUser method="POST">
+		<property>userType</property>
+		<property>name</property>
+		<property>dob</property>
+		<property>gender</property>
+		<property pattern="mobile">number</property>
+		<property pattern="email">email</property>
+		<property>password</property>
+		<property>location</property>
+		<property>city</property>
+		<property>state</property>
+		<property>branchId</property>
+		<property pattern="aadhaar">aadhaarNo</property>
+		<property pattern="pan">panNo</property>
+	</admin-addUser>
+	
+	<admin-modifyUser method="POST">
+		<property>userId</property>
+		<property>userType</property>
+		<property>name</property>
+		<property>dob</property>
+		<property>gender</property>
+		<property pattern="mobile">number</property>
+		<property pattern="email">email</property>
+		<property>password</property>
+		<property>location</property>
+		<property>city</property>
+		<property>state</property>
+		<property>branchId</property>
+		<property pattern="aadhaar">aadhaarNo</property>
+		<property pattern="pan">panNo</property>
+	</admin-modifyUser>
+	
+	<admin-changePassword method="POST">
+		<property>currentPassword</property>
+		<property>newPassword</property>
+		<property>confirmPassword</property>
+	</admin-changePassword>
+	
+	<employee-addAccount method="POST">
+		<property>customerId</property>
+	</employee-addAccount>
+	
+	<employee-manageAccount method="POST">
+		<property>accountNo</property>
+		<property>activate</property>
+	</employee-manageAccount>
+	
+	<employee-manageUser method="POST">
+		<property>userId</property>
+		<property>activate</property>
+	</employee-manageUser>
+	
+	<employee-addUser method="POST">
+		<property>userType</property>
+		<property>name</property>
+		<property>dob</property>
+		<property>gender</property>
+		<property pattern="mobile">number</property>
+		<property pattern="email">email</property>
+		<property>password</property>
+		<property>location</property>
+		<property>city</property>
+		<property>state</property>
+		<property pattern="aadhaar">aadhaarNo</property>
+		<property pattern="pan">panNo</property>
+	</employee-addUser>
+	
+	<employee-modifyUser method="POST">
+		<property>userId</property>
+		<property>userType</property>
+		<property>name</property>
+		<property>dob</property>
+		<property>gender</property>
+		<property pattern="mobile">number</property>
+		<property pattern="email">email</property>
+		<property>password</property>
+		<property>location</property>
+		<property>city</property>
+		<property>state</property>
+		<property pattern="aadhaar">aadhaarNo</property>
+		<property pattern="pan">panNo</property>
+	</employee-modifyUser>
+	
+	<employee-fundTransfer method="POST">
+		<property>accountNo</property>
+		<property>amount</property>
+		<property>description</property>
+	</employee-fundTransfer>
+	
+	<employee-changePassword method="POST">
+		<property>currentPassword</property>
+		<property>newPassword</property>
+		<property>confirmPassword</property>
+	</employee-changePassword>
+	
+	<admin-api method="POST">
+		<property>accessLevel</property>
+	</admin-api>
+	
+	<employee-api method="POST">
+		<property>accessLevel</property>
+	</employee-api>
+	
+	<patterns>
+		<email>[a-z]+[.a-z0-9]*@[a-z]{1,}\\.[a-z]{2,}(\\.[a-z]{2,})?</email>
+		<mobile>[1-9]{1}[0-9]{9}</mobile>
+		<pan>[A-Z]{5}[0-9]{4}[A-Z]</pan>
+		<aadhaar>[0-9]{12}</aadhaar>
+	</patterns>
+
+</url-path>

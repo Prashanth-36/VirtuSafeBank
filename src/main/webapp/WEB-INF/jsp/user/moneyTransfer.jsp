@@ -59,7 +59,7 @@
         <input type="text" name="beneficiaryIfsc" id="beneficiaryIfsc"
           placeholder="Beneficiary IFSC code" /> 
         <label for="amount">Amount</label>
-          <input type="number" name="amount" min="0.01" id="amount" placeholder="Amount" step="0.01" required/> 
+          <input type="number" name="amount" min="0.01"  max="100000" id="amount" placeholder="Amount" step="0.01" required/> 
         <label for="description">Description</label>
           <input type="text"name="description" id="description" maxlength="50" placeholder="Description" /> 
         <label for="mpin">MPIN</label>

@@ -1,9 +1,7 @@
 package logicallayer;
 
-import java.util.Iterator;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 public class Lock {
 
@@ -28,16 +26,9 @@ public class Lock {
 		}
 	}
 
-	private static ConcurrentHashMap<Integer, LockObj> lockMap = new ConcurrentHashMap<Integer, LockObj>();
+	private static Map<Integer, LockObj> lockMap = new ConcurrentHashMap<Integer, LockObj>();
 
-	static {
-		Thread gc = new Thread(() -> mapGc());
-		gc.setDaemon(true);
-		gc.start();
-		System.out.println("gc started");
-	}
-
-	static LockObj lock(int accNo) {
+	public static LockObj lock(int accNo) {
 		synchronized (lockMap) {
 			LockObj lockObj = lockMap.computeIfAbsent(accNo, k -> new LockObj());
 			lockObj.addCount();
@@ -45,42 +36,18 @@ public class Lock {
 		}
 	}
 
-	static void unLock(int accNo) {
+	public static void unLock(int accNo) {
 		LockObj lock = lockMap.get(accNo);
 		if (lock != null) {
 			lock.removeCount();
-		}
-	}
-
-	private static void mapGc() {
-		while (true) {
-			int size = lockMap.size();
-			if (size > 0) {
-				if (size > 1000) {
-					Thread.currentThread().setPriority(6);
-				} else {
-					Thread.currentThread().setPriority(5);
-				}
+			if (lock.getLockCount() == 0) {
 				synchronized (lockMap) {
-					Iterator<Entry<Integer, LockObj>> iterator = lockMap.entrySet().iterator();
-					while (iterator.hasNext()) {
-						Entry<Integer, LockObj> entry = iterator.next();
-						Integer key = entry.getKey();
-						LockObj value = entry.getValue();
-						if (value.getLockCount() == 0) {
-							iterator.remove();
-							System.out.println("Removed: " + key + " -> " + value);
-						}
+					if (lock.getLockCount() == 0) {
+						lockMap.remove(accNo);
 					}
-				}
-			} else {
-				try {
-					System.out.println("Locks holded" + lockMap);
-					Thread.sleep(TimeUnit.HOURS.toMillis(1));
-				} catch (InterruptedException e) {
-					e.printStackTrace();
 				}
 			}
 		}
 	}
+
 }

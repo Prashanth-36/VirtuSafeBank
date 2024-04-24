@@ -1,3 +1,4 @@
+<%@page import="java.time.LocalDate"%>
 <%@page import="model.Account"%>
 <%@page import="utility.ActiveStatus"%>
 <%@page import="model.Customer"%>
@@ -101,7 +102,7 @@
             	   employee=(Employee) user;
               }
             %>
-            <%if(user==null || (user!=null && user.getType()!=UserType.USER)){ %>
+            <%if((user==null&& userType==UserType.ADMIN)|| (user!=null && user.getType()!=UserType.USER)){ %>
             <div class="form-row" id="branchField">
               <label for="branchId" id="branchIdLabel">Branch ID *</label>
                 <select name="branchId" id="branchId" style="margin:1rem" class="selection" required>
@@ -208,18 +209,23 @@
       const customer=document.getElementById("customer");
       const aadhaarNo=document.getElementById("aadhaarNo");
       const panNo=document.getElementById("panNo");
+      const branchLabel= document.getElementById("branchIdLabel");
       function toggleInputs(){
         const type=document.getElementById("userType").value;
         if(type==="0"){
           customer.style.display="block";
-          document.getElementById("branchIdLabel").innerText="Account's Branch ID";
           aadhaarNo.setAttribute("required","required");
-          panNo.setAttribute("required","required");
+          //panNo.setAttribute("required","required");
+          aadhaarNo.removeAttribute("disabled");
+          panNo.removeAttribute("disabled");
+          if(branchLabel){branchLabel.innerText="Account's Branch ID";}
         }else{
-          document.getElementById("branchIdLabel").innerText="Branch ID";
           customer.style.display="none";
           aadhaarNo.removeAttribute("required");
-          panNo.removeAttribute("required");
+          //panNo.removeAttribute("required");
+          aadhaarNo.setAttribute("disabled","disabled");
+          panNo.setAttribute("disabled","disabled");
+          if(branchLabel){ branchLabel.innerText="Branch ID";}
         }
       }
       window.onload=toggleInputs();
@@ -246,7 +252,6 @@
             reset.style.display="none";
           }else{
             submit.removeAttribute("disabled");
-            reset.style.display="block";
           }
         });
       }
@@ -275,6 +280,7 @@
     	  }
     	  document.getElementById("activate").style.display="none";
     	  submit.style.display="block";
+    	  reset.style.display="block";
       }
       function cancelEdit(){
 		  for(e of selections){

@@ -106,12 +106,6 @@
         class="form-container"
       >
         <h3>Change Password</h3>
-        <input
-          type="hidden"
-          name="customerId"
-          id="customerId"
-          value="<%=profile.getUserId() %>"
-        />
         <label for="currentPassword">Current Password</label>
         <input
           type="password"

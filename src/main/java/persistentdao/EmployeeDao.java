@@ -135,7 +135,7 @@ public class EmployeeDao implements EmployeeManager {
 			throws CustomException {
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection
-						.prepareStatement("UPDATE user SET status = ?. modifiedBy = ?, modifiedOn = ? WHERE id = ?")) {
+						.prepareStatement("UPDATE user SET status = ?, modifiedBy = ?, modifiedOn = ? WHERE id = ?")) {
 			statement.setObject(1, status.ordinal());
 			statement.setObject(2, modifiedBy);
 			statement.setObject(3, modifedOn);

@@ -1,6 +1,9 @@
 * {
   box-sizing: border-box;
 }
+:root {
+  --bgGreen: #cbeacb;
+}
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -70,6 +73,14 @@ label {
   margin: 2rem auto;
   background-color: #dd000032;
   color: red;
+  font-size: large;
+  padding: 2rem;
+}
+.success {
+  width: 20%;
+  margin: 2rem auto;
+  background-color: var(--bgGreen);
+  color: green;
   font-size: large;
   padding: 2rem;
 }

@@ -6,5 +6,36 @@
 	<display-name>VirtuSafeBank</display-name>
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
-	</welcome-file-list>
+	</welcome-file-list>	
+		
+	<filter>
+		<filter-name>accessFilter</filter-name>
+		<filter-class>controller.AccessFilter</filter-class>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>accessFilter</filter-name>
+		<url-pattern>/controller/*</url-pattern>
+	</filter-mapping>
+	
+	<filter>
+		<filter-name>securityFilter</filter-name>
+		<filter-class>controller.SecurityFilter</filter-class>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>securityFilter</filter-name>
+		<url-pattern>/controller/*</url-pattern>
+	</filter-mapping>
+	
+	<servlet>
+		<servlet-name>controller</servlet-name>
+		<servlet-class>controller.ControllerServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>controller</servlet-name>
+		<url-pattern>/controller/*</url-pattern>
+	</servlet-mapping>
+	
 </web-app>

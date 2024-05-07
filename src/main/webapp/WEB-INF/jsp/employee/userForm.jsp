@@ -156,7 +156,9 @@
           <%if(user!=null){ %>
             <form method="post" id="activateForm" action="<%=request.getContextPath() %>/controller/<%=userType==UserType.ADMIN?"admin":"employee" %>/manageUser">
               <input type="hidden" name="userId" value="<%=user.getUserId() %>" />
+              <%if(userType==UserType.ADMIN){ %>
               <input type="hidden" name="userType" value="<%=user.getType() %>" />
+              <%} %>
               <% if(user.getStatus()==ActiveStatus.INACTIVE){ %>
                 <button id="activate" name="activate" class="btn-success" value="1">Activate</button>
               <%}else{ %>

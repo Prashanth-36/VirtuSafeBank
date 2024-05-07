@@ -54,45 +54,41 @@ public class SecurityFilter implements Filter {
 		chain.doFilter(request, response);
 	}
 
+	Document document;
+
 	public Set<String> getAllowedParameters(HttpServletRequest req, HttpServletResponse res)
 			throws InvalidValueException, CustomException {
 		Set<String> allowedParams = new HashSet<String>();
 		allowedParams.add("error");
 		allowedParams.add("message");
-		try {
-			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			String filePath = req.getServletContext().getRealPath("security.xml");
-			Document document = builder.parse(new File(filePath));
-			document.getDocumentElement().normalize();
-			String urlPath = req.getPathInfo().replace("/", "-").substring(1);
-			NodeList nodeList = document.getElementsByTagName(urlPath);
-			int size = nodeList.getLength();
-			for (int i = 0; i < size; i++) {
-				Element element = (Element) nodeList.item(i);
-				String method = element.getAttribute("method");
-				String requestMethod = req.getMethod();
-				if (method.equals(requestMethod)) {
-					NodeList paramsList = element.getElementsByTagName("property");
-					int paramsSize = paramsList.getLength();
-					for (int j = 0; j < paramsSize; j++) {
-						Element param = (Element) paramsList.item(j);
-						String patternName = param.getAttribute("pattern");
-						if (!patternName.isEmpty()) {
-							Element patternsList = (Element) document.getElementsByTagName("patterns").item(0);
-							Element patternNode = (Element) patternsList.getElementsByTagName(patternName).item(0);
-							if (!req.getParameter(param.getTextContent()).matches(patternNode.getTextContent())) {
-								throw new InvalidValueException("Invalid Value for " + param.getTextContent());
-							}
+		String urlPath = req.getPathInfo().replace("/", "-").substring(1);
+		NodeList nodeList = document.getElementsByTagName(urlPath);
+		int size = nodeList.getLength();
+		for (int i = 0; i < size; i++) {
+			Element element = (Element) nodeList.item(i);
+			String method = element.getAttribute("method");
+			String requestMethod = req.getMethod();
+			if (method.equals(requestMethod)) {
+				NodeList paramsList = element.getElementsByTagName("property");
+				int paramsSize = paramsList.getLength();
+				for (int j = 0; j < paramsSize; j++) {
+					Element param = (Element) paramsList.item(j);
+					String patternName = param.getAttribute("pattern");
+					if (!patternName.isEmpty()) {
+						Element patternsList = (Element) document.getElementsByTagName("patterns").item(0);
+						Element patternNode = (Element) patternsList.getElementsByTagName(patternName).item(0);
+						String requestParam = req.getParameter(param.getTextContent());
+						if (!requestParam.matches(patternNode.getTextContent())) {
+							throw new InvalidValueException(
+									"Invalid Value " + requestParam + " for " + param.getTextContent());
 						}
-						allowedParams.add(param.getTextContent());
 					}
-					break;
+					allowedParams.add(param.getTextContent());
 				}
+				break;
 			}
-			return allowedParams;
-		} catch (ParserConfigurationException | SAXException | IOException e) {
-			throw new CustomException("Security Exception", e);
 		}
+		return allowedParams;
 	}
 
 	@Override
@@ -102,9 +98,15 @@ public class SecurityFilter implements Filter {
 	}
 
 	@Override
-	public void init(FilterConfig arg0) throws ServletException {
-		// TODO Auto-generated method stub
-
+	public void init(FilterConfig filterConfig) throws ServletException {
+		try {
+			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			String filePath = filterConfig.getServletContext().getRealPath("security.xml");
+			document = builder.parse(new File(filePath));
+			document.getDocumentElement().normalize();
+		} catch (ParserConfigurationException | SAXException | IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

@@ -236,7 +236,7 @@
 	</employee-api>
 	
 	<patterns>
-		<email>[a-z]+[.a-z0-9]*@[a-z]{1,}\\.[a-z]{2,}(\\.[a-z]{2,})?</email>
+		<email>[a-z]+[.a-z0-9]*@[a-z]{1,}\.[a-z]{2,}(\.[a-z]{2,})?</email>
 		<mobile>[1-9]{1}[0-9]{9}</mobile>
 		<pan>[A-Z]{5}[0-9]{4}[A-Z]</pan>
 		<aadhaar>[0-9]{12}</aadhaar>
